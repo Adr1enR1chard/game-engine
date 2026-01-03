@@ -6,12 +6,13 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "ecs/handle/ShaderHandle.hpp"
-#include "ecs/handle/TextureHandle.hpp"
-#include "render/Camera.hpp"
+#include "handle/ShaderHandle.hpp"
+#include "handle/TextureHandle.hpp"
 #include "ecs/component/MeshRendererComponent.hpp"
 #include "ecs/component/TransformComponent.hpp"
-#include "ecs/handle/MeshHandle.hpp"
+#include "handle/MeshHandle.hpp"
+#include "ecs/registry/Registry.hpp"
+#include "scene/SceneManager.hpp"
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -22,8 +23,6 @@ unsigned int viewport_height = 600;
 
 float deltaTime = 0.0f; // time between current frame and last frame
 float lastFrame = 0.0f;
-
-Camera mainCamera;
 
 int main()
 {
@@ -121,6 +120,22 @@ int main()
         glm::vec3(1.5f, 0.2f, -1.5f),
         glm::vec3(-1.3f, 1.0f, -1.5f)};
 
+    Scene &scene = SceneManager::GetCurrentScene();
+
+    auto rendererComponent = scene.getWorld().createComponent<MeshRendererComponent>();
+    rendererComponent.setMesh(std::make_shared<MeshHandle>(vertices, sizeof(vertices) / sizeof(float)));
+
+    for (int i = 0; i < 10; i++)
+    {
+        Entity cube = scene.getWorld().createEntity();
+
+        auto &transform = scene.getWorld().createComponent<TransformComponent>();
+        transform.bindToEntity(cube);
+        transform.position = cubePositions[i];
+
+        rendererComponent.bindToEntity(cube);
+    }
+
     // Entity cubes[10];
     // for (int i = 0; i < 10; i++)
     // {
@@ -129,12 +144,12 @@ int main()
     // }
 
     // // texture
-    // TextureHandle texture("assets/textures/container.jpg");
-    // texture.filteringParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+    TextureHandle texture("assets/textures/container.jpg");
+    texture.filteringParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
 
-    // glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
 
-    mainCamera.setPosition(glm::vec3(0.0f, 0.0f, -3.0f));
+    scene.getMainCamera().setPosition(glm::vec3(0.0f, 0.0f, -3.0f));
 
     // render loop
     // -----------
@@ -150,7 +165,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glActiveTexture(GL_TEXTURE0);
-        // texture.bind();
+        texture.bind();
 
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0f, 1.0f, 0.0f));
@@ -160,7 +175,7 @@ int main()
 
         // render
         ourShader.use();
-        ourShader.setMat4("view", mainCamera.getViewMatrix());
+        ourShader.setMat4("view", scene.getMainCamera().getViewMatrix());
         ourShader.setMat4("projection", projection);
 
         // glBindVertexArray(VAO);
@@ -175,12 +190,17 @@ int main()
         //     glDrawArrays(GL_TRIANGLES, 0, 36);
         // }
 
-        // for (Entity &cube : cubes)
-        // {
-        //     cube.getComponent<TransformComponent>().rotation.y += 20.0f * deltaTime;
-        //     ourShader.setMat4("model", cube.getComponent<TransformComponent>().getModelMatrix());
-        //     cube.getComponent<MeshRendererComponent>().render();
-        // }
+        auto transforms = scene.getWorld().getComponents<TransformComponent>();
+
+        // std::cout << "Number of TransformComponents: " << transforms.size() << std::endl;
+
+        for (auto &transform : transforms)
+        {
+            transform->rotation.y += 20.0f * deltaTime;
+            // std::cout << "Rendering entity with position: (" << transform->position.x << ", " << transform->position.y << ", " << transform->position.z << ")" << std::endl;
+            ourShader.setMat4("model", transform->getModelMatrix());
+            rendererComponent.render();
+        }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -217,6 +237,7 @@ void processInput(GLFWwindow *window)
     // camera controls
     // --------------------------------------------
     // camera position
+    Camera &mainCamera = SceneManager::GetCurrentScene().getMainCamera();
     glm::vec3 cameraVelocity = glm::vec3(0.0f);
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         cameraVelocity.z += 1.0f;

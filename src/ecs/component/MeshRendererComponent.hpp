@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 
 #include "ecs/component/Component.hpp"
-#include "ecs/handle/MeshHandle.hpp"
+#include "handle/MeshHandle.hpp"
 
 class MeshRendererComponent : public Component
 {

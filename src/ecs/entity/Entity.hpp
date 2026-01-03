@@ -1,17 +1,9 @@
 #ifndef __ENTITY_HPP__
 #define __ENTITY_HPP__
 
-class Entity
-{
-private:
-    int index;
+#include <cstdint>
 
-public:
-    Entity(int index) : index(index) {};
-
-    ~Entity() {};
-
-    int getIndex() const { return index; }
-};
+using Entity = std::uint32_t;
+static constexpr Entity InvalidEntity = 0;
 
 #endif

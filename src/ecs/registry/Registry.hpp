@@ -6,53 +6,58 @@
 
 #include "ecs/entity/Entity.hpp"
 #include "ecs/component/Component.hpp"
+#include "utils/types.hpp"
 
 class Registry
 {
 private:
-    int entityIndex = 0;
-    std::queue<int> freeIndices;
-    std::unordered_map<int, Entity *> entityMap;
+    int m_entityIndex = 0;
+    std::queue<int> m_freeIndices;
 
-    std::vector<Component *> components;
+    std::vector<std::unique_ptr<Component>> m_components;
 
 public:
-    Registry() {}
-    ~Registry()
-    {
-        for (auto &[index, entity] : entityMap)
-        {
-            delete entity;
-        }
-        entityMap.clear();
-    }
+    Registry() = default;
+    Registry(const Registry &) = delete;
+    Registry &operator=(const Registry &) = delete;
+    Registry(Registry &&) = default;
+    Registry &operator=(Registry &&) = default;
+    ~Registry() = default;
 
-    Entity *createEntity()
+    Entity createEntity()
     {
-        int index;
-        if (!freeIndices.empty())
+        Entity entity;
+        if (!m_freeIndices.empty())
         {
-            index = freeIndices.front();
-            freeIndices.pop();
+            int index = m_freeIndices.front();
+            m_freeIndices.pop();
+            entity = index;
         }
         else
         {
-            index = entityIndex++;
+            entity = m_entityIndex;
+            m_entityIndex++;
         }
 
-        Entity *entity = new Entity(index);
-        entityMap[index] = entity;
         return entity;
     }
 
-    void destroyEntity(int index)
+    template <ComponentType T, typename... Args>
+    T &createComponent(Args &&...args)
     {
-        auto it = entityMap.find(index);
-        if (it != entityMap.end())
-        {
-            delete it->second;
-            entityMap.erase(it);
-            freeIndices.push(index);
-        }
+        auto ptr = std::make_unique<T>(std::forward<Args>(args)...);
+        T &ref = *ptr;
+        m_components.emplace_back(std::move(ptr));
+        return ref;
+    }
+
+    template <ComponentType T>
+    std::vector<T *> getComponents() const
+    {
+        std::vector<T *> out;
+        for (auto &c : m_components)
+            if (auto *casted = dynamic_cast<T *>(c.get()))
+                out.push_back(casted);
+        return out;
     }
 };

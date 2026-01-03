@@ -9,7 +9,7 @@
 class Component
 {
 private:
-    std::vector<int> entityIndices;
+    std::vector<Entity> entityIndices;
 
 public:
     /// @brief Indicates whether the component is reserved (cannot be removed from a Entity).
@@ -22,27 +22,16 @@ public:
 
 public:
     Component() {}
-    virtual ~Component() {}
+    virtual ~Component() = default;
 
-    void bindToEntity(int entityIndex)
+    void bindToEntity(Entity entity)
     {
-        entityIndices.push_back(entityIndex);
+        entityIndices.push_back(entity);
     }
 
-    void bindToEntity(Entity &entity)
+    void unbindFromEntity(Entity entity)
     {
-        entityIndices.push_back(entity.getIndex());
-    }
-
-    void unbindFromEntity(int entityIndex)
-    {
-        entityIndices.erase(std::remove(entityIndices.begin(), entityIndices.end(), entityIndex), entityIndices.end());
-    }
-
-    void unbindFromEntity(Entity &entity)
-    {
-        int entityIndex = entity.getIndex();
-        entityIndices.erase(std::remove(entityIndices.begin(), entityIndices.end(), entityIndex), entityIndices.end());
+        entityIndices.erase(std::remove(entityIndices.begin(), entityIndices.end(), entity), entityIndices.end());
     }
 };
 
