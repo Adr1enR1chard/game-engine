@@ -4,20 +4,20 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
-#include "core/components/component.hpp"
-#include "core/data/mesh.hpp"
+#include "ecs/component/Component.hpp"
+#include "ecs/handle/MeshHandle.hpp"
 
-class MeshRenderer : public Component
+class MeshRendererComponent : public Component
 {
 private:
-    std::shared_ptr<Mesh> mesh;
+    std::shared_ptr<MeshHandle> mesh;
 
 public:
-    MeshRenderer(Mesh *mesh = nullptr) : mesh(mesh) {}
+    MeshRendererComponent(MeshHandle *mesh = nullptr) : mesh(mesh) {}
 
-    ~MeshRenderer() {}
+    ~MeshRendererComponent() {}
 
-    MeshRenderer *setMesh(std::shared_ptr<Mesh> newMesh)
+    MeshRendererComponent *setMesh(std::shared_ptr<MeshHandle> newMesh)
     {
         mesh = newMesh;
         return this;

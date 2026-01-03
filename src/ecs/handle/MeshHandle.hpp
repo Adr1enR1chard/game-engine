@@ -3,7 +3,7 @@
 
 #include <glad/glad.h>
 
-class Mesh
+class MeshHandle
 {
 private:
     const float *vertices;
@@ -15,10 +15,10 @@ public:
     unsigned int EBO;
 
 public:
-    /// @brief Construct a new Mesh object
+    /// @brief Construct a new MeshHandle object
     /// @param vertices Pointer to the vertex data
     /// @param vertexCount Number of vertices
-    Mesh(const float *vertices, size_t vertexCount) : vertices(vertices), vertexCount(vertexCount)
+    MeshHandle(const float *vertices, size_t vertexCount) : vertices(vertices), vertexCount(vertexCount)
     {
         glGenVertexArrays(1, &VAO);
         glGenBuffers(1, &VBO);
@@ -38,7 +38,7 @@ public:
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     }
-    ~Mesh()
+    ~MeshHandle()
     {
         glDeleteVertexArrays(1, &VAO);
         glDeleteBuffers(1, &VBO);

@@ -5,11 +5,11 @@
 #include <stb_image/stb_image.h>
 #include <iostream>
 
-class Texture
+class TextureHandle
 {
 public:
     unsigned int ID;
-    Texture(const char *imagePath)
+    TextureHandle(const char *imagePath)
     {
         // load and generate the texture
         int width, height, nrChannels;

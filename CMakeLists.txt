@@ -23,6 +23,7 @@ add_executable(OpenGLTutorial
 # Include directories for local headers (GLAD, etc.)
 target_include_directories(OpenGLTutorial PRIVATE
 		${CMAKE_CURRENT_SOURCE_DIR}/include
+		${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 # Avoid GLFW including GL headers; we provide them via GLAD

@@ -1,11 +1,12 @@
 #ifndef __TRANSFORM_HPP__
 #define __TRANSFORM_HPP__
 
-#include "component.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-class Transform : public Component
+#include "ecs/component/Component.hpp"
+
+class TransformComponent : public Component
 {
 public:
     glm::vec3 position;
@@ -13,7 +14,7 @@ public:
     glm::vec3 scale;
 
 public:
-    Transform(glm::vec3 position = glm::vec3(0.0f), glm::vec3 rotation = glm::vec3(0.0f), glm::vec3 scale = glm::vec3(1.0f))
+    TransformComponent(glm::vec3 position = glm::vec3(0.0f), glm::vec3 rotation = glm::vec3(0.0f), glm::vec3 scale = glm::vec3(1.0f))
         : position(position), rotation(rotation), scale(scale) {}
 
     glm::mat4 getModelMatrix() const

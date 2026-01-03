@@ -6,11 +6,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "core/data/shader.hpp"
-#include "core/data/texture.hpp"
-#include "core/game_objects/camera.hpp"
-#include "core/components/meshes/mesh_renderer.hpp"
-#include "core/data/mesh.hpp"
+#include "ecs/handle/ShaderHandle.hpp"
+#include "ecs/handle/TextureHandle.hpp"
+#include "render/Camera.hpp"
+#include "ecs/component/MeshRendererComponent.hpp"
+#include "ecs/component/TransformComponent.hpp"
+#include "ecs/handle/MeshHandle.hpp"
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -59,7 +60,7 @@ int main()
 
     // build and compile our shader program
     // ------------------------------------
-    Shader ourShader("assets/shaders/basic.vs", "assets/shaders/basic.fs"); // you can name your shader files however you like
+    ShaderHandle ourShader("assets/shaders/basic.vs", "assets/shaders/basic.fs"); // you can name your shader files however you like
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -120,20 +121,20 @@ int main()
         glm::vec3(1.5f, 0.2f, -1.5f),
         glm::vec3(-1.3f, 1.0f, -1.5f)};
 
-    GameObject cubes[10];
-    for (int i = 0; i < 10; i++)
-    {
-        cubes[i].getComponent<Transform>().position = cubePositions[i];
-        cubes[i].addComponent<MeshRenderer>()->setMesh(std::make_shared<Mesh>(vertices, sizeof(vertices) / sizeof(float)));
-    }
+    // Entity cubes[10];
+    // for (int i = 0; i < 10; i++)
+    // {
+    //     cubes[i].getComponent<TransformComponent>().position = cubePositions[i];
+    //     cubes[i].addComponent<MeshRendererComponent>()->setMesh(std::make_shared<MeshHandle>(vertices, sizeof(vertices) / sizeof(float)));
+    // }
 
-    // texture
-    Texture texture("assets/textures/container.jpg");
-    texture.filteringParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+    // // texture
+    // TextureHandle texture("assets/textures/container.jpg");
+    // texture.filteringParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
 
-    glEnable(GL_DEPTH_TEST);
+    // glEnable(GL_DEPTH_TEST);
 
-    mainCamera.getComponent<Transform>() = Transform(glm::vec3(0.0f, 0.0f, -3.0f));
+    mainCamera.setPosition(glm::vec3(0.0f, 0.0f, -3.0f));
 
     // render loop
     // -----------
@@ -149,7 +150,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glActiveTexture(GL_TEXTURE0);
-        texture.bind();
+        // texture.bind();
 
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0f, 1.0f, 0.0f));
@@ -159,7 +160,7 @@ int main()
 
         // render
         ourShader.use();
-        ourShader.setMat4("view", mainCamera.getComponent<Transform>().getViewMatrix());
+        ourShader.setMat4("view", mainCamera.getViewMatrix());
         ourShader.setMat4("projection", projection);
 
         // glBindVertexArray(VAO);
@@ -174,12 +175,12 @@ int main()
         //     glDrawArrays(GL_TRIANGLES, 0, 36);
         // }
 
-        for (GameObject &cube : cubes)
-        {
-            cube.getComponent<Transform>().rotation.y += 20.0f * deltaTime;
-            ourShader.setMat4("model", cube.getComponent<Transform>().getModelMatrix());
-            cube.getComponent<MeshRenderer>().render();
-        }
+        // for (Entity &cube : cubes)
+        // {
+        //     cube.getComponent<TransformComponent>().rotation.y += 20.0f * deltaTime;
+        //     ourShader.setMat4("model", cube.getComponent<TransformComponent>().getModelMatrix());
+        //     cube.getComponent<MeshRendererComponent>().render();
+        // }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -228,8 +229,7 @@ void processInput(GLFWwindow *window)
 
     if (glm::length(cameraVelocity) != 0)
         cameraVelocity = glm::normalize(cameraVelocity) * deltaTime;
-    Transform &cameraTransform = mainCamera.getComponent<Transform>();
-    cameraTransform.position += cameraVelocity;
+    mainCamera.setPosition(mainCamera.getPosition() + cameraVelocity);
 
     // camera orientation with mouse
     double mouseX, mouseY;
@@ -237,8 +237,7 @@ void processInput(GLFWwindow *window)
     glm::vec2 currentMousePos = glm::vec2(mouseX, mouseY);
     mouseVelocity = (currentMousePos - lastMousePos) * 0.1f;
     lastMousePos = currentMousePos;
-    cameraTransform.rotation.y += mouseVelocity.x;
-    cameraTransform.rotation.x += mouseVelocity.y;
+    mainCamera.setRotation(mainCamera.getRotation() + glm::vec3(mouseVelocity.y, mouseVelocity.x, 0.0f));
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
