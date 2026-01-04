@@ -8,11 +8,12 @@
 
 #include "handle/ShaderHandle.hpp"
 #include "handle/TextureHandle.hpp"
-#include "ecs/component/MeshRendererComponent.hpp"
-#include "ecs/component/TransformComponent.hpp"
+#include "ecs/component/CMeshRenderer.hpp"
+#include "ecs/component/CTransform.hpp"
 #include "handle/MeshHandle.hpp"
 #include "ecs/registry/Registry.hpp"
 #include "scene/SceneManager.hpp"
+#include "ecs/system/RenderableSystem.hpp"
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -21,8 +22,8 @@ void processInput(GLFWwindow *window);
 unsigned int viewport_width = 800;
 unsigned int viewport_height = 600;
 
-float deltaTime = 0.0f; // time between current frame and last frame
-float lastFrame = 0.0f;
+double deltaTime = 0.0; // time between current frame and last frame
+double lastFrame = 0.0;
 
 void run()
 {
@@ -122,9 +123,8 @@ void run()
 
     Scene &scene = SceneManager::GetCurrentScene();
 
-    scene.getRegistry().registerComponent<TransformComponent>();
-    scene.getRegistry().registerComponent<MeshRendererComponent>();
-    scene.getRegistry().registerComponent<MeshRendererComponent>();
+    scene.getRegistry().registerComponent<CTransform>();
+    scene.getRegistry().registerComponent<CMeshRenderer>();
 
     // auto rendererComponent = scene.getRegistry().createComponent<MeshRendererComponent>();
     // rendererComponent.setMesh();
@@ -137,10 +137,12 @@ void run()
         Entity cube = scene.getRegistry().createEntity();
         cubes[i] = cube;
 
-        auto &transform = scene.getRegistry().createComponent<TransformComponent>(cube);
+        auto &transform = scene.getRegistry().createComponent<CTransform>(cube);
         transform.position = cubePositions[i];
 
-        scene.getRegistry().createComponent<MeshRendererComponent>(cube).setMesh(rendererMesh);
+        CMeshRenderer &meshRenderer = scene.getRegistry().createComponent<CMeshRenderer>(cube);
+        meshRenderer.mesh = rendererMesh;
+        meshRenderer.shader = std::make_shared<ShaderHandle>(ourShader);
     }
 
     // Entity cubes[10];
@@ -157,6 +159,8 @@ void run()
     glEnable(GL_DEPTH_TEST);
 
     scene.getMainCamera().setPosition(glm::vec3(0.0f, 0.0f, -3.0f));
+
+    scene.getSystemScheduler().registerSystem<RenderableSystem>();
 
     // render loop
     // -----------
@@ -184,6 +188,9 @@ void run()
         ourShader.use();
         ourShader.setMat4("view", scene.getMainCamera().getViewMatrix());
         ourShader.setMat4("projection", projection);
+        ourShader.setMat4("model", model);
+
+        scene.getSystemScheduler().updateSystems((float)deltaTime);
 
         // glBindVertexArray(VAO);
         // for (int i = 0; i < 10; i++)
@@ -201,13 +208,13 @@ void run()
 
         for (auto &cube : cubes)
         {
-            auto &transform = scene.getRegistry().getComponent<TransformComponent>(cube);
-            auto &meshRenderer = scene.getRegistry().getComponent<MeshRendererComponent>(cube);
+            auto &transform = scene.getRegistry().getComponent<CTransform>(cube);
+            // auto &meshRenderer = scene.getRegistry().getComponent<CMeshRenderer>(cube);
 
             // std::cout << "Rendering entity with position: (" << transform->position.x << ", " << transform->position.y << ", " << transform->position.z << ")" << std::endl;
-            transform.rotation.y += 20.0f * deltaTime;
-            ourShader.setMat4("model", transform.getModelMatrix());
-            meshRenderer.render();
+            transform.rotation.y += 20.0f * (float)deltaTime;
+            // ourShader.setMat4("model", transform.getModelMatrix());
+            // meshRenderer.render();
         }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -215,7 +222,7 @@ void run()
         glfwSwapBuffers(window);
         glfwPollEvents();
 
-        float currentFrame = glfwGetTime();
+        double currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
     }
@@ -271,7 +278,7 @@ void processInput(GLFWwindow *window)
         cameraVelocity.x -= 1.0f;
 
     if (glm::length(cameraVelocity) != 0)
-        cameraVelocity = glm::normalize(cameraVelocity) * deltaTime;
+        cameraVelocity = glm::normalize(cameraVelocity) * (float)deltaTime;
     mainCamera.setPosition(mainCamera.getPosition() + cameraVelocity);
 
     // camera orientation with mouse
@@ -292,4 +299,6 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
     glViewport(0, 0, width, height);
     viewport_width = width;
     viewport_height = height;
+
+    window; // Unused parameter
 }

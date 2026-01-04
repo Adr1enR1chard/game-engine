@@ -19,6 +19,8 @@ enable_testing()
 # Sources
 add_executable(OpenGLTutorial
 	src/main.cpp
+	src/ecs/system/RenderableSystem.cpp
+	src/ecs/system/SystemScheduler.cpp
 	src/include/glad.c
 	src/include/stb_image.cpp
 )
@@ -73,3 +75,36 @@ target_include_directories(RegistryTests PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 add_test(NAME RegistryTests COMMAND RegistryTests)
+
+function(enable_strict_warnings target)
+    if (MSVC)
+        target_compile_options(${target} PRIVATE
+            /W4        # high warnings
+            /WX        # warnings as errors
+            /permissive-
+            /Zc:__cplusplus
+            /EHsc
+        )
+    else()
+        target_compile_options(${target} PRIVATE
+            -Wall
+            -Wextra
+            -Wpedantic
+            -Werror
+            -Wshadow
+            -Wconversion
+            -Wsign-conversion
+            -Wcast-align
+            -Woverloaded-virtual
+            -Wnon-virtual-dtor
+            -Wold-style-cast
+            -Wnull-dereference
+            -Wdouble-promotion
+            -Wformat=2
+            -Wimplicit-fallthrough
+        )
+    endif()
+endfunction()
+
+enable_strict_warnings(OpenGLTutorial)
+enable_strict_warnings(RegistryTests)

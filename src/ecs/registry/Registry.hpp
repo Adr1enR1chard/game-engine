@@ -5,14 +5,16 @@
 #include <queue>
 #include <typeindex>
 #include <memory>
+#include <stdexcept>
+#include <string>
 
 #include "ecs/entity/Entity.hpp"
-#include "ecs/component/Component.hpp"
+#include "ecs/component/CComponent.hpp"
 #include "utils/types.hpp"
 
 struct ComponentStorage
 {
-    std::unordered_map<Entity, std::unique_ptr<Component>> components;
+    std::unordered_map<Entity, std::unique_ptr<CComponent>> components;
 };
 
 class Registry
@@ -20,6 +22,7 @@ class Registry
 private:
     int m_entityIndex = 0;
     std::queue<int> m_freeIndices;
+    std::vector<Entity> m_entities;
 
     std::unordered_map<std::type_index, ComponentStorage> m_componentMap;
 
@@ -46,7 +49,55 @@ public:
             m_entityIndex++;
         }
 
+        m_entities.push_back(entity);
+
         return entity;
+    }
+
+    const std::vector<Entity> &getEntities() const
+    {
+        return m_entities;
+    }
+
+    template <ComponentType T>
+    const std::vector<Entity> getEntitiesWithComponent() const
+    {
+        std::vector<Entity> entitiesWithComponent;
+        const std::type_index typeIndex = std::type_index(typeid(T));
+
+        auto itStorage = m_componentMap.find(typeIndex);
+        if (itStorage == m_componentMap.end())
+            return entitiesWithComponent;
+
+        const auto &storage = itStorage->second;
+        for (const auto &[entity, component] : storage.components)
+        {
+            entitiesWithComponent.push_back(entity);
+        }
+
+        return entitiesWithComponent;
+    }
+
+    template <ComponentType... Components>
+    const std::vector<Entity> getEntitiesWithComponents() const
+    {
+        std::vector<Entity> entitiesWithAllComponents;
+
+        for (const Entity &entity : m_entities)
+        {
+            bool hasAllComponents = true;
+            ((hasAllComponents &= (m_componentMap.find(std::type_index(typeid(Components))) != m_componentMap.end() &&
+                                   m_componentMap.at(std::type_index(typeid(Components))).components.find(entity) !=
+                                       m_componentMap.at(std::type_index(typeid(Components))).components.end())),
+             ...);
+
+            if (hasAllComponents)
+            {
+                entitiesWithAllComponents.push_back(entity);
+            }
+        }
+
+        return entitiesWithAllComponents;
     }
 
     template <ComponentType T>

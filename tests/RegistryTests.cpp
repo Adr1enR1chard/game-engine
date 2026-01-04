@@ -3,27 +3,33 @@
 
 #include "ecs/registry/Registry.hpp"
 
-struct Position : Component
+struct Position : CComponent
 {
     int x = 0;
     int y = 0;
-    bool reserved() const override { return false; }
-    bool unique() const override { return true; }
+    inline const bool isValid() const override
+    {
+        return true;
+    }
 };
 
-struct Velocity : Component
+struct Velocity : CComponent
 {
     float vx = 0.f;
     float vy = 0.f;
-    bool reserved() const override { return false; }
-    bool unique() const override { return true; }
+    inline const bool isValid() const override
+    {
+        return true;
+    }
 };
 
-struct Health : Component
+struct Health : CComponent
 {
     int hp = 100;
-    bool reserved() const override { return false; }
-    bool unique() const override { return true; }
+    inline const bool isValid() const override
+    {
+        return true;
+    }
 };
 
 int main()
