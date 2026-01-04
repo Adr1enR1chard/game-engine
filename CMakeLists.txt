@@ -13,6 +13,9 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 # Output directories (useful for Visual Studio multi-config)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+# Enable CTest for unit tests
+enable_testing()
+
 # Sources
 add_executable(OpenGLTutorial
 	src/main.cpp
@@ -60,3 +63,13 @@ add_custom_command(TARGET OpenGLTutorial POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
           "${CMAKE_SOURCE_DIR}/assets"
           "$<TARGET_FILE_DIR:OpenGLTutorial>/assets")
+
+# Registry unit tests
+add_executable(RegistryTests
+	tests/RegistryTests.cpp
+)
+target_include_directories(RegistryTests PRIVATE
+	${CMAKE_CURRENT_SOURCE_DIR}/src
+	${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+add_test(NAME RegistryTests COMMAND RegistryTests)

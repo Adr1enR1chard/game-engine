@@ -4,6 +4,7 @@
 #include <vector>
 #include <queue>
 #include <typeindex>
+#include <memory>
 
 #include "ecs/entity/Entity.hpp"
 #include "ecs/component/Component.hpp"
@@ -20,7 +21,6 @@ private:
     int m_entityIndex = 0;
     std::queue<int> m_freeIndices;
 
-    int m_componentTypeIDCounter = 0;
     std::unordered_map<std::type_index, ComponentStorage> m_componentMap;
 
 public:
