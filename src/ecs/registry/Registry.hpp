@@ -3,10 +3,16 @@
 #include <unordered_map>
 #include <vector>
 #include <queue>
+#include <typeindex>
 
 #include "ecs/entity/Entity.hpp"
 #include "ecs/component/Component.hpp"
 #include "utils/types.hpp"
+
+struct ComponentStorage
+{
+    std::unordered_map<Entity, std::unique_ptr<Component>> components;
+};
 
 class Registry
 {
@@ -14,7 +20,8 @@ private:
     int m_entityIndex = 0;
     std::queue<int> m_freeIndices;
 
-    std::vector<std::unique_ptr<Component>> m_components;
+    int m_componentTypeIDCounter = 0;
+    std::unordered_map<std::type_index, ComponentStorage> m_componentMap;
 
 public:
     Registry() = default;
@@ -42,22 +49,50 @@ public:
         return entity;
     }
 
-    template <ComponentType T, typename... Args>
-    T &createComponent(Args &&...args)
+    template <ComponentType T>
+    void registerComponent()
     {
-        auto ptr = std::make_unique<T>(std::forward<Args>(args)...);
-        T &ref = *ptr;
-        m_components.emplace_back(std::move(ptr));
-        return ref;
+        const std::type_index typeIndex = std::type_index(typeid(T));
+
+        auto [it, inserted] = m_componentMap.try_emplace(typeIndex, ComponentStorage{});
+        if (!inserted)
+        {
+            throw std::runtime_error("Component " + std::string(typeid(T).name()) + " is already registered.");
+        }
     }
 
     template <ComponentType T>
-    std::vector<T *> getComponents() const
+    T &createComponent(Entity entity)
     {
-        std::vector<T *> out;
-        for (auto &c : m_components)
-            if (auto *casted = dynamic_cast<T *>(c.get()))
-                out.push_back(casted);
-        return out;
+        const std::type_index typeIndex{typeid(T)};
+
+        auto itStorage = m_componentMap.find(typeIndex);
+        if (itStorage == m_componentMap.end())
+            throw std::runtime_error("Component type not registered.");
+
+        auto &storage = itStorage->second;
+
+        auto [itComp, inserted] = storage.components.emplace(entity, std::make_unique<T>());
+        if (!inserted)
+            throw std::runtime_error("Entity already has component of this type.");
+
+        return *static_cast<T *>(itComp->second.get());
+    }
+
+    template <ComponentType T>
+    T &getComponent(Entity entity)
+    {
+        auto storageIt = m_componentMap.find(std::type_index(typeid(T)));
+        if (storageIt == m_componentMap.end())
+            throw std::runtime_error("Component type not registered.");
+
+        auto &storage = storageIt->second;
+        auto compIt = storage.components.find(entity);
+        if (compIt == storage.components.end())
+        {
+            throw std::runtime_error("Entity does not have component of this type.");
+        }
+
+        return *static_cast<T *>(compIt->second.get());
     }
 };

@@ -7,7 +7,7 @@
 class Scene
 {
 private:
-    Registry world;
+    Registry registry;
     Camera mainCamera;
 
 public:
@@ -18,7 +18,7 @@ public:
     {
     }
 
-    Registry &getWorld() { return world; }
+    Registry &getRegistry() { return registry; }
 
     Camera &getMainCamera() { return mainCamera; }
 };

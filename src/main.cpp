@@ -24,7 +24,7 @@ unsigned int viewport_height = 600;
 float deltaTime = 0.0f; // time between current frame and last frame
 float lastFrame = 0.0f;
 
-int main()
+void run()
 {
     // glfw: initialize and configure
     // ------------------------------
@@ -44,7 +44,7 @@ int main()
     {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
-        return -1;
+        return;
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -54,7 +54,7 @@ int main()
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::cout << "Failed to initialize GLAD" << std::endl;
-        return -1;
+        return;
     }
 
     // build and compile our shader program
@@ -122,18 +122,25 @@ int main()
 
     Scene &scene = SceneManager::GetCurrentScene();
 
-    auto rendererComponent = scene.getWorld().createComponent<MeshRendererComponent>();
-    rendererComponent.setMesh(std::make_shared<MeshHandle>(vertices, sizeof(vertices) / sizeof(float)));
+    scene.getRegistry().registerComponent<TransformComponent>();
+    scene.getRegistry().registerComponent<MeshRendererComponent>();
+    scene.getRegistry().registerComponent<MeshRendererComponent>();
 
+    // auto rendererComponent = scene.getRegistry().createComponent<MeshRendererComponent>();
+    // rendererComponent.setMesh();
+
+    std::shared_ptr<MeshHandle> rendererMesh = std::make_shared<MeshHandle>(vertices, sizeof(vertices) / sizeof(float));
+
+    Entity cubes[10];
     for (int i = 0; i < 10; i++)
     {
-        Entity cube = scene.getWorld().createEntity();
+        Entity cube = scene.getRegistry().createEntity();
+        cubes[i] = cube;
 
-        auto &transform = scene.getWorld().createComponent<TransformComponent>();
-        transform.bindToEntity(cube);
+        auto &transform = scene.getRegistry().createComponent<TransformComponent>(cube);
         transform.position = cubePositions[i];
 
-        rendererComponent.bindToEntity(cube);
+        scene.getRegistry().createComponent<MeshRendererComponent>(cube).setMesh(rendererMesh);
     }
 
     // Entity cubes[10];
@@ -190,16 +197,17 @@ int main()
         //     glDrawArrays(GL_TRIANGLES, 0, 36);
         // }
 
-        auto transforms = scene.getWorld().getComponents<TransformComponent>();
-
         // std::cout << "Number of TransformComponents: " << transforms.size() << std::endl;
 
-        for (auto &transform : transforms)
+        for (auto &cube : cubes)
         {
-            transform->rotation.y += 20.0f * deltaTime;
+            auto &transform = scene.getRegistry().getComponent<TransformComponent>(cube);
+            auto &meshRenderer = scene.getRegistry().getComponent<MeshRendererComponent>(cube);
+
             // std::cout << "Rendering entity with position: (" << transform->position.x << ", " << transform->position.y << ", " << transform->position.z << ")" << std::endl;
-            ourShader.setMat4("model", transform->getModelMatrix());
-            rendererComponent.render();
+            transform.rotation.y += 20.0f * deltaTime;
+            ourShader.setMat4("model", transform.getModelMatrix());
+            meshRenderer.render();
         }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -221,6 +229,20 @@ int main()
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
     glfwTerminate();
+}
+
+int main()
+{
+    try
+    {
+        run();
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return -1;
+    }
+
     return 0;
 }
 
