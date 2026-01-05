@@ -1,120 +1,72 @@
 #include <cassert>
 #include <stdexcept>
 
-#include "scene/Scene.hpp"
 #include "ecs/system/System.hpp"
+#include "ecs/system/SystemScheduler.hpp"
 
-// Test systems
-struct TestSystemA : System
+#include <engine/EngineContext.hpp>
+
+class TimeService : public Service
 {
-    static int updates;
-    static float lastDt;
-    static Scene *lastScene;
-
-    void update(Scene &scene, float deltaTime) override
-    {
-        updates++;
-        lastDt = deltaTime;
-        lastScene = &scene;
-    }
+public:
+    int tick = 0;
 };
 
-int TestSystemA::updates = 0;
-float TestSystemA::lastDt = 0.0f;
-Scene *TestSystemA::lastScene = nullptr;
-
-struct TestSystemB : System
+// A simple system that increments TimeService::tick on every update
+class TickSystem : public System
 {
-    static int updates;
-    static float lastDt;
-    static Scene *lastScene;
-
-    void update(Scene &scene, float deltaTime) override
+public:
+    void update(EngineContext &engineContext) override
     {
-        updates++;
-        lastDt = deltaTime;
-        lastScene = &scene;
+        engineContext.getService<TimeService>().tick++;
     }
 };
-
-int TestSystemB::updates = 0;
-float TestSystemB::lastDt = 0.0f;
-Scene *TestSystemB::lastScene = nullptr;
 
 int main()
 {
-    // Create a scene and get its scheduler
-    Scene scene;
-    auto &scheduler = scene.getSystemScheduler();
+    // Arrange: engine context with a TimeService registered
+    EngineContext engineContext;
+    engineContext.registerService<TimeService>(std::make_unique<TimeService>());
 
-    // Unregistering a non-registered system should throw
-    bool threwUnregisterBeforeRegister = false;
+    // Arrange: scheduler with a TickSystem registered
+    SystemScheduler scheduler;
+    scheduler.registerSystem<TickSystem>();
+
+    // Act: run updates and validate TimeService is used by the system
+    scheduler.updateSystems(engineContext);
+    assert(engineContext.getService<TimeService>().tick == 1);
+
+    scheduler.updateSystems(engineContext);
+    assert(engineContext.getService<TimeService>().tick == 2);
+
+    // Duplicate registration should throw
+    bool threwDupReg = false;
     try
     {
-        scheduler.unregisterSystem<TestSystemA>();
+        scheduler.registerSystem<TickSystem>();
     }
     catch (const std::runtime_error &)
     {
-        threwUnregisterBeforeRegister = true;
+        threwDupReg = true;
     }
-    assert(threwUnregisterBeforeRegister);
+    assert(threwDupReg);
 
-    // Register a system successfully
-    scheduler.registerSystem<TestSystemA>();
+    // Unregister and ensure further updates don't change the tick
+    scheduler.unregisterSystem<TickSystem>();
+    scheduler.updateSystems(engineContext);
+    assert(engineContext.getService<TimeService>().tick == 2);
 
-    // Double registration should throw
-    bool threwDoubleRegister = false;
+    // Unregistering again should throw
+    bool threwUnreg = false;
     try
     {
-        scheduler.registerSystem<TestSystemA>();
+        scheduler.unregisterSystem<TickSystem>();
     }
     catch (const std::runtime_error &)
     {
-        threwDoubleRegister = true;
+        threwUnreg = true;
     }
-    assert(threwDoubleRegister);
-
-    // Register a second distinct system
-    scheduler.registerSystem<TestSystemB>();
-
-    // Reset counters
-    TestSystemA::updates = 0;
-    TestSystemA::lastDt = 0.0f;
-    TestSystemA::lastScene = nullptr;
-    TestSystemB::updates = 0;
-    TestSystemB::lastDt = 0.0f;
-    TestSystemB::lastScene = nullptr;
-
-    // Update should call both systems once
-    const float dt1 = 0.25f;
-    scheduler.updateSystems(dt1);
-    assert(TestSystemA::updates == 1);
-    assert(TestSystemB::updates == 1);
-    assert(TestSystemA::lastDt == dt1);
-    assert(TestSystemB::lastDt == dt1);
-    assert(TestSystemA::lastScene == &scene);
-    assert(TestSystemB::lastScene == &scene);
-
-    // Unregister first system, only the second should update
-    scheduler.unregisterSystem<TestSystemA>();
-    const float dt2 = 0.5f;
-    scheduler.updateSystems(dt2);
-    assert(TestSystemA::updates == 1); // unchanged
-    assert(TestSystemB::updates == 2); // incremented
-    assert(TestSystemB::lastDt == dt2);
-    assert(TestSystemB::lastScene == &scene);
-
-    // Unregistering already unregistered should throw
-    bool threwUnregisterAgain = false;
-    try
-    {
-        scheduler.unregisterSystem<TestSystemA>();
-    }
-    catch (const std::runtime_error &)
-    {
-        threwUnregisterAgain = true;
-    }
-    assert(threwUnregisterAgain);
+    assert(threwUnreg);
 
     return 0;
 }

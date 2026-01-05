@@ -2,28 +2,43 @@
 
 #include "ecs/registry/Registry.hpp"
 #include "ecs/system/SystemScheduler.hpp"
-#include "render/Camera.hpp"
+
+#include "ecs/component/CTransform.hpp"
+#include "ecs/component/CTransformCache.hpp"
+#include "ecs/component/CMeshRenderer.hpp"
+#include "ecs/component/CCamera.hpp"
+#include "ecs/component/CCameraTransform.hpp"
+#include "ecs/component/CCameraTransformCache.hpp"
+#include "ecs/system/TransformSystem.hpp"
+#include "ecs/system/RenderSystem.hpp"
+#include <ecs/system/CameraSystem.hpp>
 
 class Scene
 {
 private:
-    Registry registry;
-    Camera mainCamera;
-    SystemScheduler systemScheduler;
+    Registry m_registry;
+    SystemScheduler m_systemScheduler;
 
 public:
     Scene()
-        : systemScheduler(*this)
     {
+        // Register default components and systems
+        m_registry.registerComponent<CTransform>();
+        m_registry.registerComponent<CTransformCache>();
+        m_registry.registerComponent<CMeshRenderer>();
+        m_registry.registerComponent<CCamera>();
+        m_registry.registerComponent<CCameraTransform>();
+        m_registry.registerComponent<CCameraTransformCache>();
+        m_systemScheduler.registerSystem<TransformSystem>();
+        m_systemScheduler.registerSystem<CameraSystem>();
+        m_systemScheduler.registerSystem<RenderSystem>();
     }
 
     ~Scene()
     {
     }
 
-    Registry &getRegistry() { return registry; }
+    Registry &registry() { return m_registry; }
 
-    Camera &getMainCamera() { return mainCamera; }
-
-    SystemScheduler &getSystemScheduler() { return systemScheduler; }
+    SystemScheduler &systems() { return m_systemScheduler; }
 };

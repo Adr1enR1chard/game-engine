@@ -1,15 +1,17 @@
 #pragma once
 #include "scene/Scene.hpp"
 
-class SceneManager
+#include "engine/Service.hpp"
+
+class SceneManager : public Service
 {
 public:
     SceneManager() = default;
-    ~SceneManager() = default;
+    virtual ~SceneManager() = default;
     SceneManager(const SceneManager &) = delete;
     SceneManager &operator=(const SceneManager &) = delete;
 
-    Scene &GetCurrentScene()
+    Scene &currentScene()
     {
         return m_CurrentScene;
     }

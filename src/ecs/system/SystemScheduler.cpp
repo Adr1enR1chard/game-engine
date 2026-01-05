@@ -1,12 +1,13 @@
 #include "ecs/system/SystemScheduler.hpp"
 
-#include "scene/Scene.hpp"
 #include "SystemScheduler.hpp"
 
-void SystemScheduler::updateSystems(float deltaTime)
+#include <engine/EngineContext.hpp>
+
+void SystemScheduler::updateSystems(EngineContext &engineContext)
 {
     for (auto &[typeIndex, system] : m_systems)
     {
-        system->update(m_scene, deltaTime);
+        system->update(engineContext);
     }
 }

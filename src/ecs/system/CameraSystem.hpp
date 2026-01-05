@@ -1,8 +1,10 @@
 #pragma once
 
-#include "ecs/system/System.hpp"
+#include "System.hpp"
 
-class TransformSystem : public System
+class EngineContext;
+
+class CameraSystem : public System
 {
 public:
     void update(EngineContext &engineContext) override;

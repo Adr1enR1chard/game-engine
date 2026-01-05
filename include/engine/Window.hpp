@@ -3,9 +3,11 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-class Window
+#include "engine/Service.hpp"
+
+class Window : public Service
 {
-public:
+private:
     static void framebuffer_size_callback(GLFWwindow *window, int width, int height)
     {
         if (width == 0 || height == 0)
@@ -84,5 +86,10 @@ public:
     {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
+    void getFramebufferSize(int &width, int &height) const
+    {
+        glfwGetFramebufferSize(this->m_window, &width, &height);
     }
 };

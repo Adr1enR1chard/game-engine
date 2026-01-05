@@ -1,7 +1,9 @@
 #pragma once
 #include <GLFW/glfw3.h>
 
-class Time
+#include "engine/Service.hpp"
+
+class Time : public Service
 {
 
 public:
@@ -13,13 +15,13 @@ public:
     void update()
     {
         float currentFrameTime = static_cast<float>(glfwGetTime());
-        deltaTime = currentFrameTime - lastFrameTime;
-        lastFrameTime = currentFrameTime;
+        m_deltaTime = currentFrameTime - m_lastFrameTime;
+        m_lastFrameTime = currentFrameTime;
     }
 
-    float getDeltaTime() const { return deltaTime; }
+    float deltaTime() const { return m_deltaTime; }
 
 private:
-    float deltaTime = 0.0f;
-    float lastFrameTime = 0.0f;
+    float m_deltaTime = 0.0f;
+    float m_lastFrameTime = 0.0f;
 };

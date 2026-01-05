@@ -1,10 +1,10 @@
 #pragma once
 
-class Scene;
+class EngineContext;
 
 class System
 {
 public:
     virtual ~System() = default;
-    virtual void update(Scene &scene, float deltaTime) = 0;
+    virtual void update(EngineContext &engineContext) = 0;
 };

@@ -20,6 +20,7 @@ enable_testing()
 add_executable(BasicScene
 	examples/basic_scene/main.cpp
 	src/ecs/system/RenderSystem.cpp
+    src/ecs/system/CameraSystem.cpp
 	src/ecs/system/SystemScheduler.cpp
     src/ecs/system/TransformSystem.cpp
 	src/third_party/glad/glad.c

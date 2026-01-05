@@ -131,7 +131,7 @@ public:
     }
 
     template <ComponentType T>
-    T &getComponent(Entity entity)
+    T &getComponent(Entity entity) const
     {
         auto storageIt = m_componentMap.find(std::type_index(typeid(T)));
         if (storageIt == m_componentMap.end())

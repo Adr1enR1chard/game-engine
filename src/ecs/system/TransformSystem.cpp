@@ -7,6 +7,9 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
+#include <engine/SceneManager.hpp>
+
+#include <engine/EngineContext.hpp>
 
 glm::mat4 getModelMatrix(const CTransform &transform)
 {
@@ -19,23 +22,22 @@ glm::mat4 getModelMatrix(const CTransform &transform)
     return model;
 }
 
-void TransformSystem::update(Scene &scene, float deltaTime)
+void TransformSystem::update(EngineContext &engineContext)
 {
-    for (const Entity &entity : scene.getRegistry().getEntitiesWithComponent<CTransform>())
+    Scene &scene = engineContext.getService<SceneManager>().currentScene();
+    for (const Entity &entity : scene.registry().getEntitiesWithComponent<CTransform>())
     {
-        auto &transform = scene.getRegistry().getComponent<CTransform>(entity);
+        auto &transform = scene.registry().getComponent<CTransform>(entity);
         if (transform.dirty)
         {
-            if (!scene.getRegistry().hasComponent<CTransformCache>(entity))
+            if (!scene.registry().hasComponent<CTransformCache>(entity))
             {
-                scene.getRegistry().createComponent<CTransformCache>(entity);
+                scene.registry().createComponent<CTransformCache>(entity);
             }
 
-            auto &transformCache = scene.getRegistry().getComponent<CTransformCache>(entity);
+            auto &transformCache = scene.registry().getComponent<CTransformCache>(entity);
             transformCache.modelMatrix = getModelMatrix(transform);
             transform.dirty = false;
         }
     }
-
-    deltaTime;
 }

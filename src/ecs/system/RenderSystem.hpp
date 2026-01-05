@@ -7,5 +7,5 @@
 class RenderSystem : public System
 {
 public:
-    void update(Scene &scene, float deltaTime) override;
+    void update(EngineContext &engineContext) override;
 };

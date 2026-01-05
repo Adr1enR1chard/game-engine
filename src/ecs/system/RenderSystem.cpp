@@ -4,7 +4,8 @@
 #include <string>
 #include <glad/glad.h>
 
-#include "scene/Scene.hpp"
+#include <engine/EngineContext.hpp>
+#include <engine/SceneManager.hpp>
 
 #include "ecs/component/CMeshRenderer.hpp"
 #include "ecs/component/CTransformCache.hpp"
@@ -12,9 +13,19 @@
 #include "handle/ShaderHandle.hpp"
 #include "handle/TextureHandle.hpp"
 
-void RenderSystem::update(Scene &scene, float deltaTime)
+#include <engine/Time.hpp>
+#include <scene/Scene.hpp>
+#include <ecs/component/CCamera.hpp>
+#include "ecs/component/CCameraTransformCache.hpp"
+
+void RenderSystem::update(EngineContext &engineContext)
 {
-    Registry &registry = scene.getRegistry();
+    Registry &registry = engineContext.registry();
+    auto cameraEntities = registry.getEntitiesWithComponents<CCamera, CCameraTransformCache>();
+    if (cameraEntities.empty())
+        return;
+
+    const auto &cameraTransformCache = registry.getComponent<CCameraTransformCache>(cameraEntities[0]);
 
     for (const Entity &entity : registry.getEntitiesWithComponents<CMeshRenderer, CTransformCache>())
     {
@@ -28,8 +39,8 @@ void RenderSystem::update(Scene &scene, float deltaTime)
 
         const ShaderHandle &shader = meshRenderer.material->getShader();
         shader.use();
-        shader.setMat4("view", scene.getMainCamera().getViewMatrix());
-        shader.setMat4("projection", scene.getMainCamera().getProjectionMatrix());
+        shader.setMat4("view", cameraTransformCache.viewMatrix);
+        shader.setMat4("projection", cameraTransformCache.projectionMatrix);
         shader.setMat4("model", transform.modelMatrix);
 
         // Bind textures to consecutive units and set sampler uniforms to those units
@@ -58,6 +69,4 @@ void RenderSystem::update(Scene &scene, float deltaTime)
             glDrawArrays(GL_TRIANGLES, 0, meshRenderer.mesh->getVertexCount());
         }
     }
-
-    deltaTime;
 }

@@ -4,17 +4,42 @@
 #include "ecs/component/CMeshRenderer.hpp"
 #include <ecs/system/TransformSystem.hpp>
 #include <ecs/system/RenderSystem.hpp>
+#include <ecs/component/CCamera.hpp>
+#include <ecs/component/CCameraTransform.hpp>
 
 class RotatingCubeSystem : public System
 {
 public:
-    void update(Scene &scene, float deltaTime) override
+    void update(EngineContext &engineContext) override
     {
-        for (const Entity &entity : scene.getRegistry().getEntitiesWithComponent<CTransform>())
+        Scene &scene = engineContext.getService<SceneManager>().currentScene();
+        float deltaTime = engineContext.getService<Time>().deltaTime();
+        for (const Entity &entity : scene.registry().getEntitiesWithComponent<CTransform>())
         {
-            auto &transform = scene.getRegistry().getComponent<CTransform>(entity);
+            auto &transform = scene.registry().getComponent<CTransform>(entity);
             transform.rotation.y += 50.0f * deltaTime;
             transform.dirty = true;
+        }
+    }
+};
+
+class PrintFPSSystem : public System
+{
+public:
+    void update(EngineContext &engineContext) override
+    {
+        static float elapsedTime = 0.0f;
+        static int frameCount = 0;
+
+        float deltaTime = engineContext.getService<Time>().deltaTime();
+        elapsedTime += deltaTime;
+        frameCount++;
+
+        if (elapsedTime >= 1.0f)
+        {
+            std::cout << "FPS: " << frameCount << std::endl;
+            elapsedTime = 0.0f;
+            frameCount = 0;
         }
     }
 };
@@ -23,15 +48,9 @@ int main()
 {
     Engine engine(800, 600, "Game Engine");
 
-    Scene &scene = engine.getSceneManager().GetCurrentScene();
-
-    scene.getRegistry().registerComponent<CTransform>();
-    scene.getRegistry().registerComponent<CTransformCache>();
-    scene.getRegistry().registerComponent<CMeshRenderer>();
-    scene.getSystemScheduler().registerSystem<TransformSystem>();
-    scene.getSystemScheduler().registerSystem<RenderSystem>();
-
-    scene.getSystemScheduler().registerSystem<RotatingCubeSystem>();
+    Scene &scene = engine.context().getService<SceneManager>().currentScene();
+    scene.systems().registerSystem<RotatingCubeSystem>();
+    scene.systems().registerSystem<PrintFPSSystem>();
 
     // cube data
     float vertices[] = {
@@ -100,16 +119,20 @@ int main()
 
     for (const glm::vec3 &pos : cubePositions)
     {
-        Entity cube = scene.getRegistry().createEntity();
-        auto &transform = scene.getRegistry().createComponent<CTransform>(cube);
+        Entity cube = scene.registry().createEntity();
+        auto &transform = scene.registry().createComponent<CTransform>(cube);
         transform.position = pos;
         transform.dirty = true;
-        CMeshRenderer &meshRenderer = scene.getRegistry().createComponent<CMeshRenderer>(cube);
+        CMeshRenderer &meshRenderer = scene.registry().createComponent<CMeshRenderer>(cube);
         meshRenderer.mesh = rendererMesh;
         meshRenderer.material = ourMaterial;
     }
 
-    scene.getMainCamera().setPosition(glm::vec3(0.0f, 0.0f, -3.0f));
+    Entity camera = scene.registry().createEntity();
+    scene.registry().createComponent<CCamera>(camera);
+    auto &cameraTransform = scene.registry().createComponent<CCameraTransform>(camera);
+    cameraTransform.position = glm::vec3(0.0f, 0.0f, 3.0f);
+    cameraTransform.isDirty = true;
 
     engine.run();
     return 0;

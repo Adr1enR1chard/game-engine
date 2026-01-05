@@ -11,12 +11,12 @@
 
 #include "ecs/system/System.hpp"
 
-class Scene;
+class EngineContext;
 
 class SystemScheduler
 {
 public:
-    SystemScheduler(Scene &scene) : m_scene(scene) {}
+    SystemScheduler() {}
     ~SystemScheduler() {}
 
     template <SystemType System>
@@ -25,11 +25,9 @@ public:
     template <SystemType System>
     void unregisterSystem();
 
-    void updateSystems(float deltaTime);
+    void updateSystems(EngineContext &engineContext);
 
 private:
-    Scene &m_scene;
-
     std::unordered_map<std::type_index, std::unique_ptr<System>> m_systems;
 };
 
