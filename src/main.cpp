@@ -13,7 +13,9 @@
 #include "handle/MeshHandle.hpp"
 #include "ecs/registry/Registry.hpp"
 #include "scene/SceneManager.hpp"
-#include "ecs/system/RenderableSystem.hpp"
+#include "ecs/system/RenderSystem.hpp"
+#include "ecs/component/CTransformCache.hpp"
+#include "ecs/system/TransformSystem.hpp"
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -124,6 +126,7 @@ void run()
     Scene &scene = SceneManager::GetCurrentScene();
 
     scene.getRegistry().registerComponent<CTransform>();
+    scene.getRegistry().registerComponent<CTransformCache>();
     scene.getRegistry().registerComponent<CMeshRenderer>();
 
     // auto rendererComponent = scene.getRegistry().createComponent<MeshRendererComponent>();
@@ -160,7 +163,8 @@ void run()
 
     scene.getMainCamera().setPosition(glm::vec3(0.0f, 0.0f, -3.0f));
 
-    scene.getSystemScheduler().registerSystem<RenderableSystem>();
+    scene.getSystemScheduler().registerSystem<RenderSystem>();
+    scene.getSystemScheduler().registerSystem<TransformSystem>();
 
     // render loop
     // -----------
@@ -213,6 +217,7 @@ void run()
 
             // std::cout << "Rendering entity with position: (" << transform->position.x << ", " << transform->position.y << ", " << transform->position.z << ")" << std::endl;
             transform.rotation.y += 20.0f * (float)deltaTime;
+            transform.dirty = true;
             // ourShader.setMat4("model", transform.getModelMatrix());
             // meshRenderer.render();
         }

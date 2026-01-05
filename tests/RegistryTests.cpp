@@ -7,29 +7,17 @@ struct Position : CComponent
 {
     int x = 0;
     int y = 0;
-    inline const bool isValid() const override
-    {
-        return true;
-    }
 };
 
 struct Velocity : CComponent
 {
     float vx = 0.f;
     float vy = 0.f;
-    inline const bool isValid() const override
-    {
-        return true;
-    }
 };
 
 struct Health : CComponent
 {
     int hp = 100;
-    inline const bool isValid() const override
-    {
-        return true;
-    }
 };
 
 int main()

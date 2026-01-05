@@ -19,10 +19,11 @@ enable_testing()
 # Sources
 add_executable(OpenGLTutorial
 	src/main.cpp
-	src/ecs/system/RenderableSystem.cpp
+	src/ecs/system/RenderSystem.cpp
 	src/ecs/system/SystemScheduler.cpp
-	src/include/glad.c
-	src/include/stb_image.cpp
+    src/ecs/system/TransformSystem.cpp
+	src/third_party/glad/glad.c
+	src/third_party/stb_image/stb_image.cpp
 )
 
 # Include directories for local headers (GLAD, etc.)
@@ -76,6 +77,18 @@ target_include_directories(RegistryTests PRIVATE
 )
 add_test(NAME RegistryTests COMMAND RegistryTests)
 
+# SystemScheduler unit tests
+add_executable(SystemTests
+    tests/SystemTests.cpp
+    src/ecs/system/SystemScheduler.cpp
+)
+target_include_directories(SystemTests PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+add_test(NAME SystemTests COMMAND SystemTests)
+
+
 function(enable_strict_warnings target)
     if (MSVC)
         target_compile_options(${target} PRIVATE
@@ -108,3 +121,4 @@ endfunction()
 
 enable_strict_warnings(OpenGLTutorial)
 enable_strict_warnings(RegistryTests)
+enable_strict_warnings(SystemTests)

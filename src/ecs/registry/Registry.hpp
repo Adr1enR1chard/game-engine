@@ -146,4 +146,15 @@ public:
 
         return *static_cast<T *>(compIt->second.get());
     }
+
+    template <ComponentType T>
+    bool hasComponent(Entity entity) const
+    {
+        auto storageIt = m_componentMap.find(std::type_index(typeid(T)));
+        if (storageIt == m_componentMap.end())
+            return false;
+
+        const auto &storage = storageIt->second;
+        return storage.components.find(entity) != storage.components.end();
+    }
 };

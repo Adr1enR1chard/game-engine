@@ -10,8 +10,4 @@ struct CMeshRenderer : CComponent
 {
     std::shared_ptr<MeshHandle> mesh;
     std::shared_ptr<ShaderHandle> shader;
-    inline const bool isValid() const override
-    {
-        return mesh != nullptr && shader != nullptr;
-    }
 };
