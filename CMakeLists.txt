@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 # Project
-project(OpenGLTutorial LANGUAGES C CXX)
+project(BasicScene LANGUAGES C CXX)
 
 # Standards
 set(CMAKE_CXX_STANDARD 20)
@@ -17,8 +17,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 enable_testing()
 
 # Sources
-add_executable(OpenGLTutorial
-	src/main.cpp
+add_executable(BasicScene
+	examples/basic_scene/main.cpp
 	src/ecs/system/RenderSystem.cpp
 	src/ecs/system/SystemScheduler.cpp
     src/ecs/system/TransformSystem.cpp
@@ -27,13 +27,13 @@ add_executable(OpenGLTutorial
 )
 
 # Include directories for local headers (GLAD, etc.)
-target_include_directories(OpenGLTutorial PRIVATE
+target_include_directories(BasicScene PRIVATE
 		${CMAKE_CURRENT_SOURCE_DIR}/include
 		${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 # Avoid GLFW including GL headers; we provide them via GLAD
-target_compile_definitions(OpenGLTutorial PRIVATE GLFW_INCLUDE_NONE)
+target_compile_definitions(BasicScene PRIVATE GLFW_INCLUDE_NONE)
 
 # Dependencies: GLFW via FetchContent
 include(FetchContent)
@@ -51,21 +51,21 @@ FetchContent_MakeAvailable(glfw)
 find_package(OpenGL REQUIRED)
 
 # Link libraries
-target_link_libraries(OpenGLTutorial PRIVATE
+target_link_libraries(BasicScene PRIVATE
 		glfw
 		OpenGL::GL
 )
 
 # Windows-specific (ensure opengl32 linkage where necessary)
 if (WIN32)
-	target_link_libraries(OpenGLTutorial PRIVATE opengl32)
+	target_link_libraries(BasicScene PRIVATE opengl32)
 endif()
 
-add_custom_command(TARGET OpenGLTutorial POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:OpenGLTutorial>/assets"
+add_custom_command(TARGET BasicScene POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:BasicScene>/assets"
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-          "${CMAKE_SOURCE_DIR}/assets"
-          "$<TARGET_FILE_DIR:OpenGLTutorial>/assets")
+          "${CMAKE_SOURCE_DIR}/examples/basic_scene/assets"
+          "$<TARGET_FILE_DIR:BasicScene>/assets")
 
 # Registry unit tests
 add_executable(RegistryTests
@@ -119,6 +119,6 @@ function(enable_strict_warnings target)
     endif()
 endfunction()
 
-enable_strict_warnings(OpenGLTutorial)
+enable_strict_warnings(BasicScene)
 enable_strict_warnings(RegistryTests)
 enable_strict_warnings(SystemTests)

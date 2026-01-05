@@ -4,23 +4,16 @@
 class SceneManager
 {
 public:
-    static SceneManager &Instance()
-    {
-        static SceneManager instance;
-        return instance;
-    }
-
+    SceneManager() = default;
+    ~SceneManager() = default;
     SceneManager(const SceneManager &) = delete;
     SceneManager &operator=(const SceneManager &) = delete;
 
-    static Scene &GetCurrentScene()
+    Scene &GetCurrentScene()
     {
-        return Instance().m_CurrentScene;
+        return m_CurrentScene;
     }
 
 private:
-    SceneManager() = default;
-    ~SceneManager() = default;
-
     Scene m_CurrentScene;
 };

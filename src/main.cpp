@@ -16,6 +16,8 @@
 #include "ecs/system/RenderSystem.hpp"
 #include "ecs/component/CTransformCache.hpp"
 #include "ecs/system/TransformSystem.hpp"
+#include "engine/Window.hpp"
+#include "engine/Engine.hpp"
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -29,37 +31,9 @@ double lastFrame = 0.0;
 
 void run()
 {
-    // glfw: initialize and configure
-    // ------------------------------
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-
-    // glfw window creation
-    // --------------------
-    GLFWwindow *window = glfwCreateWindow(viewport_width, viewport_height, "LearnOpenGL", NULL, NULL);
-    if (window == NULL)
-    {
-        std::cout << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return;
-    }
-    glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
-    // glad: load all OpenGL function pointers
-    // ---------------------------------------
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        return;
-    }
-
+    Engine engine(viewport_width, viewport_height, "Game Engine");
+    // Window &window = engine.getWindow();
+    Scene &scene = engine.getSceneManager().GetCurrentScene();
     // build and compile our shader program
     // ------------------------------------
     ShaderHandle ourShader("assets/shaders/basic.vs", "assets/shaders/basic.fs"); // you can name your shader files however you like
@@ -123,8 +97,6 @@ void run()
         glm::vec3(1.5f, 0.2f, -1.5f),
         glm::vec3(-1.3f, 1.0f, -1.5f)};
 
-    Scene &scene = SceneManager::GetCurrentScene();
-
     scene.getRegistry().registerComponent<CTransform>();
     scene.getRegistry().registerComponent<CTransformCache>();
     scene.getRegistry().registerComponent<CMeshRenderer>();
@@ -159,15 +131,11 @@ void run()
     TextureHandle texture("assets/textures/container.jpg");
     texture.filteringParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
 
-    glEnable(GL_DEPTH_TEST);
-
     scene.getMainCamera().setPosition(glm::vec3(0.0f, 0.0f, -3.0f));
 
     scene.getSystemScheduler().registerSystem<RenderSystem>();
     scene.getSystemScheduler().registerSystem<TransformSystem>();
 
-    // render loop
-    // -----------
     while (!glfwWindowShouldClose(window))
     {
         // input
@@ -231,6 +199,8 @@ void run()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
     }
+
+    // engine.run();
 
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------

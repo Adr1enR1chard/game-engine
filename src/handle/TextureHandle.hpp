@@ -11,31 +11,41 @@ public:
     unsigned int ID;
     TextureHandle(const char *imagePath)
     {
-        // load and generate the texture
         int width, height, nrChannels;
+
+        stbi_set_flip_vertically_on_load(true);
+
         unsigned char *data = stbi_load(imagePath, &width, &height, &nrChannels, 0);
         if (data)
         {
             glGenTextures(1, &ID);
             glBindTexture(GL_TEXTURE_2D, ID);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+
+            // default texture wrapping and filtering parameters
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+            GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+            glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
             glGenerateMipmap(GL_TEXTURE_2D);
         }
         else
         {
-            std::cout << "Failed to load texture" << std::endl;
+            std::cout << "TextureHandle: Failed to load texture at path: " << imagePath << std::endl;
         }
         stbi_image_free(data);
     }
 
-    void filteringParameters(GLenum minFilter, GLenum magFilter)
+    void filteringParameters(GLenum minFilter, GLenum magFilter) const
     {
         glBindTexture(GL_TEXTURE_2D, ID);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
     }
 
-    void bind()
+    void bind() const
     {
         glBindTexture(GL_TEXTURE_2D, ID);
     }

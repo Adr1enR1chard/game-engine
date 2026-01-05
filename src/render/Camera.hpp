@@ -10,10 +10,15 @@ private:
     glm::vec3 position;
     glm::vec3 rotation;
 
+    float fov;
+    float aspectRatio;
+    float nearPlane;
+    float farPlane;
+
     bool isActive;
 
 public:
-    Camera(glm::vec3 position = glm::vec3(0.0f), glm::vec3 rotation = glm::vec3(0.0f)) : position(position), rotation(rotation), isActive(true) {};
+    Camera(glm::vec3 position = glm::vec3(0.0f), glm::vec3 rotation = glm::vec3(0.0f), float fov = 45.0f, float aspectRatio = 4.0f / 3.0f, float nearPlane = 0.1f, float farPlane = 100.0f) : position(position), rotation(rotation), fov(fov), aspectRatio(aspectRatio), nearPlane(nearPlane), farPlane(farPlane), isActive(true) {}
     ~Camera() {};
 
     bool getIsActive() const { return isActive; }
@@ -33,6 +38,11 @@ public:
         view = glm::rotate(view, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
         view = glm::translate(view, position);
         return view;
+    }
+
+    glm::mat4 getProjectionMatrix() const
+    {
+        return glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
     }
 };
 
