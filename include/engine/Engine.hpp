@@ -12,11 +12,6 @@ public:
     }
     ~Engine() = default;
 
-    void createWindow(int width, int height, const char *title)
-    {
-        this->window = Window(width, height, title);
-    }
-
     void run()
     {
         try
