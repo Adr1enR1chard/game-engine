@@ -40,15 +40,7 @@ int main()
     assert(engineContext.getService<TimeService>().tick == 2);
 
     // Duplicate registration should throw
-    bool threwDupReg = false;
-    try
-    {
-        scheduler.registerSystem<TickSystem>();
-    }
-    catch (const std::runtime_error &)
-    {
-        threwDupReg = true;
-    }
+    bool threwDupReg = !scheduler.registerSystem<TickSystem>();
     assert(threwDupReg);
 
     // Unregister and ensure further updates don't change the tick
@@ -57,15 +49,7 @@ int main()
     assert(engineContext.getService<TimeService>().tick == 2);
 
     // Unregistering again should throw
-    bool threwUnreg = false;
-    try
-    {
-        scheduler.unregisterSystem<TickSystem>();
-    }
-    catch (const std::runtime_error &)
-    {
-        threwUnreg = true;
-    }
+    bool threwUnreg = !scheduler.unregisterSystem<TickSystem>();
     assert(threwUnreg);
 
     return 0;

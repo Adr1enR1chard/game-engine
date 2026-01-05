@@ -4,8 +4,8 @@
 #include <memory>
 #include <typeindex>
 #include <unordered_map>
-#include <stdexcept>
 #include <typeindex>
+#include <iostream>
 
 #include "utils/types.hpp"
 
@@ -20,10 +20,10 @@ public:
     ~SystemScheduler() {}
 
     template <SystemType System>
-    void registerSystem();
+    bool registerSystem();
 
     template <SystemType System>
-    void unregisterSystem();
+    bool unregisterSystem();
 
     void updateSystems(EngineContext &engineContext);
 
@@ -32,21 +32,25 @@ private:
 };
 
 template <SystemType System>
-void SystemScheduler::registerSystem()
+bool SystemScheduler::registerSystem()
 {
     if (!m_systems.try_emplace(std::type_index(typeid(System)), std::make_unique<System>()).second)
     {
-        throw std::runtime_error("System already registered.");
+        std::cerr << "System already registered: " << typeid(System).name() << std::endl;
+        return false;
     }
+    return true;
 }
 
 template <SystemType System>
-void SystemScheduler::unregisterSystem()
+bool SystemScheduler::unregisterSystem()
 {
     auto it = m_systems.find(std::type_index(typeid(System)));
     if (it == m_systems.end())
     {
-        throw std::runtime_error("System not registered.");
+        std::cerr << "SystemScheduler: System not found for deregistration: " << typeid(System).name() << std::endl;
+        return false;
     }
     m_systems.erase(it);
+    return true;
 }
