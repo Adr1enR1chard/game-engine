@@ -7,8 +7,7 @@
 #include "ecs/component/CTransformCache.hpp"
 #include "ecs/component/CMeshRenderer.hpp"
 #include "ecs/component/CCamera.hpp"
-#include "ecs/component/CCameraTransform.hpp"
-#include "ecs/component/CCameraTransformCache.hpp"
+#include "ecs/component/CCameraCache.hpp"
 #include "ecs/system/TransformSystem.hpp"
 #include "ecs/system/RenderSystem.hpp"
 #include <ecs/system/CameraSystem.hpp>
@@ -27,8 +26,7 @@ public:
         m_registry.registerComponent<CTransformCache>();
         m_registry.registerComponent<CMeshRenderer>();
         m_registry.registerComponent<CCamera>();
-        m_registry.registerComponent<CCameraTransform>();
-        m_registry.registerComponent<CCameraTransformCache>();
+        m_registry.registerComponent<CCameraCache>();
         m_systemScheduler.registerSystem<TransformSystem>();
         m_systemScheduler.registerSystem<CameraSystem>();
         m_systemScheduler.registerSystem<RenderSystem>();

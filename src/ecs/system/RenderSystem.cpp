@@ -16,16 +16,17 @@
 #include <engine/Time.hpp>
 #include <scene/Scene.hpp>
 #include <ecs/component/CCamera.hpp>
-#include "ecs/component/CCameraTransformCache.hpp"
+#include "ecs/component/CCameraCache.hpp"
 
 void RenderSystem::update(EngineContext &engineContext)
 {
     Registry &registry = engineContext.registry();
-    auto cameraEntities = registry.getEntitiesWithComponents<CCamera, CCameraTransformCache>();
+    auto cameraEntities = registry.getEntitiesWithComponents<CTransformCache, CCameraCache>();
     if (cameraEntities.empty())
         return;
 
-    const auto &cameraTransformCache = registry.getComponent<CCameraTransformCache>(cameraEntities[0]);
+    const auto &cameraCache = registry.getComponent<CCameraCache>(cameraEntities[0]);
+    const auto &cameraTransform = registry.getComponent<CTransformCache>(cameraEntities[0]);
 
     for (const Entity &entity : registry.getEntitiesWithComponents<CMeshRenderer, CTransformCache>())
     {
@@ -39,9 +40,9 @@ void RenderSystem::update(EngineContext &engineContext)
 
         const ShaderHandle &shader = meshRenderer.material->getShader();
         shader.use();
-        shader.setMat4("view", cameraTransformCache.viewMatrix);
-        shader.setMat4("projection", cameraTransformCache.projectionMatrix);
+        shader.setMat4("view", cameraTransform.viewMatrix);
         shader.setMat4("model", transform.modelMatrix);
+        shader.setMat4("projection", cameraCache.projectionMatrix);
 
         // Bind textures to consecutive units and set sampler uniforms to those units
         const auto &textures = meshRenderer.material->getTextures();

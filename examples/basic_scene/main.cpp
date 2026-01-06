@@ -5,7 +5,6 @@
 #include <ecs/system/TransformSystem.hpp>
 #include <ecs/system/RenderSystem.hpp>
 #include <ecs/component/CCamera.hpp>
-#include <ecs/component/CCameraTransform.hpp>
 
 class RotatingCubeSystem : public System
 {
@@ -14,11 +13,10 @@ public:
     {
         Scene &scene = engineContext.getService<SceneManager>().currentScene();
         float deltaTime = engineContext.getService<Time>().deltaTime();
-        for (const Entity &entity : scene.registry().getEntitiesWithComponent<CTransform>())
+        for (const Entity &entity : scene.registry().getEntitiesWithComponents<CTransform, CMeshRenderer>())
         {
             auto &transform = scene.registry().getComponent<CTransform>(entity);
-            transform.rotation.y += 50.0f * deltaTime;
-            transform.dirty = true;
+            transform.setRotation(glm::vec3(transform.getRotation().x, transform.getRotation().y + 50.0f * deltaTime, transform.getRotation().z));
         }
     }
 };
@@ -121,8 +119,7 @@ int main()
     {
         Entity cube = scene.registry().createEntity();
         auto &transform = scene.registry().createComponent<CTransform>(cube);
-        transform.position = pos;
-        transform.dirty = true;
+        transform.setPosition(pos);
         CMeshRenderer &meshRenderer = scene.registry().createComponent<CMeshRenderer>(cube);
         meshRenderer.mesh = rendererMesh;
         meshRenderer.material = ourMaterial;
@@ -130,9 +127,8 @@ int main()
 
     Entity camera = scene.registry().createEntity();
     scene.registry().createComponent<CCamera>(camera);
-    auto &cameraTransform = scene.registry().createComponent<CCameraTransform>(camera);
-    cameraTransform.position = glm::vec3(0.0f, 0.0f, 3.0f);
-    cameraTransform.isDirty = true;
+    auto &cameraTransform = scene.registry().createComponent<CTransform>(camera);
+    cameraTransform.setPosition(glm::vec3(0.0f, 0.0f, 3.0f));
 
     engine.run();
     return 0;

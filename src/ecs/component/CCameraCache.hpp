@@ -4,9 +4,7 @@
 
 #include "ecs/component/CComponent.hpp"
 
-class CCameraTransformCache : public CComponent
+struct CCameraCache : public CComponent
 {
-public:
-    glm::mat4 viewMatrix{1.0f};
     glm::mat4 projectionMatrix{1.0f};
 };

@@ -18,9 +18,6 @@ private:
         window;
     }
 
-private:
-    GLFWwindow *m_window;
-
 public:
     Window(int width, int height, const char *title)
     {
@@ -62,6 +59,7 @@ public:
         glfwTerminate();
     }
 
+private:
     bool shouldClose() const
     {
         return glfwWindowShouldClose(this->m_window);
@@ -88,8 +86,14 @@ public:
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    void getFramebufferSize(int &width, int &height) const
+    friend class Engine;
+
+public:
+    void getSize(int &width, int &height) const
     {
         glfwGetFramebufferSize(this->m_window, &width, &height);
     }
+
+private:
+    GLFWwindow *m_window;
 };
