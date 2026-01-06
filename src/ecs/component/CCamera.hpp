@@ -2,9 +2,7 @@
 
 #include <glm/glm.hpp>
 
-#include "ecs/component/CComponent.hpp"
-
-struct CCamera : CComponent
+struct CCamera
 {
     float fov = 45.0f;
     float nearPlane = 0.1f;

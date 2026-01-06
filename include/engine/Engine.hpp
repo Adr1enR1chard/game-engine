@@ -21,25 +21,18 @@ public:
         Time &time = engineContext.getService<Time>();
         SceneManager &sceneManager = engineContext.getService<SceneManager>();
 
-        try
+        while (!window.shouldClose())
         {
-            while (!window.shouldClose())
-            {
-                window.makeContextCurrent();
-                window.clear();
+            window.makeContextCurrent();
+            window.clear();
 
-                // Update current scene
-                Scene &currentScene = sceneManager.currentScene();
-                currentScene.systems().updateSystems(engineContext);
+            // Update current scene
+            Scene &currentScene = sceneManager.currentScene();
+            currentScene.systems().updateSystems(engineContext);
 
-                window.swapBuffers();
-                window.pollEvents();
-                time.update();
-            }
-        }
-        catch (const std::exception &e)
-        {
-            std::cerr << "Engine run-time error: " << e.what() << std::endl;
+            window.swapBuffers();
+            window.pollEvents();
+            time.update();
         }
     }
 

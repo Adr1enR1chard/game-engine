@@ -3,19 +3,19 @@
 
 #include "ecs/registry/Registry.hpp"
 
-struct Position : CComponent
+struct Position
 {
     int x = 0;
     int y = 0;
 };
 
-struct Velocity : CComponent
+struct Velocity
 {
     float vx = 0.f;
     float vy = 0.f;
 };
 
-struct Health : CComponent
+struct Health
 {
     int hp = 100;
 };
@@ -31,7 +31,7 @@ int main()
     bool threwCreateBeforeReg = false;
     try
     {
-        (void)reg.createComponent<Position>(e1);
+        reg.createComponent<Position>(e1);
     }
     catch (const std::runtime_error &)
     {
@@ -43,7 +43,7 @@ int main()
     bool threwGetBeforeReg = false;
     try
     {
-        (void)reg.getComponent<Position>(e1);
+        reg.getComponent<Position>(e1);
     }
     catch (const std::runtime_error &)
     {
@@ -81,7 +81,7 @@ int main()
     bool threwDupCreate = false;
     try
     {
-        (void)reg.createComponent<Position>(e1);
+        reg.createComponent<Position>(e1);
     }
     catch (const std::runtime_error &)
     {
@@ -94,7 +94,7 @@ int main()
     bool threwGetMissing = false;
     try
     {
-        (void)reg.getComponent<Position>(e2);
+        reg.getComponent<Position>(e2);
     }
     catch (const std::runtime_error &)
     {
@@ -106,7 +106,7 @@ int main()
     bool threwGetUnregisteredType = false;
     try
     {
-        (void)reg.getComponent<Health>(e1);
+        reg.getComponent<Health>(e1);
     }
     catch (const std::runtime_error &)
     {

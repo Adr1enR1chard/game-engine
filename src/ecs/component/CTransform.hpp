@@ -1,10 +1,8 @@
 #pragma once
 
-#include "ecs/component/CComponent.hpp"
-
 #include <glm/glm.hpp>
 
-struct CTransform : CComponent
+struct CTransform
 {
 public:
     const glm::vec3 &getPosition() { return this->position; }

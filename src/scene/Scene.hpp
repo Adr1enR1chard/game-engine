@@ -21,12 +21,6 @@ private:
 public:
     Scene()
     {
-        // Register default components and systems
-        m_registry.registerComponent<CTransform>();
-        m_registry.registerComponent<CTransformCache>();
-        m_registry.registerComponent<CMeshRenderer>();
-        m_registry.registerComponent<CCamera>();
-        m_registry.registerComponent<CCameraCache>();
         m_systemScheduler.registerSystem<TransformSystem>();
         m_systemScheduler.registerSystem<CameraSystem>();
         m_systemScheduler.registerSystem<RenderSystem>();
