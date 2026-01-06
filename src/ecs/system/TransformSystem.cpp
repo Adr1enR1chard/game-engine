@@ -1,15 +1,14 @@
-#include "TransformSystem.hpp"
+#include <engine/system/TransformSystem.hpp>
 
-#include "scene/Scene.hpp"
-
-#include "ecs/component/CTransform.hpp"
-#include "ecs/component/CTransformCache.hpp"
+#include <engine/SceneManager.hpp>
+#include <engine/EngineContext.hpp>
+#include <engine/component/CTransform.hpp>
+#include <engine/component/CTransformCache.hpp>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
-#include <engine/SceneManager.hpp>
 
-#include <engine/EngineContext.hpp>
+#include "scene/Scene.hpp"
 
 glm::mat4 getModelMatrix(CTransform &transform)
 {

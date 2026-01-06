@@ -1,4 +1,4 @@
-#include "RenderSystem.hpp"
+#include <engine/system/RenderSystem.hpp>
 
 #include <stdio.h>
 #include <string>
@@ -7,16 +7,16 @@
 #include <engine/EngineContext.hpp>
 #include <engine/SceneManager.hpp>
 
-#include "ecs/component/CMeshRenderer.hpp"
-#include "ecs/component/CTransformCache.hpp"
+#include <engine/component/CMeshRenderer.hpp>
+#include <engine/component/CTransformCache.hpp>
+#include <engine/component/CCamera.hpp>
+#include <engine/component/CCameraCache.hpp>
 
 #include "handle/ShaderHandle.hpp"
 #include "handle/TextureHandle.hpp"
 
 #include <engine/Time.hpp>
 #include <scene/Scene.hpp>
-#include <ecs/component/CCamera.hpp>
-#include "ecs/component/CCameraCache.hpp"
 
 void RenderSystem::update(EngineContext &engineContext)
 {

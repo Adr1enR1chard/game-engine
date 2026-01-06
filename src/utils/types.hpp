@@ -2,8 +2,8 @@
 
 #include <concepts>
 
-#include "engine/Service.hpp"
-#include "ecs/system/System.hpp"
+#include <engine/System.hpp>
+#include <engine/Service.hpp>
 
 template <typename T>
 concept SystemType = std::derived_from<T, System>;

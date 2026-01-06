@@ -4,6 +4,8 @@
 
 #include <engine/EngineContext.hpp>
 
+#include <iostream>
+
 void SystemScheduler::updateSystems(EngineContext &engineContext)
 {
     for (auto &[typeIndex, system] : m_systems)

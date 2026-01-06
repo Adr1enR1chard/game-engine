@@ -1,8 +1,6 @@
 #pragma once
 
-#include "System.hpp"
-
-class EngineContext;
+#include <engine/System.hpp>
 
 class CameraSystem : public System
 {

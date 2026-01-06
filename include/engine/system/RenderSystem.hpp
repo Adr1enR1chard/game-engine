@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 
-#include "ecs/system/System.hpp"
+#include <engine/System.hpp>
 
 class RenderSystem : public System
 {

@@ -7,10 +7,10 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
-
-#include "ecs/entity/Entity.hpp"
-#include "utils/types.hpp"
 #include <any>
+
+#include <engine/Entity.hpp>
+#include "utils/types.hpp"
 
 template <typename T>
 struct ComponentStorage

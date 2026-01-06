@@ -23,6 +23,7 @@ add_executable(BasicScene
     src/ecs/system/CameraSystem.cpp
 	src/ecs/system/SystemScheduler.cpp
     src/ecs/system/TransformSystem.cpp
+    src/render/Window.cpp
 	src/third_party/glad/glad.c
 	src/third_party/stb_image/stb_image.cpp
 )

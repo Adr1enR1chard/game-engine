@@ -1,5 +1,4 @@
-#ifndef __MESH_HPP__
-#define __MESH_HPP__
+#pragma once
 
 #include <glad/glad.h>
 
@@ -48,5 +47,3 @@ public:
     const float *getVertices() const { return vertices; }
     unsigned int getVertexCount() const { return vertexCount; }
 };
-
-#endif

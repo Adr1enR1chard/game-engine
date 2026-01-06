@@ -1,4 +1,4 @@
-#include "CameraSystem.hpp"
+#include <engine/system/CameraSystem.hpp>
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -7,9 +7,9 @@
 #include "scene/Scene.hpp"
 #include "ecs/registry/Registry.hpp"
 
-#include "ecs/component/CCamera.hpp"
-#include "ecs/component/CCameraCache.hpp"
-#include "engine/Window.hpp"
+#include <engine/component/CCamera.hpp>
+#include <engine/component/CCameraCache.hpp>
+#include <engine/Window.hpp>
 
 glm::mat4 getProjectionMatrix(float fov, float aspectRatio, float nearPlane, float farPlane)
 {

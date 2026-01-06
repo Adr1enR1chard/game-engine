@@ -7,9 +7,9 @@
 #include <typeindex>
 #include <iostream>
 
-#include "utils/types.hpp"
+#include <engine/System.hpp>
 
-#include "ecs/system/System.hpp"
+#include "utils/types.hpp"
 
 class EngineContext;
 
@@ -19,10 +19,10 @@ public:
     SystemScheduler() {}
     ~SystemScheduler() {}
 
-    template <SystemType System>
+    template <SystemType T>
     bool registerSystem();
 
-    template <SystemType System>
+    template <SystemType T>
     bool unregisterSystem();
 
     void updateSystems(EngineContext &engineContext);
@@ -31,24 +31,24 @@ private:
     std::unordered_map<std::type_index, std::unique_ptr<System>> m_systems;
 };
 
-template <SystemType System>
+template <SystemType T>
 bool SystemScheduler::registerSystem()
 {
-    if (!m_systems.try_emplace(std::type_index(typeid(System)), std::make_unique<System>()).second)
+    if (!m_systems.try_emplace(std::type_index(typeid(T)), std::make_unique<T>()).second)
     {
-        std::cerr << "System already registered: " << typeid(System).name() << std::endl;
+        std::cerr << "System already registered: " << typeid(T).name() << std::endl;
         return false;
     }
     return true;
 }
 
-template <SystemType System>
+template <SystemType T>
 bool SystemScheduler::unregisterSystem()
 {
-    auto it = m_systems.find(std::type_index(typeid(System)));
+    auto it = m_systems.find(std::type_index(typeid(T)));
     if (it == m_systems.end())
     {
-        std::cerr << "SystemScheduler: System not found for deregistration: " << typeid(System).name() << std::endl;
+        std::cerr << "SystemScheduler: System not found for deregistration: " << typeid(T).name() << std::endl;
         return false;
     }
     m_systems.erase(it);

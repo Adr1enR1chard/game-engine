@@ -1,10 +1,12 @@
 #include <engine/Engine.hpp>
-#include "ecs/component/CTransform.hpp"
-#include "ecs/component/CTransformCache.hpp"
-#include "ecs/component/CMeshRenderer.hpp"
-#include <ecs/system/TransformSystem.hpp>
-#include <ecs/system/RenderSystem.hpp>
-#include <ecs/component/CCamera.hpp>
+#include <engine/SceneManager.hpp>
+#include <engine/Time.hpp>
+#include <engine/component/CTransform.hpp>
+#include <engine/component/CMeshRenderer.hpp>
+#include <engine/component/CCamera.hpp>
+#include <engine/system/TransformSystem.hpp>
+#include <engine/system/RenderSystem.hpp>
+#include <engine/system/CameraSystem.hpp>
 
 class RotatingCubeSystem : public System
 {
@@ -47,6 +49,9 @@ int main()
     Engine engine(800, 600, "Game Engine");
 
     Scene &scene = engine.context().getService<SceneManager>().currentScene();
+    scene.systems().registerSystem<TransformSystem>();
+    scene.systems().registerSystem<CameraSystem>();
+    scene.systems().registerSystem<RenderSystem>();
     scene.systems().registerSystem<RotatingCubeSystem>();
     scene.systems().registerSystem<PrintFPSSystem>();
 

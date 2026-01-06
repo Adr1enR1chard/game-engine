@@ -1,10 +1,10 @@
 #include <cassert>
 #include <stdexcept>
 
-#include "ecs/system/System.hpp"
-#include "ecs/system/SystemScheduler.hpp"
-
+#include <engine/System.hpp>
 #include <engine/EngineContext.hpp>
+
+#include "ecs/system/SystemScheduler.hpp"
 
 class TimeService : public Service
 {
