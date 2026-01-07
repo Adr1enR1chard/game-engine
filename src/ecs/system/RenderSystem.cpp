@@ -12,8 +12,8 @@
 #include <engine/component/CCamera.hpp>
 #include <engine/component/CCameraCache.hpp>
 
-#include "handle/ShaderHandle.hpp"
-#include "handle/TextureHandle.hpp"
+#include <engine/Mesh.hpp>
+#include <engine/Material.hpp>
 
 #include <engine/Time.hpp>
 #include <scene/Scene.hpp>

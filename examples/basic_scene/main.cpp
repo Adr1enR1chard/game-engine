@@ -111,12 +111,13 @@ int main()
         glm::vec3(1.5f, 0.2f, -1.5f),
         glm::vec3(-1.3f, 1.0f, -1.5f)};
 
-    std::shared_ptr<MeshHandle> mesh = std::make_shared<MeshHandle>(vertices, sizeof(vertices) / sizeof(float));
-    std::shared_ptr<MaterialHandle> material = std::make_shared<MaterialHandle>(
-        "assets/shaders/basic.vs",
-        "assets/shaders/basic.fs");
-    material->addTexture(TextureHandle("assets/textures/container.jpg"));
-    material->addTexture(TextureHandle("assets/textures/pixel_logo.png"), "faceTexture");
+    std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(vertices, sizeof(vertices) / sizeof(float));
+    // std::shared_ptr<Material> material = std::make_shared<Material>(
+    //     "assets/shaders/basic.vs",
+    //     "assets/shaders/basic.fs");
+    // material->addTexture(Texture("assets/textures/container.jpg"));
+    // material->addTexture(Texture("assets/textures/pixel_logo.png"), "faceTexture");
+    std::shared_ptr<Material> material = std::make_shared<Material>();
 
     for (const glm::vec3 &pos : cubePositions)
     {

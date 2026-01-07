@@ -1,16 +1,18 @@
 #pragma once
 #include <vector>
 #include <string>
-#include "ShaderHandle.hpp"
-#include "TextureHandle.hpp"
 
-class MaterialHandle
+#include <engine/Shader.hpp>
+#include <engine/Texture.hpp>
+
+class Material
 {
 public:
-    MaterialHandle(const char *vertexPath, const char *fragmentPath) : shader(vertexPath, fragmentPath) {};
-    ~MaterialHandle() = default;
+    Material(const char *vertexPath, const char *fragmentPath) : shader(Shader::FromFiles(vertexPath, fragmentPath)) {};
+    Material() : shader(Shader::Default()) {};
+    ~Material() = default;
 
-    TextureHandle &addTexture(const TextureHandle &texture, std::string name = "")
+    Texture &addTexture(const Texture &texture, std::string name = "")
     {
         if (textures.size() >= 32)
         {
@@ -24,18 +26,18 @@ public:
         return textures.back();
     }
 
-    ShaderHandle &setShader(const ShaderHandle &shaderHandle)
+    Shader &setShader(const Shader &shaderHandle)
     {
         shader = shaderHandle;
         return shader;
     }
 
-    const ShaderHandle &getShader() const
+    const Shader &getShader() const
     {
         return shader;
     }
 
-    const std::vector<TextureHandle> &getTextures() const
+    const std::vector<Texture> &getTextures() const
     {
         return textures;
     }
@@ -46,7 +48,7 @@ public:
     }
 
 private:
-    std::vector<TextureHandle> textures;
+    std::vector<Texture> textures;
     std::vector<std::string> textureNames;
-    ShaderHandle shader;
+    Shader shader;
 };

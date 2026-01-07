@@ -24,6 +24,9 @@ add_executable(BasicScene
 	src/ecs/system/SystemScheduler.cpp
     src/ecs/system/TransformSystem.cpp
     src/render/Window.cpp
+    src/render/Shader.cpp
+    src/render/Mesh.cpp
+    src/render/Texture.cpp
 	src/third_party/glad/glad.c
 	src/third_party/stb_image/stb_image.cpp
 )

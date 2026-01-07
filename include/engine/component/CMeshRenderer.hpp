@@ -2,24 +2,24 @@
 
 #include <memory>
 
-#include "handle/MeshHandle.hpp"
-#include "handle/MaterialHandle.hpp"
+#include <engine/Mesh.hpp>
+#include <engine/Material.hpp>
 
 struct CMeshRenderer
 {
-    CMeshRenderer &setMesh(const std::shared_ptr<MeshHandle> &meshHandle)
+    CMeshRenderer &setMesh(const std::shared_ptr<Mesh> &meshHandle)
     {
         mesh = meshHandle;
         return *this;
     }
 
-    CMeshRenderer &setMaterial(const std::shared_ptr<MaterialHandle> &materialHandle)
+    CMeshRenderer &setMaterial(const std::shared_ptr<Material> &materialHandle)
     {
         material = materialHandle;
         return *this;
     }
 
-    MeshHandle &getMesh() const
+    Mesh &getMesh() const
     {
         if (!mesh)
         {
@@ -28,7 +28,7 @@ struct CMeshRenderer
         return *mesh;
     }
 
-    MaterialHandle &getMaterial() const
+    Material &getMaterial() const
     {
         if (!material)
         {
@@ -38,6 +38,6 @@ struct CMeshRenderer
     }
 
 private:
-    std::shared_ptr<MeshHandle> mesh;
-    std::shared_ptr<MaterialHandle> material;
+    std::shared_ptr<Mesh> mesh;
+    std::shared_ptr<Material> material;
 };
