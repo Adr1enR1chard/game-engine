@@ -111,29 +111,23 @@ int main()
         glm::vec3(1.5f, 0.2f, -1.5f),
         glm::vec3(-1.3f, 1.0f, -1.5f)};
 
-    std::shared_ptr<MeshHandle> rendererMesh = std::make_shared<MeshHandle>(vertices, sizeof(vertices) / sizeof(float));
-    std::shared_ptr<MaterialHandle> ourMaterial = std::make_shared<MaterialHandle>(
+    std::shared_ptr<MeshHandle> mesh = std::make_shared<MeshHandle>(vertices, sizeof(vertices) / sizeof(float));
+    std::shared_ptr<MaterialHandle> material = std::make_shared<MaterialHandle>(
         "assets/shaders/basic.vs",
         "assets/shaders/basic.fs");
-    ourMaterial->addTexture(TextureHandle("assets/textures/container.jpg"))
-        .filteringParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
-    ourMaterial->addTexture(TextureHandle("assets/textures/pixel_logo.png"), "faceTexture")
-        .filteringParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+    material->addTexture(TextureHandle("assets/textures/container.jpg"));
+    material->addTexture(TextureHandle("assets/textures/pixel_logo.png"), "faceTexture");
 
     for (const glm::vec3 &pos : cubePositions)
     {
         Entity cube = scene.registry().createEntity();
-        auto &transform = scene.registry().createComponent<CTransform>(cube);
-        transform.setPosition(pos);
-        CMeshRenderer &meshRenderer = scene.registry().createComponent<CMeshRenderer>(cube);
-        meshRenderer.mesh = rendererMesh;
-        meshRenderer.material = ourMaterial;
+        scene.registry().createComponent<CTransform>(cube).setPosition(pos);
+        scene.registry().createComponent<CMeshRenderer>(cube).setMesh(mesh).setMaterial(material);
     }
 
     Entity camera = scene.registry().createEntity();
     scene.registry().createComponent<CCamera>(camera);
-    auto &cameraTransform = scene.registry().createComponent<CTransform>(camera);
-    cameraTransform.setPosition(glm::vec3(0.0f, 0.0f, 3.0f));
+    scene.registry().createComponent<CTransform>(camera).setPosition(glm::vec3(0.0f, 0.0f, 3.0f));
 
     engine.run();
     return 0;

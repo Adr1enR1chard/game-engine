@@ -33,20 +33,18 @@ void RenderSystem::update(EngineContext &engineContext)
         auto &transform = registry.getComponent<CTransformCache>(entity);
         auto &meshRenderer = registry.getComponent<CMeshRenderer>(entity);
 
-        if (!meshRenderer.material || !meshRenderer.mesh)
-        {
-            continue;
-        }
+        auto &material = meshRenderer.getMaterial();
+        auto &mesh = meshRenderer.getMesh();
+        auto &shader = material.getShader();
 
-        const ShaderHandle &shader = meshRenderer.material->getShader();
         shader.use();
         shader.setMat4("view", cameraTransform.viewMatrix);
         shader.setMat4("model", transform.modelMatrix);
         shader.setMat4("projection", cameraCache.projectionMatrix);
 
         // Bind textures to consecutive units and set sampler uniforms to those units
-        const auto &textures = meshRenderer.material->getTextures();
-        const auto &texNames = meshRenderer.material->getTextureNames();
+        const auto &textures = material.getTextures();
+        const auto &texNames = material.getTextureNames();
         for (size_t i = 0; i < textures.size(); ++i)
         {
             glActiveTexture(GL_TEXTURE0 + static_cast<GLenum>(i));
@@ -64,10 +62,7 @@ void RenderSystem::update(EngineContext &engineContext)
             }
         }
 
-        if (meshRenderer.mesh)
-        {
-            glBindVertexArray(meshRenderer.mesh->VAO);
-            glDrawArrays(GL_TRIANGLES, 0, meshRenderer.mesh->getVertexCount());
-        }
+        glBindVertexArray(mesh.VAO);
+        glDrawArrays(GL_TRIANGLES, 0, mesh.getVertexCount());
     }
 }
