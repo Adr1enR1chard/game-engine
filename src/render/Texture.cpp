@@ -21,8 +21,39 @@ Texture::Texture(const char *imagePath)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+        GLenum format = GL_RGB;
+        GLenum internalFormat = GL_RGB8;
+
+        if (nrChannels == 1)
+        {
+            format = GL_RED;
+            internalFormat = GL_R8;
+        }
+        else if (nrChannels == 2)
+        {
+            format = GL_RG;
+            internalFormat = GL_RG8;
+        }
+        else if (nrChannels == 3)
+        {
+            format = GL_RGB;
+            internalFormat = GL_RGB8;
+        }
+        else if (nrChannels == 4)
+        {
+            format = GL_RGBA;
+            internalFormat = GL_RGBA8;
+        }
+        else
+        {
+            std::cout << "Unexpected channel count (" << nrChannels << ") for " << imagePath << "\n";
+            stbi_image_free(data);
+            return;
+        }
+
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else

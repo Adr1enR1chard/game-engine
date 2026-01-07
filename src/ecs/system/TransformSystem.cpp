@@ -31,7 +31,7 @@ glm::mat4 getViewMatrix(const glm::vec3 &position, const glm::vec3 &rotation)
     return view;
 }
 
-void TransformSystem::update(EngineContext &engineContext)
+void TransformSystem::update(EngineContext &engineContext, double deltaTime)
 {
     Scene &scene = engineContext.getService<SceneManager>().currentScene();
     for (const Entity &entity : scene.registry().getEntitiesWithComponent<CTransform>())
@@ -50,4 +50,6 @@ void TransformSystem::update(EngineContext &engineContext)
             transform.setDirty(false);
         }
     }
+
+    deltaTime; // Unused parameter
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 #include "engine/Service.hpp"
 
 class Window : public Service
@@ -22,7 +24,12 @@ private:
 
 public:
     void getSize(int &width, int &height) const;
+    void setClearColor(const glm::vec3 &color)
+    {
+        m_clearColor = color;
+    }
 
 private:
     struct GLFWwindow *m_window;
+    glm::vec3 m_clearColor = glm::vec3(0.0f, 0.0f, 0.0f);
 };

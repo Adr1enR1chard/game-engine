@@ -25,7 +25,7 @@ public:
     template <SystemType T>
     bool unregisterSystem();
 
-    void updateSystems(EngineContext &engineContext);
+    void updateSystems(EngineContext &engineContext, double deltaTime);
 
 private:
     std::unordered_map<std::type_index, std::unique_ptr<System>> m_systems;

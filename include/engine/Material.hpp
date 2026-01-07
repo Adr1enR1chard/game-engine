@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <memory>
+#include <stdexcept>
 
 #include <engine/Shader.hpp>
 #include <engine/Texture.hpp>
@@ -12,6 +14,11 @@ public:
     Material() : shader(Shader::Default()) {};
     ~Material() = default;
 
+    static std::shared_ptr<Material> Default()
+    {
+        return std::make_shared<Material>();
+    }
+
     Texture &addTexture(const Texture &texture, std::string name = "")
     {
         if (textures.size() >= 32)
@@ -21,6 +28,11 @@ public:
 
         textures.push_back(texture);
         std::string textureName = name.empty() ? "texture" + std::to_string(textures.size() - 1) : name;
+
+        if (std::find(textureNames.begin(), textureNames.end(), textureName) != textureNames.end())
+        {
+            throw std::runtime_error("MaterialHandle: Texture name already exists: " + textureName);
+        }
         textureNames.push_back(textureName);
 
         return textures.back();

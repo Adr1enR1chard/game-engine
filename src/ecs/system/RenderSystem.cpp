@@ -15,10 +15,9 @@
 #include <engine/Mesh.hpp>
 #include <engine/Material.hpp>
 
-#include <engine/Time.hpp>
 #include <scene/Scene.hpp>
 
-void RenderSystem::update(EngineContext &engineContext)
+void RenderSystem::update(EngineContext &engineContext, double deltaTime)
 {
     Registry &registry = engineContext.registry();
     auto cameraEntities = registry.getEntitiesWithComponents<CTransformCache, CCameraCache>();
@@ -65,4 +64,6 @@ void RenderSystem::update(EngineContext &engineContext)
         glBindVertexArray(mesh.VAO);
         glDrawArrays(GL_TRIANGLES, 0, mesh.getVertexCount());
     }
+
+    deltaTime; // Unused parameter
 }

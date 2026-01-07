@@ -16,7 +16,7 @@ glm::mat4 getProjectionMatrix(float fov, float aspectRatio, float nearPlane, flo
     return glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
 }
 
-void CameraSystem::update(EngineContext &engineContext)
+void CameraSystem::update(EngineContext &engineContext, double deltaTime)
 {
     Registry &registry = engineContext.registry();
 
@@ -44,4 +44,6 @@ void CameraSystem::update(EngineContext &engineContext)
         cameraComponent.dirty = false;
         break; // Only one active camera is supported
     }
+
+    deltaTime; // Unused parameter
 }

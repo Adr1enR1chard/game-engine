@@ -1,20 +1,11 @@
-#include <engine/Engine.hpp>
-#include <engine/SceneManager.hpp>
-#include <engine/Time.hpp>
-#include <engine/component/CTransform.hpp>
-#include <engine/component/CMeshRenderer.hpp>
-#include <engine/component/CCamera.hpp>
-#include <engine/system/TransformSystem.hpp>
-#include <engine/system/RenderSystem.hpp>
-#include <engine/system/CameraSystem.hpp>
+#include <engine/Core.hpp>
 
 class RotatingCubeSystem : public System
 {
 public:
-    void update(EngineContext &engineContext) override
+    void update(EngineContext &engineContext, double deltaTime) override
     {
         Scene &scene = engineContext.getService<SceneManager>().currentScene();
-        float deltaTime = engineContext.getService<Time>().deltaTime();
         for (const Entity &entity : scene.registry().getEntitiesWithComponents<CTransform, CMeshRenderer>())
         {
             auto &transform = scene.registry().getComponent<CTransform>(entity);
@@ -26,20 +17,25 @@ public:
 class PrintFPSSystem : public System
 {
 public:
-    void update(EngineContext &engineContext) override
+    void update(EngineContext & /*engineContext*/, double /*deltaTime*/) override
     {
-        static float elapsedTime = 0.0f;
-        static int frameCount = 0;
+        using clock = std::chrono::steady_clock;
 
-        float deltaTime = engineContext.getService<Time>().deltaTime();
-        elapsedTime += deltaTime;
-        frameCount++;
+        static auto lastReport = clock::now();
+        static int frames = 0;
 
-        if (elapsedTime >= 1.0f)
+        frames++;
+
+        auto now = clock::now();
+        std::chrono::duration<double> elapsed = now - lastReport;
+
+        if (elapsed.count() >= 1.0)
         {
-            std::cout << "FPS: " << frameCount << std::endl;
-            elapsedTime = 0.0f;
-            frameCount = 0;
+            double fps = frames / elapsed.count();
+            std::cout << "FPS: " << fps << std::endl;
+
+            frames = 0;
+            lastReport = now;
         }
     }
 };
@@ -47,6 +43,7 @@ public:
 int main()
 {
     Engine engine(800, 600, "Game Engine");
+    engine.context().window().setClearColor(glm::vec3(0.1f, 0.1f, 0.1f));
 
     Scene &scene = engine.context().getService<SceneManager>().currentScene();
     scene.systems().registerSystem<TransformSystem>();
@@ -55,49 +52,9 @@ int main()
     scene.systems().registerSystem<RotatingCubeSystem>();
     scene.systems().registerSystem<PrintFPSSystem>();
 
-    // cube data
-    float vertices[] = {
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-        0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-        0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-        0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-
-        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-        0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-        0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-        0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-        -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
-        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-
-        -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-        -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-        -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-
-        0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-        0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-        0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-        0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-        0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
-        0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-        0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-
-        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-        0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-        0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-        0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-        -0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
-        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f};
+    std::shared_ptr<Mesh> mesh = Mesh::Cube();
+    std::shared_ptr<Material> material = Material::Default();
+    material->addTexture(Texture("assets/textures/tiles-albedo.jpg"), "albedo");
 
     glm::vec3 cubePositions[] = {
         glm::vec3(0.0f, 0.0f, 0.0f),
@@ -110,14 +67,6 @@ int main()
         glm::vec3(1.5f, 2.0f, -2.5f),
         glm::vec3(1.5f, 0.2f, -1.5f),
         glm::vec3(-1.3f, 1.0f, -1.5f)};
-
-    std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(vertices, sizeof(vertices) / sizeof(float));
-    // std::shared_ptr<Material> material = std::make_shared<Material>(
-    //     "assets/shaders/basic.vs",
-    //     "assets/shaders/basic.fs");
-    // material->addTexture(Texture("assets/textures/container.jpg"));
-    // material->addTexture(Texture("assets/textures/pixel_logo.png"), "faceTexture");
-    std::shared_ptr<Material> material = std::make_shared<Material>();
 
     for (const glm::vec3 &pos : cubePositions)
     {

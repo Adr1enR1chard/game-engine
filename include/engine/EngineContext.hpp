@@ -8,7 +8,6 @@
 #include "engine/Service.hpp"
 
 #include "engine/SceneManager.hpp"
-#include "engine/Time.hpp"
 #include "engine/Window.hpp"
 
 class EngineContext
@@ -53,9 +52,9 @@ public:
         return currentScene().systems();
     }
 
-    float deltaTime()
+    Window &window()
     {
-        return getService<Time>().deltaTime();
+        return getService<Window>();
     }
 
 private:

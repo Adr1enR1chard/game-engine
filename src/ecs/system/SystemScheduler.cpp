@@ -6,10 +6,10 @@
 
 #include <iostream>
 
-void SystemScheduler::updateSystems(EngineContext &engineContext)
+void SystemScheduler::updateSystems(EngineContext &engineContext, double deltaTime)
 {
     for (auto &[typeIndex, system] : m_systems)
     {
-        system->update(engineContext);
+        system->update(engineContext, deltaTime);
     }
 }

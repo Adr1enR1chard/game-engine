@@ -16,9 +16,10 @@ public:
 class TickSystem : public System
 {
 public:
-    void update(EngineContext &engineContext) override
+    void update(EngineContext &engineContext, double deltaTime) override
     {
         engineContext.getService<TimeService>().tick++;
+        deltaTime; // Unused parameter
     }
 };
 
@@ -33,10 +34,10 @@ int main()
     scheduler.registerSystem<TickSystem>();
 
     // Act: run updates and validate TimeService is used by the system
-    scheduler.updateSystems(engineContext);
+    scheduler.updateSystems(engineContext, 0.0);
     assert(engineContext.getService<TimeService>().tick == 1);
 
-    scheduler.updateSystems(engineContext);
+    scheduler.updateSystems(engineContext, 0.0);
     assert(engineContext.getService<TimeService>().tick == 2);
 
     // Duplicate registration should throw
@@ -45,7 +46,7 @@ int main()
 
     // Unregister and ensure further updates don't change the tick
     scheduler.unregisterSystem<TickSystem>();
-    scheduler.updateSystems(engineContext);
+    scheduler.updateSystems(engineContext, 0.0);
     assert(engineContext.getService<TimeService>().tick == 2);
 
     // Unregistering again should throw

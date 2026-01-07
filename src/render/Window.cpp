@@ -45,6 +45,7 @@ Window::Window(int width, int height, const char *title)
         return;
     }
 
+    glfwSwapInterval(0); // Disable V-Sync
     glEnable(GL_DEPTH_TEST);
 
     this->m_window = window;
@@ -76,7 +77,7 @@ void Window::pollEvents()
 
 void Window::clear()
 {
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(m_clearColor.r, m_clearColor.g, m_clearColor.b, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 

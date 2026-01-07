@@ -1,8 +1,10 @@
 #pragma once
-#include "engine/SceneManager.hpp"
-#include "engine/Window.hpp"
-#include "engine/Time.hpp"
-#include "engine/EngineContext.hpp"
+#include <chrono>
+#include <thread>
+
+#include <engine/SceneManager.hpp>
+#include <engine/Window.hpp>
+#include <engine/EngineContext.hpp>
 
 class Engine
 {
@@ -11,28 +13,33 @@ public:
     {
         engineContext.registerService<SceneManager>(std::make_unique<SceneManager>());
         engineContext.registerService<Window>(std::make_unique<Window>(width, height, title));
-        engineContext.registerService<Time>(std::make_unique<Time>());
     }
     ~Engine() = default;
 
     void run()
     {
         Window &window = engineContext.getService<Window>();
-        Time &time = engineContext.getService<Time>();
         SceneManager &sceneManager = engineContext.getService<SceneManager>();
+
+        using clock = std::chrono::steady_clock;
+        using frames = std::chrono::duration<int, std::ratio<1, 144>>;
+
+        auto lastFrame = clock::now();
 
         while (!window.shouldClose())
         {
-            window.makeContextCurrent();
+            auto frameStart = clock::now();
+            std::chrono::duration<double> delta = frameStart - lastFrame;
+            lastFrame = frameStart;
+
+            // --- Engine loop ---
             window.clear();
 
-            // Update current scene
             Scene &currentScene = sceneManager.currentScene();
-            currentScene.systems().updateSystems(engineContext);
+            currentScene.systems().updateSystems(engineContext, delta.count());
 
             window.swapBuffers();
             window.pollEvents();
-            time.update();
         }
     }
 
