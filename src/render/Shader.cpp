@@ -16,6 +16,7 @@ layout (location = 2) in vec2 aUV;
 
 out vec2 vUV;
 out vec3 vNormal;
+out vec3 vFragPos;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -24,7 +25,8 @@ uniform mat4 projection;
 void main()
 {
     vUV = aUV;
-    vNormal = aNormal;
+    vNormal = mat3(transpose(inverse(model))) * aNormal;
+    vFragPos = vec3(model * vec4(aPos, 1.0));
     
     gl_Position = projection * view * model * vec4(aPos, 1.0);
 }
@@ -33,16 +35,52 @@ void main()
 constexpr const char *kDefaultFragmentShader = R"( 
 #version 330 core
 
+struct DirLight {
+    vec3 direction; 
+    vec3 color;
+    float ambient;
+    float intensity;
+};
+
+vec3 shadeDirLight(DirLight light, vec3 worldPos, vec3 N, vec3 viewPos, float shininess)
+{
+    vec3 V = normalize(viewPos - worldPos);
+
+    vec3 L = normalize(-light.direction);
+
+    float NdotL = max(dot(N, L), 0.0);
+
+    vec3 R = reflect(-L, N);
+    float spec = pow(max(dot(R, V), 0.0), shininess);
+
+    vec3 diffuse  = light.color * NdotL;
+    vec3 specular = light.color * spec;
+    vec3 ambient  = light.color * light.ambient;
+
+    return ambient + (diffuse + specular) * light.intensity;
+}
+
 out vec4 FragColor;
 
 in vec2 vUV;
 in vec3 vNormal;
+in vec3 vFragPos;
 
 uniform sampler2D albedo;
+uniform float shininess = 12.0;
+
+uniform DirLight dirLight;
+
+uniform vec3 viewPos;
 
 void main()
 {
-    FragColor = texture(albedo, vUV);
+    vec3 norm = normalize(vNormal);
+    vec3 albedoColor = texture(albedo, vUV).rgb;
+    vec3 lighting = shadeDirLight(dirLight, vFragPos, norm, viewPos, shininess);
+
+    vec3 result =  (lighting * albedoColor);
+    FragColor = vec4(result, 1.0);
 }
 )";
 
@@ -163,6 +201,19 @@ void Shader::setFloat(const std::string &name, float value) const
 void Shader::setMat4(const std::string &name, const glm::mat4 mat) const
 {
     glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
+}
+
+void Shader::setVec3(const std::string &name, const glm::vec3 &value) const
+{
+    glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, glm::value_ptr(value));
+}
+
+void Shader::setDirectionalLight(const glm::vec3 &direction, const glm::vec3 &color, float intensity, float ambient) const
+{
+    glUniform3fv(glGetUniformLocation(ID, "dirLight.direction"), 1, glm::value_ptr(direction));
+    glUniform3fv(glGetUniformLocation(ID, "dirLight.color"), 1, glm::value_ptr(color));
+    glUniform1f(glGetUniformLocation(ID, "dirLight.intensity"), intensity);
+    glUniform1f(glGetUniformLocation(ID, "dirLight.ambient"), ambient);
 }
 
 void Shader::checkCompileErrors(unsigned int shader, std::string type)

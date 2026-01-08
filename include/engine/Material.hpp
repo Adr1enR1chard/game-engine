@@ -38,6 +38,7 @@ public:
         return textures.back();
     }
 
+private:
     Shader &setShader(const Shader &shaderHandle)
     {
         shader = shaderHandle;
@@ -58,6 +59,9 @@ public:
     {
         return textureNames;
     }
+
+    friend class RenderSystem;
+    friend class LightSystem;
 
 private:
     std::vector<Texture> textures;

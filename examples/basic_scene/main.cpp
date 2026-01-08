@@ -49,6 +49,7 @@ int main()
     scene.systems().registerSystem<TransformSystem>();
     scene.systems().registerSystem<CameraSystem>();
     scene.systems().registerSystem<RenderSystem>();
+    scene.systems().registerSystem<LightSystem>();
     scene.systems().registerSystem<RotatingCubeSystem>();
     scene.systems().registerSystem<PrintFPSSystem>();
 
@@ -78,6 +79,13 @@ int main()
     Entity camera = scene.registry().createEntity();
     scene.registry().createComponent<CCamera>(camera);
     scene.registry().createComponent<CTransform>(camera).setPosition(glm::vec3(0.0f, 0.0f, 3.0f));
+
+    Entity dirLight = scene.registry().createEntity();
+    CDirectionalLight &directionalLight = scene.registry().createComponent<CDirectionalLight>(dirLight);
+    directionalLight.direction = glm::vec3(0.0f, 0.0f, -1.0f);
+    directionalLight.color = glm::vec3(1.0f, 1.0f, 1.0f);
+    directionalLight.ambient = 0.2f;
+    directionalLight.intensity = 0.8f;
 
     engine.run();
     return 0;

@@ -23,6 +23,7 @@ add_executable(BasicScene
     src/ecs/system/CameraSystem.cpp
 	src/ecs/system/SystemScheduler.cpp
     src/ecs/system/TransformSystem.cpp
+    src/ecs/system/LightSystem.cpp
     src/render/Window.cpp
     src/render/Shader.cpp
     src/render/Mesh.cpp
