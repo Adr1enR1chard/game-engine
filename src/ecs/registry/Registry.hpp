@@ -136,6 +136,12 @@ public:
         return storage<T>().emplace(entity, T{});
     }
 
+    template <typename... T>
+    void createComponents(Entity entity)
+    {
+        (createComponent<T>(entity), ...);
+    }
+
     template <typename T>
     T &getComponent(Entity entity)
     {

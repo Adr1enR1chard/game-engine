@@ -3,68 +3,48 @@
 #include <string>
 #include <memory>
 #include <stdexcept>
+#include <variant>
 
 #include <engine/Shader.hpp>
 #include <engine/Texture.hpp>
 
+using UniformValue = std::variant<
+    int,
+    float,
+    glm::vec2,
+    glm::vec3,
+    glm::vec4,
+    glm::mat4>;
+
+struct UniformWrapper
+{
+    uint32_t location;
+    UniformValue value;
+};
+
 class Material
 {
 public:
-    Material(const char *vertexPath, const char *fragmentPath) : shader(Shader::FromFiles(vertexPath, fragmentPath)) {};
-    Material() : shader(Shader::Default()) {};
+    Material(Shader shader) : shaderProgram(shader) {};
+    Material() : shaderProgram(Shader::Default()) {};
     ~Material() = default;
+    static std::shared_ptr<Material> Default();
 
-    static std::shared_ptr<Material> Default()
-    {
-        return std::make_shared<Material>();
-    }
-
-    Texture &addTexture(const Texture &texture, std::string name = "")
-    {
-        if (textures.size() >= 32)
-        {
-            throw std::runtime_error("MaterialHandle can only hold up to 32 textures.");
-        }
-
-        textures.push_back(texture);
-        std::string textureName = name.empty() ? "texture" + std::to_string(textures.size() - 1) : name;
-
-        if (std::find(textureNames.begin(), textureNames.end(), textureName) != textureNames.end())
-        {
-            throw std::runtime_error("MaterialHandle: Texture name already exists: " + textureName);
-        }
-        textureNames.push_back(textureName);
-
-        return textures.back();
-    }
+    Texture &setTexture(std::string name, const Texture &texture);
+    void setUniform(const std::string &name, const UniformValue &value);
 
 private:
-    Shader &setShader(const Shader &shaderHandle)
-    {
-        shader = shaderHandle;
-        return shader;
-    }
+    void applyUniforms();
+    void bindTextures() const;
 
-    const Shader &getShader() const
-    {
-        return shader;
-    }
-
-    const std::vector<Texture> &getTextures() const
-    {
-        return textures;
-    }
-
-    const std::vector<std::string> &getTextureNames() const
-    {
-        return textureNames;
-    }
+    Shader &setShader(const Shader &shaderHandle);
+    const Shader &getShader() const;
 
     friend class RenderSystem;
     friend class LightSystem;
 
 private:
-    std::vector<Texture> textures;
-    std::vector<std::string> textureNames;
-    Shader shader;
+    std::unordered_map<std::string, Texture> textureMap;
+    Shader shaderProgram;
+    std::unordered_map<uint32_t, UniformValue> uniforms;
 };

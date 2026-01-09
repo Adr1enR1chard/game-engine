@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <stb_image/stb_image.h>
 #include <iostream>
+
 Texture::Texture(const char *imagePath)
 {
     int width, height, nrChannels;
@@ -20,8 +21,6 @@ Texture::Texture(const char *imagePath)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
         GLenum format = GL_RGB;
         GLenum internalFormat = GL_RGB8;
@@ -55,6 +54,7 @@ Texture::Texture(const char *imagePath)
 
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
     else
     {
@@ -63,7 +63,27 @@ Texture::Texture(const char *imagePath)
     stbi_image_free(data);
 }
 
-void Texture::filteringParameters(GLenum minFilter, GLenum magFilter) const
+Texture Texture::White()
+{
+    unsigned int whiteTextureID;
+    glGenTextures(1, &whiteTextureID);
+    glBindTexture(GL_TEXTURE_2D, whiteTextureID);
+
+    unsigned char whitePixel[4] = {255, 255, 255, 255};
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, whitePixel);
+
+    // default texture wrapping and filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    return Texture(whiteTextureID);
+}
+
+void Texture::filteringParameters(unsigned int minFilter, unsigned int magFilter) const
 {
     glBindTexture(GL_TEXTURE_2D, ID);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);

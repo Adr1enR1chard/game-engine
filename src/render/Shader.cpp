@@ -18,9 +18,12 @@ out vec2 vUV;
 out vec3 vNormal;
 out vec3 vFragPos;
 
+// ------ WORLD UNIFORMS ------
+// -- Set in the RenderSystem -
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+// -----------------------------
 
 void main()
 {
@@ -42,6 +45,13 @@ struct DirLight {
     float intensity;
 };
 
+struct PointLight {
+    vec3 position;
+    vec3 color;
+    float intensity;
+    float radius;
+};
+
 vec3 shadeDirLight(DirLight light, vec3 worldPos, vec3 N, vec3 viewPos, float shininess)
 {
     vec3 V = normalize(viewPos - worldPos);
@@ -60,29 +70,64 @@ vec3 shadeDirLight(DirLight light, vec3 worldPos, vec3 N, vec3 viewPos, float sh
     return ambient + (diffuse + specular) * light.intensity;
 }
 
+vec3 shadePointLight(PointLight light, vec3 worldPos, vec3 N, vec3 viewPos, float shininess)
+{
+    vec3 V = normalize(viewPos - worldPos);
+
+    vec3 L = normalize(light.position - worldPos);
+    float distance = length(light.position - worldPos);
+    float attenuation = 1.0 / (1.0 + (distance / light.radius) * (distance / light.radius));
+
+    float NdotL = max(dot(N, L), 0.0);
+
+    vec3 R = reflect(-L, N);
+    float spec = pow(max(dot(R, V), 0.0), shininess);
+
+    vec3 diffuse  = light.color * NdotL;
+    vec3 specular = light.color * spec;
+
+    return (diffuse + specular) * light.intensity * attenuation;
+}
+
 out vec4 FragColor;
 
 in vec2 vUV;
 in vec3 vNormal;
 in vec3 vFragPos;
 
-uniform sampler2D albedo;
+// ------ MATERIAL UNIFORMS -------
+// --- Require defaults value per -
+// --------  material -------------
+uniform sampler2D albedoMap;
+uniform vec3 albedo = vec3(1.0, 1.0, 1.0);
 uniform float shininess = 12.0;
+// -------------------------------
 
+// ------ LIGHT UNIFORMS ------
 uniform DirLight dirLight;
+uniform PointLight pointLights[32]; // Max 32 point lights
+uniform int pointLightCount;
+// -----------------------------
 
-uniform vec3 viewPos;
+// ------ WORLD UNIFORM ------
+uniform vec3 viewPos; // Set in the LightSystem
+// ----------------------------
 
 void main()
 {
     vec3 norm = normalize(vNormal);
-    vec3 albedoColor = texture(albedo, vUV).rgb;
+    vec3 albedoColor = texture(albedoMap, vUV).rgb * albedo;
     vec3 lighting = shadeDirLight(dirLight, vFragPos, norm, viewPos, shininess);
 
-    vec3 result =  (lighting * albedoColor);
-    FragColor = vec4(result, 1.0);
+    for (int i = 0; i < pointLightCount; ++i) {
+        lighting += shadePointLight(pointLights[i], vFragPos, norm, viewPos, shininess);
+    }
+
+    FragColor = vec4(lighting * albedoColor, 1.0);
 }
 )";
+
+unsigned int Shader::defaultShaderID = 0;
 
 Shader Shader::FromFiles(const char *vertexPath, const char *fragmentPath)
 {
@@ -175,37 +220,62 @@ Shader Shader::FromSource(const char *vertexSource, const char *fragmentSource)
 
 Shader Shader::Default()
 {
-    return Shader::FromSource(kDefaultVertexShader, kDefaultFragmentShader);
+    if (defaultShaderID != 0)
+    {
+        return Shader(defaultShaderID);
+    }
+
+    Shader defaultShader = Shader::FromSource(kDefaultVertexShader, kDefaultFragmentShader);
+    defaultShaderID = defaultShader.ID;
+    return defaultShader;
 }
 
 void Shader::use() const
 {
-    glUseProgram(ID);
+    GLint current = 0;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &current);
+    if ((GLuint)current != ID)
+        glUseProgram(ID);
 }
 
-void Shader::setBool(const std::string &name, bool value) const
+bool Shader::setBool(const std::string &name, bool value) const
 {
-    glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
+    int location = glGetUniformLocation(ID, name.c_str());
+    glUniform1i(location, (int)value);
+
+    return location != -1;
 }
 
-void Shader::setInt(const std::string &name, int value) const
+bool Shader::setInt(const std::string &name, int value) const
 {
-    glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
+    int location = glGetUniformLocation(ID, name.c_str());
+    glUniform1i(location, value);
+
+    return location != -1;
 }
 
-void Shader::setFloat(const std::string &name, float value) const
+bool Shader::setFloat(const std::string &name, float value) const
 {
-    glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
+    int location = glGetUniformLocation(ID, name.c_str());
+    glUniform1f(location, value);
+
+    return location != -1;
 }
 
-void Shader::setMat4(const std::string &name, const glm::mat4 mat) const
+bool Shader::setMat4(const std::string &name, const glm::mat4 mat) const
 {
-    glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
+    int location = glGetUniformLocation(ID, name.c_str());
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat));
+
+    return location != -1;
 }
 
-void Shader::setVec3(const std::string &name, const glm::vec3 &value) const
+bool Shader::setVec3(const std::string &name, const glm::vec3 &value) const
 {
-    glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, glm::value_ptr(value));
+    int location = glGetUniformLocation(ID, name.c_str());
+    glUniform3fv(location, 1, glm::value_ptr(value));
+
+    return location != -1;
 }
 
 void Shader::setDirectionalLight(const glm::vec3 &direction, const glm::vec3 &color, float intensity, float ambient) const

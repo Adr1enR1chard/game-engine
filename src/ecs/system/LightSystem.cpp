@@ -5,6 +5,7 @@
 #include <engine/component/CDirectionalLight.hpp>
 #include <engine/component/CMeshRenderer.hpp>
 #include <engine/component/CCamera.hpp>
+#include <engine/component/CPointLight.hpp>
 
 void LightSystem::update(EngineContext &engineContext, double /*deltaTime*/)
 {
@@ -15,13 +16,10 @@ void LightSystem::update(EngineContext &engineContext, double /*deltaTime*/)
 
     auto &cameraTransform = engineContext.currentScene().registry().getComponent<CTransform>(camera[0]);
 
-    auto &dirLightQuery = engineContext.currentScene().registry().getEntitiesWithComponent<CDirectionalLight>();
+    auto &dirLights = engineContext.currentScene().registry().getEntitiesWithComponent<CDirectionalLight>();
+    auto &dirLight = engineContext.currentScene().registry().getComponent<CDirectionalLight>(dirLights[0]);
 
-    // If no directional lights, nothing to do for now
-    if (dirLightQuery.empty())
-        return;
-
-    auto &dirLight = engineContext.currentScene().registry().getComponent<CDirectionalLight>(dirLightQuery[0]);
+    auto &pointLights = engineContext.currentScene().registry().getEntitiesWithComponents<CPointLight, CTransform>();
 
     auto &renderers = engineContext.currentScene().registry().getEntitiesWithComponents<CMeshRenderer>();
 
@@ -30,6 +28,7 @@ void LightSystem::update(EngineContext &engineContext, double /*deltaTime*/)
         auto &meshRenderer = engineContext.currentScene().registry().getComponent<CMeshRenderer>(entity);
         auto &material = meshRenderer.getMaterial();
         auto &shader = material.getShader();
+        material.setUniform("viewPos", cameraTransform.getPosition());
 
         shader.setDirectionalLight(
             dirLight.direction, // direction
@@ -37,6 +36,19 @@ void LightSystem::update(EngineContext &engineContext, double /*deltaTime*/)
             dirLight.intensity, // intensity
             dirLight.ambient    // ambient
         );
-        shader.setVec3("viewPos", cameraTransform.getPosition());
+
+        material.setUniform("pointLightCount", static_cast<int>(pointLights.size()));
+        for (size_t i = 0; i < pointLights.size(); ++i)
+        {
+            auto &pointLight = engineContext.currentScene().registry().getComponent<CPointLight>(pointLights[i]);
+            auto &lightTransform = engineContext.currentScene().registry().getComponent<CTransform>(pointLights[i]);
+
+            std::string baseName = "pointLights[" + std::to_string(i) + "]";
+
+            material.setUniform(baseName + ".position", lightTransform.getPosition());
+            material.setUniform(baseName + ".color", pointLight.color);
+            material.setUniform(baseName + ".intensity", pointLight.intensity);
+            material.setUniform(baseName + ".radius", pointLight.radius);
+        }
     }
 }

@@ -1,17 +1,24 @@
 #include <engine/Core.hpp>
 
-class RotatingCubeSystem : public System
+class MovingPointLightSystem : public System
 {
 public:
     void update(EngineContext &engineContext, double deltaTime) override
     {
         Scene &scene = engineContext.getService<SceneManager>().currentScene();
-        for (const Entity &entity : scene.registry().getEntitiesWithComponents<CTransform, CMeshRenderer>())
+        for (const Entity &entity : scene.registry().getEntitiesWithComponents<CTransform, CPointLight>())
         {
             auto &transform = scene.registry().getComponent<CTransform>(entity);
-            transform.setRotation(glm::vec3(transform.getRotation().x, transform.getRotation().y + 50.0f * deltaTime, transform.getRotation().z));
+            glm::vec3 pos = transform.getPosition();
+            pos.x = 5.0f * std::sin(static_cast<float>(timeAccumulator));
+            pos.z = 5.0f * std::cos(static_cast<float>(timeAccumulator));
+            transform.setPosition(pos);
         }
+        timeAccumulator += static_cast<float>(deltaTime);
     }
+
+private:
+    float timeAccumulator = 0.0f;
 };
 
 class PrintFPSSystem : public System
@@ -50,12 +57,13 @@ int main()
     scene.systems().registerSystem<CameraSystem>();
     scene.systems().registerSystem<RenderSystem>();
     scene.systems().registerSystem<LightSystem>();
-    scene.systems().registerSystem<RotatingCubeSystem>();
+    scene.systems().registerSystem<MovingPointLightSystem>();
     scene.systems().registerSystem<PrintFPSSystem>();
 
-    std::shared_ptr<Mesh> mesh = Mesh::Cube();
+    std::shared_ptr<Mesh> cubeMesh = Mesh::Cube();
     std::shared_ptr<Material> material = Material::Default();
-    material->addTexture(Texture("assets/textures/tiles-albedo.jpg"), "albedo");
+    material->setTexture("albedoMap", Texture("assets/textures/tiles-albedo.jpg"));
+    material->setUniform("shininess", 32.0f);
 
     glm::vec3 cubePositions[] = {
         glm::vec3(0.0f, 0.0f, 0.0f),
@@ -73,7 +81,7 @@ int main()
     {
         Entity cube = scene.registry().createEntity();
         scene.registry().createComponent<CTransform>(cube).setPosition(pos);
-        scene.registry().createComponent<CMeshRenderer>(cube).setMesh(mesh).setMaterial(material);
+        scene.registry().createComponent<CMeshRenderer>(cube).setMesh(cubeMesh).setMaterial(material);
     }
 
     Entity camera = scene.registry().createEntity();
@@ -82,10 +90,27 @@ int main()
 
     Entity dirLight = scene.registry().createEntity();
     CDirectionalLight &directionalLight = scene.registry().createComponent<CDirectionalLight>(dirLight);
+
     directionalLight.direction = glm::vec3(0.0f, 0.0f, -1.0f);
     directionalLight.color = glm::vec3(1.0f, 1.0f, 1.0f);
     directionalLight.ambient = 0.2f;
-    directionalLight.intensity = 0.8f;
+    directionalLight.intensity = 0.5f;
+
+    Entity pointLight = scene.registry().createEntity();
+    CPointLight &pointLightComp = scene.registry().createComponent<CPointLight>(pointLight);
+    std::shared_ptr<Material> lightMaterial = Material::Default();
+    auto &pointLightTransform = scene.registry().createComponent<CTransform>(pointLight);
+    scene.registry().createComponent<CMeshRenderer>(pointLight).setMesh(cubeMesh).setMaterial(lightMaterial);
+
+    pointLightTransform.setPosition(glm::vec3(2.0f, 2.0f, 2.0f));
+    pointLightTransform.setScale(glm::vec3(0.2f));
+
+    pointLightComp.color = glm::vec3(0.2f, 1.0f, 0.2f);
+    pointLightComp.intensity = 10.0f;
+    pointLightComp.radius = 1.0f;
+
+    lightMaterial->setUniform("albedo", glm::vec3(1.0f, 1.0f, 0.0f));
+    lightMaterial->setTexture("albedoMap", Texture("assets/textures/tiles-albedo.jpg"));
 
     engine.run();
     return 0;

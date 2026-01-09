@@ -28,6 +28,7 @@ add_executable(BasicScene
     src/render/Shader.cpp
     src/render/Mesh.cpp
     src/render/Texture.cpp
+    src/render/Material.cpp
 	src/third_party/glad/glad.c
 	src/third_party/stb_image/stb_image.cpp
 )

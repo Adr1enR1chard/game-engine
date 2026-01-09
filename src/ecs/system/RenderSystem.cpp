@@ -32,34 +32,15 @@ void RenderSystem::update(EngineContext &engineContext, double deltaTime)
         auto &transform = registry.getComponent<CTransformCache>(entity);
         auto &meshRenderer = registry.getComponent<CMeshRenderer>(entity);
 
-        auto &material = meshRenderer.getMaterial();
         auto &mesh = meshRenderer.getMesh();
-        auto &shader = material.getShader();
+        auto &material = meshRenderer.getMaterial();
 
-        shader.use();
-        shader.setMat4("view", cameraTransform.viewMatrix);
-        shader.setMat4("model", transform.modelMatrix);
-        shader.setMat4("projection", cameraCache.projectionMatrix);
+        material.setUniform("view", cameraTransform.viewMatrix);
+        material.setUniform("projection", cameraCache.projectionMatrix);
+        material.setUniform("model", transform.modelMatrix);
+        material.applyUniforms();
 
-        // Bind textures to consecutive units and set sampler uniforms to those units
-        const auto &textures = material.getTextures();
-        const auto &texNames = material.getTextureNames();
-        for (size_t i = 0; i < textures.size(); ++i)
-        {
-            glActiveTexture(GL_TEXTURE0 + static_cast<GLenum>(i));
-            textures[i].bind();
-
-            // Use provided name or default to "texture{i}" if names list is shorter
-            if (i < texNames.size())
-            {
-                shader.setInt(texNames[i].c_str(), static_cast<int>(i));
-            }
-            else
-            {
-                std::string defaultName = "texture" + std::to_string(i);
-                shader.setInt(defaultName.c_str(), static_cast<int>(i));
-            }
-        }
+        material.bindTextures();
 
         glBindVertexArray(mesh.VAO);
         glDrawArrays(GL_TRIANGLES, 0, mesh.getVertexCount());
