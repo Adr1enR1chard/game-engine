@@ -10,8 +10,6 @@
 
 #include "utils/types.hpp"
 
-class EngineContext;
-
 class SystemScheduler
 {
   public:
@@ -22,7 +20,7 @@ class SystemScheduler
 
     template <SystemType T> bool unregisterSystem();
 
-    void updateSystems(EngineContext& engineContext, double deltaTime);
+    void updateSystems(World& world, double deltaTime);
 
   private:
     std::unordered_map<std::type_index, std::unique_ptr<System>> m_systems;

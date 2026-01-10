@@ -1,10 +1,10 @@
 #include <engine/Window.hpp>
 
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glad/glad.h>
 #include <iostream>
 
-void Window::framebuffer_size_callback(GLFWwindow *window, int width, int height)
+void Window::framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     if (width == 0 || height == 0)
         return;
@@ -14,7 +14,12 @@ void Window::framebuffer_size_callback(GLFWwindow *window, int width, int height
     window;
 }
 
-Window::Window(int width, int height, const char *title)
+Window::~Window()
+{
+    glfwTerminate();
+}
+
+void Window::init(int width, int height, const char* title)
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -27,9 +32,8 @@ Window::Window(int width, int height, const char *title)
 
     // glfw window creation
     // --------------------
-    GLFWwindow *window = glfwCreateWindow(width, height, title, NULL, NULL);
-    if (window == NULL)
-    {
+    GLFWwindow* window = glfwCreateWindow(width, height, title, NULL, NULL);
+    if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return;
@@ -39,8 +43,7 @@ Window::Window(int width, int height, const char *title)
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return;
     }
@@ -49,10 +52,6 @@ Window::Window(int width, int height, const char *title)
     glEnable(GL_DEPTH_TEST);
 
     this->m_window = window;
-}
-Window::~Window()
-{
-    glfwTerminate();
 }
 
 bool Window::shouldClose() const
@@ -81,7 +80,7 @@ void Window::clear()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Window::getSize(int &width, int &height) const
+void Window::getSize(int& width, int& height) const
 {
     glfwGetFramebufferSize(this->m_window, &width, &height);
 }

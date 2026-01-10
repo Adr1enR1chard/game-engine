@@ -6,6 +6,6 @@
 
 class RenderSystem : public System
 {
-public:
-    void update(EngineContext &engineContext, double deltaTime) override;
+  public:
+    void update(World& engineContext, double deltaTime) override;
 };

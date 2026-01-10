@@ -2,8 +2,10 @@
 
 #include <engine/System.hpp>
 
+class World;
+
 class TransformSystem : public System
 {
-public:
-    void update(EngineContext &engineContext, double deltaTime) override;
+  public:
+    void update(World& world, double deltaTime) override;
 };

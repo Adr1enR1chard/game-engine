@@ -2,14 +2,13 @@
 
 #include "SystemScheduler.hpp"
 
-#include <engine/EngineContext.hpp>
+#include <engine/World.hpp>
 
 #include <iostream>
 
-void SystemScheduler::updateSystems(EngineContext &engineContext, double deltaTime)
+void SystemScheduler::updateSystems(World& world, double deltaTime)
 {
-    for (auto &[typeIndex, system] : m_systems)
-    {
-        system->update(engineContext, deltaTime);
+    for (auto& [typeIndex, system] : m_systems) {
+        system->update(world, deltaTime);
     }
 }

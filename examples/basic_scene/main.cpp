@@ -3,11 +3,10 @@
 class MovingPointLightSystem : public System
 {
   public:
-    void update(EngineContext& engineContext, double deltaTime) override
+    void update(World& world, double deltaTime) override
     {
-        Scene& scene = engineContext.getService<SceneManager>().currentScene();
-        for (const Entity& entity : scene.registry().getEntitiesWithComponents<CTransform, CPointLight>()) {
-            auto&     transform = scene.registry().getComponent<CTransform>(entity);
+        for (const Entity& entity : world.getEntitiesWithComponents<CTransform, CPointLight>()) {
+            auto&     transform = world.getComponent<CTransform>(entity);
             glm::vec3 pos       = transform.getPosition();
             pos.x               = 5.0f * std::sin(static_cast<float>(timeAccumulator));
             pos.z               = 5.0f * std::cos(static_cast<float>(timeAccumulator));
@@ -23,7 +22,7 @@ class MovingPointLightSystem : public System
 class PrintFPSSystem : public System
 {
   public:
-    void update(EngineContext& /*engineContext*/, double /*deltaTime*/) override
+    void update(World& /*world*/, double /*deltaTime*/) override
     {
         using clock = std::chrono::steady_clock;
 
@@ -48,34 +47,31 @@ class PrintFPSSystem : public System
 int main()
 {
     Engine engine(800, 600, "Game Engine");
-    engine.context().window().setClearColor(glm::vec3(0.1f, 0.1f, 0.1f));
+    engine.world().Serv<Window>().setClearColor(glm::vec3(0.1f, 0.1f, 0.1f));
 
-    Scene& scene = engine.context().getService<SceneManager>().currentScene();
-    scene.systems().registerSystem<TransformSystem>();
-    scene.systems().registerSystem<CameraSystem>();
-    scene.systems().registerSystem<RenderSystem>();
-    scene.systems().registerSystem<LightSystem>();
-    scene.systems().registerSystem<MovingPointLightSystem>();
-    scene.systems().registerSystem<PrintFPSSystem>();
+    engine.systems().registerSystem<TransformSystem>();
+    engine.systems().registerSystem<CameraSystem>();
+    engine.systems().registerSystem<RenderSystem>();
+    engine.systems().registerSystem<LightSystem>();
+    engine.systems().registerSystem<MovingPointLightSystem>();
+    engine.systems().registerSystem<PrintFPSSystem>();
 
-    Entity camera = scene.registry().createEntity();
-    scene.registry().createComponent<CCamera>(camera);
-    scene.registry().createComponent<CTransform>(camera).setPosition(glm::vec3(0.0f, 0.0f, 3.0f));
-
-    Entity             dirLight         = scene.registry().createEntity();
-    CDirectionalLight& directionalLight = scene.registry().createComponent<CDirectionalLight>(dirLight);
+    Entity camera = engine.world().createEntity();
+    engine.world().createComponent<CCamera>(camera);
+    engine.world().createComponent<CTransform>(camera).setPosition(glm::vec3(0.0f, 0.0f, 3.0f));
+    Entity             dirLight         = engine.world().createEntity();
+    CDirectionalLight& directionalLight = engine.world().createComponent<CDirectionalLight>(dirLight);
 
     directionalLight.direction = glm::vec3(0.0f, 0.0f, -1.0f);
     directionalLight.color     = glm::vec3(1.0f, 1.0f, 1.0f);
     directionalLight.ambient   = 0.2f;
     directionalLight.intensity = 0.2f;
 
-    Entity                    pointLight          = scene.registry().createEntity();
-    CPointLight&              pointLightComp      = scene.registry().createComponent<CPointLight>(pointLight);
+    Entity                    pointLight          = engine.world().createEntity();
+    CPointLight&              pointLightComp      = engine.world().createComponent<CPointLight>(pointLight);
     std::shared_ptr<Material> lightMaterial       = Material::Default();
-    auto&                     pointLightTransform = scene.registry().createComponent<CTransform>(pointLight);
-    scene.registry().createComponent<CMeshRenderer>(pointLight).setMesh(Mesh::Cube()).setMaterial(lightMaterial);
-
+    auto&                     pointLightTransform = engine.world().createComponent<CTransform>(pointLight);
+    engine.world().createComponent<CMeshRenderer>(pointLight).setMesh(Mesh::Cube()).setMaterial(lightMaterial);
     pointLightTransform.setPosition(glm::vec3(2.0f, 2.0f, 2.0f));
     pointLightTransform.setScale(glm::vec3(0.2f));
 
@@ -87,12 +83,12 @@ int main()
 
     Model backpackModel("assets/models/backpack.gltf");
 
-    Entity backpack          = scene.registry().createEntity();
-    auto&  backpackTransform = scene.registry().createComponent<CTransform>(backpack);
+    Entity backpack          = engine.world().createEntity();
+    auto&  backpackTransform = engine.world().createComponent<CTransform>(backpack);
     backpackTransform.setPosition(glm::vec3(0.0f, 0, -6.0f));
     backpackTransform.setScale(glm::vec3(0.01f));
     // backpackTransform.setRotation(glm::vec3(0.0f, -90.0f, 0.0f));
-    auto& backpackMeshRenderer = scene.registry().createComponent<CMeshRenderer>(backpack);
+    auto& backpackMeshRenderer = engine.world().createComponent<CMeshRenderer>(backpack);
     backpackMeshRenderer.setModel(backpackModel);
     backpackMeshRenderer.setMaterial(Material::Default());
     backpackMeshRenderer.getMaterial().setTexture("albedoMap", Texture("assets/textures/backpack/baseColor.jpeg"));

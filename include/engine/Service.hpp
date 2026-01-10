@@ -2,6 +2,9 @@
 
 class Service
 {
-public:
-    virtual ~Service() = default;
+  public:
+    Service()                          = default;
+    virtual ~Service()                 = default;
+    Service(const Service&)            = delete;
+    Service& operator=(const Service&) = delete;
 };
