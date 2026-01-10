@@ -105,7 +105,7 @@ Shader &Material::setShader(const Shader &shaderHandle)
     return shaderProgram;
 }
 
-const Shader &Material::getShader() const
+Shader &Material::getShader()
 {
     return shaderProgram;
 }

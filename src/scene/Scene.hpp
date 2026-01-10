@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ecs/registry/Registry.hpp"
+#include "ecs/Registry.hpp"
 #include "ecs/system/SystemScheduler.hpp"
 
 class Scene

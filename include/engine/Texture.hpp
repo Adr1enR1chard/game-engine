@@ -13,7 +13,10 @@ public:
 
     void filteringParameters(unsigned int minFilter, unsigned int magFilter) const;
 
+private:
     void bind() const;
+
+    friend class Material;
 
 private:
     Texture(unsigned int ID) : ID(ID) {};

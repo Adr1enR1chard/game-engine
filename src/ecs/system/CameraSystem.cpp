@@ -5,7 +5,7 @@
 #include <engine/EngineContext.hpp>
 #include <engine/SceneManager.hpp>
 #include "scene/Scene.hpp"
-#include "ecs/registry/Registry.hpp"
+#include "ecs/Registry.hpp"
 
 #include <engine/component/CCamera.hpp>
 #include <engine/component/CCameraCache.hpp>

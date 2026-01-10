@@ -230,6 +230,12 @@ Shader Shader::Default()
     return defaultShader;
 }
 
+Shader::~Shader()
+{
+    // TODO: Delete shader program?
+    // glDeleteProgram(ID);
+}
+
 void Shader::use() const
 {
     GLint current = 0;

@@ -32,7 +32,7 @@ void RenderSystem::update(EngineContext &engineContext, double deltaTime)
         auto &transform = registry.getComponent<CTransformCache>(entity);
         auto &meshRenderer = registry.getComponent<CMeshRenderer>(entity);
 
-        auto &mesh = meshRenderer.getMesh();
+        auto &model = meshRenderer.getModel();
         auto &material = meshRenderer.getMaterial();
 
         material.setUniform("view", cameraTransform.viewMatrix);
@@ -42,8 +42,12 @@ void RenderSystem::update(EngineContext &engineContext, double deltaTime)
 
         material.bindTextures();
 
-        glBindVertexArray(mesh.VAO);
-        glDrawArrays(GL_TRIANGLES, 0, mesh.getVertexCount());
+        // Debug vertices position
+        // for (const auto &vertex : mesh.vertices)
+        // {
+        //     printf("Vertex position: %f, %f, %f\n", vertex.position.x, vertex.position.y, vertex.position.z);
+        // }
+        model.Draw(material.getShader(), transform.modelMatrix);
     }
 
     deltaTime; // Unused parameter

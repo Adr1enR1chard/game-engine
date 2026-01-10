@@ -31,6 +31,7 @@ add_executable(BasicScene
     src/render/Material.cpp
 	src/third_party/glad/glad.c
 	src/third_party/stb_image/stb_image.cpp
+    src/model/Model.cpp
 )
 
 # Include directories for local headers (GLAD, etc.)
@@ -57,10 +58,23 @@ FetchContent_MakeAvailable(glfw)
 # OpenGL
 find_package(OpenGL REQUIRED)
 
+# Assimp
+include(FetchContent)
+FetchContent_Declare(assimp
+    GIT_REPOSITORY https://github.com/assimp/assimp.git
+    GIT_TAG master
+)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INJECT_DEBUG_POSTFIX OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(assimp)
+
 # Link libraries
 target_link_libraries(BasicScene PRIVATE
 		glfw
 		OpenGL::GL
+        assimp::assimp
 )
 
 # Windows-specific (ensure opengl32 linkage where necessary)

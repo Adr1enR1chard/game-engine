@@ -1,5 +1,7 @@
 #include <engine/Core.hpp>
 
+#include <filesystem>
+
 class MovingPointLightSystem : public System
 {
 public:
@@ -60,30 +62,6 @@ int main()
     scene.systems().registerSystem<MovingPointLightSystem>();
     scene.systems().registerSystem<PrintFPSSystem>();
 
-    std::shared_ptr<Mesh> cubeMesh = Mesh::Cube();
-    std::shared_ptr<Material> material = Material::Default();
-    material->setTexture("albedoMap", Texture("assets/textures/tiles-albedo.jpg"));
-    material->setUniform("shininess", 32.0f);
-
-    glm::vec3 cubePositions[] = {
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(2.0f, 5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3(2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f, 3.0f, -7.5f),
-        glm::vec3(1.3f, -2.0f, -2.5f),
-        glm::vec3(1.5f, 2.0f, -2.5f),
-        glm::vec3(1.5f, 0.2f, -1.5f),
-        glm::vec3(-1.3f, 1.0f, -1.5f)};
-
-    for (const glm::vec3 &pos : cubePositions)
-    {
-        Entity cube = scene.registry().createEntity();
-        scene.registry().createComponent<CTransform>(cube).setPosition(pos);
-        scene.registry().createComponent<CMeshRenderer>(cube).setMesh(cubeMesh).setMaterial(material);
-    }
-
     Entity camera = scene.registry().createEntity();
     scene.registry().createComponent<CCamera>(camera);
     scene.registry().createComponent<CTransform>(camera).setPosition(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -94,13 +72,13 @@ int main()
     directionalLight.direction = glm::vec3(0.0f, 0.0f, -1.0f);
     directionalLight.color = glm::vec3(1.0f, 1.0f, 1.0f);
     directionalLight.ambient = 0.2f;
-    directionalLight.intensity = 0.5f;
+    directionalLight.intensity = 0.2f;
 
     Entity pointLight = scene.registry().createEntity();
     CPointLight &pointLightComp = scene.registry().createComponent<CPointLight>(pointLight);
     std::shared_ptr<Material> lightMaterial = Material::Default();
     auto &pointLightTransform = scene.registry().createComponent<CTransform>(pointLight);
-    scene.registry().createComponent<CMeshRenderer>(pointLight).setMesh(cubeMesh).setMaterial(lightMaterial);
+    scene.registry().createComponent<CMeshRenderer>(pointLight).setMesh(Mesh::Cube()).setMaterial(lightMaterial);
 
     pointLightTransform.setPosition(glm::vec3(2.0f, 2.0f, 2.0f));
     pointLightTransform.setScale(glm::vec3(0.2f));
@@ -110,8 +88,18 @@ int main()
     pointLightComp.radius = 1.0f;
 
     lightMaterial->setUniform("albedo", glm::vec3(1.0f, 1.0f, 0.0f));
-    lightMaterial->setTexture("albedoMap", Texture("assets/textures/tiles-albedo.jpg"));
 
+    Model backpackModel("assets/models/backpack.gltf");
+
+    Entity backpack = scene.registry().createEntity();
+    auto &backpackTransform = scene.registry().createComponent<CTransform>(backpack);
+    backpackTransform.setPosition(glm::vec3(0.0f, 0, -6.0f));
+    backpackTransform.setScale(glm::vec3(0.01f));
+    // backpackTransform.setRotation(glm::vec3(0.0f, -90.0f, 0.0f));
+    auto &backpackMeshRenderer = scene.registry().createComponent<CMeshRenderer>(backpack);
+    backpackMeshRenderer.setModel(backpackModel);
+    backpackMeshRenderer.setMaterial(Material::Default());
+    backpackMeshRenderer.getMaterial().setTexture("albedoMap", Texture("assets/textures/backpack/baseColor.jpeg"));
     engine.run();
     return 0;
 }

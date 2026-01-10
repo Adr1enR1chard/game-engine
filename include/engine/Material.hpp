@@ -38,7 +38,7 @@ private:
     void bindTextures() const;
 
     Shader &setShader(const Shader &shaderHandle);
-    const Shader &getShader() const;
+    Shader &getShader();
 
     friend class RenderSystem;
     friend class LightSystem;

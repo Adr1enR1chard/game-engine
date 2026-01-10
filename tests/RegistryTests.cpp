@@ -1,7 +1,7 @@
 #include <cassert>
 #include <stdexcept>
 
-#include "ecs/registry/Registry.hpp"
+#include "ecs/Registry.hpp"
 
 struct Position
 {

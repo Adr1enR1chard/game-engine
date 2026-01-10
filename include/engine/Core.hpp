@@ -10,3 +10,4 @@
 #include <engine/system/RenderSystem.hpp>
 #include <engine/system/CameraSystem.hpp>
 #include <engine/system/LightSystem.hpp>
+#include <engine/Model.hpp>
