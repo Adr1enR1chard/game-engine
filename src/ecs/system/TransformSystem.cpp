@@ -11,11 +11,11 @@
 glm::mat4 getModelMatrix(CTransform& transform)
 {
     glm::mat4 model = glm::mat4(1.0f);
-    model           = glm::translate(model, transform.getPosition());
-    model           = glm::rotate(model, glm::radians(transform.getRotation().x), glm::vec3(1.0f, 0.0f, 0.0f));
-    model           = glm::rotate(model, glm::radians(transform.getRotation().y), glm::vec3(0.0f, 1.0f, 0.0f));
-    model           = glm::rotate(model, glm::radians(transform.getRotation().z), glm::vec3(0.0f, 0.0f, 1.0f));
-    model           = glm::scale(model, transform.getScale());
+    model           = glm::translate(model, transform.position);
+    model           = glm::rotate(model, glm::radians(transform.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+    model           = glm::rotate(model, glm::radians(transform.rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+    model           = glm::rotate(model, glm::radians(transform.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+    model           = glm::scale(model, transform.scale);
     return model;
 }
 
@@ -33,16 +33,13 @@ void TransformSystem::update(World& world, double deltaTime)
 {
     for (const Entity& entity : world.getEntitiesWithComponent<CTransform>()) {
         auto& transform = world.getComponent<CTransform>(entity);
-        if (transform.isDirty()) {
-            if (!world.hasComponent<CTransformCache>(entity)) {
-                world.createComponent<CTransformCache>(entity);
-            }
-
-            auto& transformCache       = world.getComponent<CTransformCache>(entity);
-            transformCache.modelMatrix = getModelMatrix(transform);
-            transformCache.viewMatrix  = getViewMatrix(transform.getPosition(), transform.getRotation());
-            transform.setDirty(false);
+        if (!world.hasComponent<CTransformCache>(entity)) {
+            world.createComponent<CTransformCache>(entity);
         }
+
+        auto& transformCache       = world.getComponent<CTransformCache>(entity);
+        transformCache.modelMatrix = getModelMatrix(transform);
+        transformCache.viewMatrix  = getViewMatrix(transform.position, transform.rotation);
     }
 
     deltaTime; // Unused parameter

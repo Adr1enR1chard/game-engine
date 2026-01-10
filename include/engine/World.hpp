@@ -56,14 +56,17 @@ class World
     World& operator=(World&&)      = default;
     ~World()                       = default;
 
-    Entity createEntity();
+    Entity                           createEntity();
+    template <typename... Cs> Entity createEntity(Cs&&... components);
 
-    template <typename T> const std::vector<Entity>             getEntitiesWithComponent() const;
-    template <typename... Components> const std::vector<Entity> getEntitiesWithComponents() const;
-    template <typename T> T&                                    createComponent(Entity entity);
-    template <typename... T> void                               createComponents(Entity entity);
-    template <typename T> T&                                    getComponent(Entity entity);
-    template <typename T> bool                                  hasComponent(Entity entity) const;
+    template <typename T> const std::vector<Entity>     getEntitiesWithComponent() const;
+    template <typename... Cs> const std::vector<Entity> getEntitiesWithComponents() const;
+    template <typename T> T&                            createComponent(Entity entity);
+    template <typename T> T&                            createComponent(Entity entity, T&& component);
+    template <typename... T> void                       createComponents(Entity entity);
+    template <typename... T> void                       createComponents(Entity entity, T&&... components);
+    template <typename T> T&                            getComponent(Entity entity);
+    template <typename T> bool                          hasComponent(Entity entity) const;
 
     template <ServiceType T> T& Serv();
 
@@ -80,6 +83,13 @@ class World
     std::unordered_map<std::type_index, std::unique_ptr<Service>> m_services;
 };
 
+template <typename... Cs> Entity World::createEntity(Cs&&... components)
+{
+    Entity entity = createEntity();
+    createComponents<Cs...>(entity, std::forward<Cs>(components)...);
+    return entity;
+}
+
 template <typename T> const std::vector<Entity> World::getEntitiesWithComponent() const
 {
     const ComponentStorage<T>* storage = tryRegistry<T>();
@@ -89,12 +99,12 @@ template <typename T> const std::vector<Entity> World::getEntitiesWithComponent(
     return storage->getEntities();
 }
 
-template <typename... Components> const std::vector<Entity> World::getEntitiesWithComponents() const
+template <typename... Cs> const std::vector<Entity> World::getEntitiesWithComponents() const
 {
     std::vector<Entity> entitiesWithAllComponents;
 
     for (const Entity& entity : m_entities) {
-        bool hasAll = (hasComponent<Components>(entity) && ...);
+        bool hasAll = (hasComponent<Cs>(entity) && ...);
         if (hasAll) {
             entitiesWithAllComponents.push_back(entity);
         }
@@ -108,16 +118,26 @@ template <typename T> T& World::createComponent(Entity entity)
     return registry<T>().emplace(entity, T{});
 }
 
+template <typename T> T& World::createComponent(Entity entity, T&& component)
+{
+    return registry<T>().emplace(entity, std::forward<T>(component));
+}
+
 template <typename... T> void World::createComponents(Entity entity)
 {
     (createComponent<T>(entity), ...);
+}
+
+template <typename... T> void World::createComponents(Entity entity, T&&... components)
+{
+    (createComponent<T>(entity, std::forward<T>(components)), ...);
 }
 
 template <typename T> T& World::getComponent(Entity entity)
 {
     auto* ptr = registry<T>().get(entity);
     if (!ptr)
-        std::runtime_error("Component not found");
+        throw std::runtime_error("Component not found");
 
     return *ptr;
 }

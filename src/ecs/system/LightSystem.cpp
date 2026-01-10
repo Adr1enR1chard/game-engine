@@ -24,9 +24,9 @@ void LightSystem::update(World& world, double /*deltaTime*/)
     auto& renderers = world.getEntitiesWithComponents<CMeshRenderer>();
     for (const Entity& entity : renderers) {
         auto& meshRenderer = world.getComponent<CMeshRenderer>(entity);
-        auto& material     = meshRenderer.getMaterial();
-        auto& shader       = material.getShader();
-        material.setUniform("viewPos", cameraTransform.getPosition());
+        auto& material     = meshRenderer.material;
+        auto& shader       = material->getShader();
+        material->setUniform("viewPos", cameraTransform.position);
 
         shader.setDirectionalLight(dirLight.direction, // direction
                                    dirLight.color,     // color
@@ -34,17 +34,17 @@ void LightSystem::update(World& world, double /*deltaTime*/)
                                    dirLight.ambient    // ambient
         );
 
-        material.setUniform("pointLightCount", static_cast<int>(pointLights.size()));
+        material->setUniform("pointLightCount", static_cast<int>(pointLights.size()));
         for (size_t i = 0; i < pointLights.size(); ++i) {
             auto& pointLight     = world.getComponent<CPointLight>(pointLights[i]);
             auto& lightTransform = world.getComponent<CTransform>(pointLights[i]);
 
             std::string baseName = "pointLights[" + std::to_string(i) + "]";
 
-            material.setUniform(baseName + ".position", lightTransform.getPosition());
-            material.setUniform(baseName + ".color", pointLight.color);
-            material.setUniform(baseName + ".intensity", pointLight.intensity);
-            material.setUniform(baseName + ".radius", pointLight.radius);
+            material->setUniform(baseName + ".position", lightTransform.position);
+            material->setUniform(baseName + ".color", pointLight.color);
+            material->setUniform(baseName + ".intensity", pointLight.intensity);
+            material->setUniform(baseName + ".radius", pointLight.radius);
         }
     }
 }

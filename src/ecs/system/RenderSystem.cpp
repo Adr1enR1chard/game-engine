@@ -26,22 +26,22 @@ void RenderSystem::update(World& world, double deltaTime)
     for (const Entity& entity : world.getEntitiesWithComponents<CMeshRenderer, CTransformCache>()) {
         auto& transform    = world.getComponent<CTransformCache>(entity);
         auto& meshRenderer = world.getComponent<CMeshRenderer>(entity);
-        auto& model        = meshRenderer.getModel();
-        auto& material     = meshRenderer.getMaterial();
+        auto& model        = meshRenderer.model;
+        auto& material     = meshRenderer.material;
 
-        material.setUniform("view", cameraTransform.viewMatrix);
-        material.setUniform("projection", cameraCache.projectionMatrix);
-        material.setUniform("model", transform.modelMatrix);
-        material.applyUniforms();
+        material->setUniform("view", cameraTransform.viewMatrix);
+        material->setUniform("projection", cameraCache.projectionMatrix);
+        material->setUniform("model", transform.modelMatrix);
+        material->applyUniforms();
 
-        material.bindTextures();
+        material->bindTextures();
 
         // Debug vertices position
         // for (const auto &vertex : mesh.vertices)
         // {
         //     printf("Vertex position: %f, %f, %f\n", vertex.position.x, vertex.position.y, vertex.position.z);
         // }
-        model.Draw(material.getShader(), transform.modelMatrix);
+        model.Draw(material->getShader(), transform.modelMatrix);
     }
 
     deltaTime; // Unused parameter

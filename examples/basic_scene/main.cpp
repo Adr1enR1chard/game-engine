@@ -7,10 +7,10 @@ class MovingPointLightSystem : public System
     {
         for (const Entity& entity : world.getEntitiesWithComponents<CTransform, CPointLight>()) {
             auto&     transform = world.getComponent<CTransform>(entity);
-            glm::vec3 pos       = transform.getPosition();
+            glm::vec3 pos       = transform.position;
             pos.x               = 5.0f * std::sin(static_cast<float>(timeAccumulator));
             pos.z               = 5.0f * std::cos(static_cast<float>(timeAccumulator));
-            transform.setPosition(pos);
+            transform.position  = pos;
         }
         timeAccumulator += static_cast<float>(deltaTime);
     }
@@ -50,42 +50,26 @@ class StartupSystem : public System
     void start(World& world) override
     {
         world.Serv<Window>().setClearColor(glm::vec3(0.1f, 0.1f, 0.1f));
-        Entity camera = world.createEntity();
-        world.createComponent<CCamera>(camera);
-        world.createComponent<CTransform>(camera).setPosition(glm::vec3(0.0f, 0.0f, 3.0f));
-        Entity             dirLight         = world.createEntity();
-        CDirectionalLight& directionalLight = world.createComponent<CDirectionalLight>(dirLight);
+        world.createEntity(CCamera{}, CTransform{.position = glm::vec3(0.0f, 0.0f, 3.0f)});
+        world.createEntity(CDirectionalLight{.direction = glm::vec3(-0.2f, -1.0f, -0.3f),
+                                             .color     = glm::vec3(1.0f, 1.0f, 1.0f),
+                                             .ambient   = 0.2f,
+                                             .intensity = 0.5f});
 
-        directionalLight.direction = glm::vec3(0.0f, 0.0f, -1.0f);
-        directionalLight.color     = glm::vec3(1.0f, 1.0f, 1.0f);
-        directionalLight.ambient   = 0.2f;
-        directionalLight.intensity = 0.2f;
+        // TODO: Fix Mesh rendering. Actually only models are rendered properly.
+        world.createEntity(CPointLight{.color = glm::vec3(1.0f, 0.5f, 0.5f), .intensity = 5.0f, .radius = 1.0f},
+                           CTransform{.position = glm::vec3(-2.0f, 2.0f, -2.0f), .scale = glm::vec3(0.2f)},
+                           CMeshRenderer{
+                               .mesh     = Mesh::Cube(),
+                               .material = Material::Default(),
+                           });
 
-        Entity                    pointLight          = world.createEntity();
-        CPointLight&              pointLightComp      = world.createComponent<CPointLight>(pointLight);
-        std::shared_ptr<Material> lightMaterial       = Material::Default();
-        auto&                     pointLightTransform = world.createComponent<CTransform>(pointLight);
-        world.createComponent<CMeshRenderer>(pointLight).setMesh(Mesh::Cube()).setMaterial(lightMaterial);
-        pointLightTransform.setPosition(glm::vec3(2.0f, 2.0f, 2.0f));
-        pointLightTransform.setScale(glm::vec3(0.2f));
-
-        pointLightComp.color     = glm::vec3(0.2f, 1.0f, 0.2f);
-        pointLightComp.intensity = 10.0f;
-        pointLightComp.radius    = 1.0f;
-
-        lightMaterial->setUniform("albedo", glm::vec3(1.0f, 1.0f, 0.0f));
-
-        Model backpackModel("assets/models/backpack.gltf");
-
-        Entity backpack          = world.createEntity();
-        auto&  backpackTransform = world.createComponent<CTransform>(backpack);
-        backpackTransform.setPosition(glm::vec3(0.0f, 0, -6.0f));
-        backpackTransform.setScale(glm::vec3(0.01f));
-        // backpackTransform.setRotation(glm::vec3(0.0f, -90.0f, 0.0f));
-        auto& backpackMeshRenderer = world.createComponent<CMeshRenderer>(backpack);
-        backpackMeshRenderer.setModel(backpackModel);
-        backpackMeshRenderer.setMaterial(Material::Default());
-        backpackMeshRenderer.getMaterial().setTexture("albedoMap", Texture("assets/textures/backpack/baseColor.jpeg"));
+        world.createEntity(CTransform{.position = glm::vec3(0.0f, 0, -6.0f), .scale = glm::vec3(0.01f)},
+                           CMeshRenderer{
+                               .material = Material::Default()->setTexture(
+                                   "albedoMap", Texture("assets/textures/backpack/baseColor.jpeg")),
+                               .model = Model("assets/models/backpack.gltf"),
+                           });
     }
 };
 
