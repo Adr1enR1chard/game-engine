@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.20)
 # Project
 project(BasicScene LANGUAGES C CXX)
 
+# Warnings configuration
+include(cmake/CompilerWarnings.cmake)
+
 # Standards
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -16,32 +19,51 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # Enable CTest for unit tests
 enable_testing()
 
-# Sources
-add_executable(BasicScene
-	examples/basic_scene/main.cpp
-	src/ecs/system/RenderSystem.cpp
+# Library: ECS systems
+add_library(engine_ecs
+    src/ecs/system/RenderSystem.cpp
     src/ecs/system/CameraSystem.cpp
-	src/ecs/system/SystemScheduler.cpp
+    src/ecs/system/SystemScheduler.cpp
     src/ecs/system/TransformSystem.cpp
     src/ecs/system/LightSystem.cpp
+)
+target_include_directories(engine_ecs PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+# Library: Rendering
+add_library(engine_render
     src/render/Window.cpp
     src/render/Shader.cpp
     src/render/Mesh.cpp
     src/render/Texture.cpp
     src/render/Material.cpp
-	src/third_party/glad/glad.c
-	src/third_party/stb_image/stb_image.cpp
+)
+target_include_directories(engine_render PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+target_compile_definitions(engine_render PUBLIC GLFW_INCLUDE_NONE)
+
+# Library: Model loading
+add_library(engine_model
     src/model/Model.cpp
 )
-
-# Include directories for local headers (GLAD, etc.)
-target_include_directories(BasicScene PRIVATE
-		${CMAKE_CURRENT_SOURCE_DIR}/include
-		${CMAKE_CURRENT_SOURCE_DIR}/src
+target_include_directories(engine_model PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-# Avoid GLFW including GL headers; we provide them via GLAD
-target_compile_definitions(BasicScene PRIVATE GLFW_INCLUDE_NONE)
+# Library: third-party single-file implementations (GLAD, stb_image)
+add_library(engine_vendor
+    src/third_party/glad/glad.c
+    src/third_party/stb_image/stb_image.cpp
+)
+target_include_directories(engine_vendor PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
 
 # Dependencies: GLFW via FetchContent
 include(FetchContent)
@@ -70,17 +92,34 @@ set(ASSIMP_INJECT_DEBUG_POSTFIX OFF CACHE BOOL "" FORCE)
 set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(assimp)
 
-# Link libraries
+# Link third-party to engine libraries
+target_link_libraries(engine_render PUBLIC
+    glfw
+    OpenGL::GL
+)
+target_link_libraries(engine_model PUBLIC
+    assimp::assimp
+)
+if (WIN32)
+    target_link_libraries(engine_render PUBLIC opengl32)
+endif()
+
+# Executable: BasicScene sample
+add_executable(BasicScene
+    examples/basic_scene/main.cpp
+)
+target_include_directories(BasicScene PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
 target_link_libraries(BasicScene PRIVATE
-		glfw
-		OpenGL::GL
-        assimp::assimp
+    engine_ecs
+    engine_render
+    engine_model
+    engine_vendor
 )
 
-# Windows-specific (ensure opengl32 linkage where necessary)
-if (WIN32)
-	target_link_libraries(BasicScene PRIVATE opengl32)
-endif()
+## Note: dependencies are linked to engine_* libraries above
 
 add_custom_command(TARGET BasicScene POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:BasicScene>/assets"
@@ -90,56 +129,35 @@ add_custom_command(TARGET BasicScene POST_BUILD
 
 # Registry unit tests
 add_executable(RegistryTests
-	tests/RegistryTests.cpp
+    tests/RegistryTests.cpp
 )
 target_include_directories(RegistryTests PRIVATE
-	${CMAKE_CURRENT_SOURCE_DIR}/src
-	${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+target_link_libraries(RegistryTests PRIVATE
+    engine_ecs
 )
 add_test(NAME RegistryTests COMMAND RegistryTests)
 
 # SystemScheduler unit tests
 add_executable(SystemTests
     tests/SystemTests.cpp
-    src/ecs/system/SystemScheduler.cpp
 )
 target_include_directories(SystemTests PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
+target_link_libraries(SystemTests PRIVATE
+    engine_ecs
+)
 add_test(NAME SystemTests COMMAND SystemTests)
 
 
-function(enable_strict_warnings target)
-    if (MSVC)
-        target_compile_options(${target} PRIVATE
-            /W4        # high warnings
-            /WX        # warnings as errors
-            /permissive-
-            /Zc:__cplusplus
-            /EHsc
-        )
-    else()
-        target_compile_options(${target} PRIVATE
-            -Wall
-            -Wextra
-            -Wpedantic
-            -Werror
-            -Wshadow
-            -Wconversion
-            -Wsign-conversion
-            -Wcast-align
-            -Woverloaded-virtual
-            -Wnon-virtual-dtor
-            -Wold-style-cast
-            -Wnull-dereference
-            -Wdouble-promotion
-            -Wformat=2
-            -Wimplicit-fallthrough
-        )
-    endif()
-endfunction()
-
+enable_strict_warnings(engine_ecs)
+enable_strict_warnings(engine_render)
+enable_strict_warnings(engine_model)
+enable_strict_warnings(engine_vendor)
 enable_strict_warnings(BasicScene)
 enable_strict_warnings(RegistryTests)
 enable_strict_warnings(SystemTests)
