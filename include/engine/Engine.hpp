@@ -25,6 +25,8 @@ class Engine
 
         auto lastFrame = clock::now();
 
+        m_systemScheduler.startSystems(m_world);
+
         while (!window.shouldClose()) {
             auto                          frameStart = clock::now();
             std::chrono::duration<double> delta      = frameStart - lastFrame;

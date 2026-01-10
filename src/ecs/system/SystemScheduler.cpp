@@ -6,9 +6,16 @@
 
 #include <iostream>
 
+void SystemScheduler::startSystems(World& world)
+{
+    for (auto& [typeIndex, system] : m_startSystems) {
+        system->start(world);
+    }
+}
+
 void SystemScheduler::updateSystems(World& world, double deltaTime)
 {
-    for (auto& [typeIndex, system] : m_systems) {
+    for (auto& [typeIndex, system] : m_updateSystems) {
         system->update(world, deltaTime);
     }
 }

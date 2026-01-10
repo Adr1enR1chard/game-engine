@@ -44,10 +44,54 @@ class PrintFPSSystem : public System
     }
 };
 
+class StartupSystem : public System
+{
+  public:
+    void start(World& world) override
+    {
+        world.Serv<Window>().setClearColor(glm::vec3(0.1f, 0.1f, 0.1f));
+        Entity camera = world.createEntity();
+        world.createComponent<CCamera>(camera);
+        world.createComponent<CTransform>(camera).setPosition(glm::vec3(0.0f, 0.0f, 3.0f));
+        Entity             dirLight         = world.createEntity();
+        CDirectionalLight& directionalLight = world.createComponent<CDirectionalLight>(dirLight);
+
+        directionalLight.direction = glm::vec3(0.0f, 0.0f, -1.0f);
+        directionalLight.color     = glm::vec3(1.0f, 1.0f, 1.0f);
+        directionalLight.ambient   = 0.2f;
+        directionalLight.intensity = 0.2f;
+
+        Entity                    pointLight          = world.createEntity();
+        CPointLight&              pointLightComp      = world.createComponent<CPointLight>(pointLight);
+        std::shared_ptr<Material> lightMaterial       = Material::Default();
+        auto&                     pointLightTransform = world.createComponent<CTransform>(pointLight);
+        world.createComponent<CMeshRenderer>(pointLight).setMesh(Mesh::Cube()).setMaterial(lightMaterial);
+        pointLightTransform.setPosition(glm::vec3(2.0f, 2.0f, 2.0f));
+        pointLightTransform.setScale(glm::vec3(0.2f));
+
+        pointLightComp.color     = glm::vec3(0.2f, 1.0f, 0.2f);
+        pointLightComp.intensity = 10.0f;
+        pointLightComp.radius    = 1.0f;
+
+        lightMaterial->setUniform("albedo", glm::vec3(1.0f, 1.0f, 0.0f));
+
+        Model backpackModel("assets/models/backpack.gltf");
+
+        Entity backpack          = world.createEntity();
+        auto&  backpackTransform = world.createComponent<CTransform>(backpack);
+        backpackTransform.setPosition(glm::vec3(0.0f, 0, -6.0f));
+        backpackTransform.setScale(glm::vec3(0.01f));
+        // backpackTransform.setRotation(glm::vec3(0.0f, -90.0f, 0.0f));
+        auto& backpackMeshRenderer = world.createComponent<CMeshRenderer>(backpack);
+        backpackMeshRenderer.setModel(backpackModel);
+        backpackMeshRenderer.setMaterial(Material::Default());
+        backpackMeshRenderer.getMaterial().setTexture("albedoMap", Texture("assets/textures/backpack/baseColor.jpeg"));
+    }
+};
+
 int main()
 {
     Engine engine(800, 600, "Game Engine");
-    engine.world().Serv<Window>().setClearColor(glm::vec3(0.1f, 0.1f, 0.1f));
 
     engine.systems().registerSystem<TransformSystem>();
     engine.systems().registerSystem<CameraSystem>();
@@ -55,43 +99,8 @@ int main()
     engine.systems().registerSystem<LightSystem>();
     engine.systems().registerSystem<MovingPointLightSystem>();
     engine.systems().registerSystem<PrintFPSSystem>();
+    engine.systems().registerSystem<StartupSystem>(SystemPhase::Start);
 
-    Entity camera = engine.world().createEntity();
-    engine.world().createComponent<CCamera>(camera);
-    engine.world().createComponent<CTransform>(camera).setPosition(glm::vec3(0.0f, 0.0f, 3.0f));
-    Entity             dirLight         = engine.world().createEntity();
-    CDirectionalLight& directionalLight = engine.world().createComponent<CDirectionalLight>(dirLight);
-
-    directionalLight.direction = glm::vec3(0.0f, 0.0f, -1.0f);
-    directionalLight.color     = glm::vec3(1.0f, 1.0f, 1.0f);
-    directionalLight.ambient   = 0.2f;
-    directionalLight.intensity = 0.2f;
-
-    Entity                    pointLight          = engine.world().createEntity();
-    CPointLight&              pointLightComp      = engine.world().createComponent<CPointLight>(pointLight);
-    std::shared_ptr<Material> lightMaterial       = Material::Default();
-    auto&                     pointLightTransform = engine.world().createComponent<CTransform>(pointLight);
-    engine.world().createComponent<CMeshRenderer>(pointLight).setMesh(Mesh::Cube()).setMaterial(lightMaterial);
-    pointLightTransform.setPosition(glm::vec3(2.0f, 2.0f, 2.0f));
-    pointLightTransform.setScale(glm::vec3(0.2f));
-
-    pointLightComp.color     = glm::vec3(0.2f, 1.0f, 0.2f);
-    pointLightComp.intensity = 10.0f;
-    pointLightComp.radius    = 1.0f;
-
-    lightMaterial->setUniform("albedo", glm::vec3(1.0f, 1.0f, 0.0f));
-
-    Model backpackModel("assets/models/backpack.gltf");
-
-    Entity backpack          = engine.world().createEntity();
-    auto&  backpackTransform = engine.world().createComponent<CTransform>(backpack);
-    backpackTransform.setPosition(glm::vec3(0.0f, 0, -6.0f));
-    backpackTransform.setScale(glm::vec3(0.01f));
-    // backpackTransform.setRotation(glm::vec3(0.0f, -90.0f, 0.0f));
-    auto& backpackMeshRenderer = engine.world().createComponent<CMeshRenderer>(backpack);
-    backpackMeshRenderer.setModel(backpackModel);
-    backpackMeshRenderer.setMaterial(Material::Default());
-    backpackMeshRenderer.getMaterial().setTexture("albedoMap", Texture("assets/textures/backpack/baseColor.jpeg"));
     engine.run();
     return 0;
 }
