@@ -4,6 +4,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
+#include <engine/Material.hpp>
+
 MaterialInstance MaterialInstance::Default(const DefaultMaterialParameters& params)
 {
     MaterialInstance material = MaterialInstance(Material::Default());

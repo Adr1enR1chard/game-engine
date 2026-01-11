@@ -1,12 +1,14 @@
 #pragma once
 
-#include <engine/Material.hpp>
+#include "utils/types.hpp"
 #include <engine/Texture.hpp>
 #include <glm/glm.hpp>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <variant>
+
+class Material;
 
 struct DefaultMaterialParameters {
     Texture   albedoMap = Texture::White();

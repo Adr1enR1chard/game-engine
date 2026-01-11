@@ -42,7 +42,7 @@ class StartupSystem : public System
                      CTransform{.position = glm::vec3(-2.0f, 2.0f, -2.0f), .scale = glm::vec3(0.2f)},
                      CMeshRenderer{
                          .mesh     = Mesh::Cube(),
-                         .material = Material::Default(),
+                         .material = MaterialInstance::Default(),
                      });
 
         world.create(CTransform{.position = glm::vec3(0.0f, 0, -6.0f), .scale = glm::vec3(0.01f)},
