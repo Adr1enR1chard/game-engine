@@ -9,41 +9,10 @@
 #include <vector>
 
 #include "utils/types.hpp"
+#include <engine/ComponentStorage.hpp>
 #include <engine/Entity.hpp>
 #include <engine/Service.hpp>
-
-template <typename T> struct ComponentStorage {
-    bool has(Entity entity) const
-    {
-        return components.find(entity) != components.end();
-    }
-
-    T& emplace(Entity entity, const T& component)
-    {
-        return components[entity] = component;
-    }
-
-    T* get(Entity entity)
-    {
-        auto it = components.find(entity);
-        if (it != components.end()) {
-            return &it->second;
-        }
-        return nullptr;
-    }
-
-    std::vector<Entity> getEntities() const
-    {
-        std::vector<Entity> entities;
-        for (const auto& [entity, component] : components) {
-            entities.push_back(entity);
-        }
-        return entities;
-    }
-
-  private:
-    std::unordered_map<Entity, T> components;
-};
+#include <optional>
 
 class World
 {
@@ -56,26 +25,54 @@ class World
     World& operator=(World&&)      = default;
     ~World()                       = default;
 
-    Entity                           createEntity();
-    template <typename... Cs> Entity createEntity(Cs&&... components);
+    template <typename... Cs> Entity create(Cs&&... components);
 
-    template <typename T> const std::vector<Entity>     getEntitiesWithComponent() const;
-    template <typename... Cs> const std::vector<Entity> getEntitiesWithComponents() const;
-    template <typename T> T&                            createComponent(Entity entity);
-    template <typename T> T&                            createComponent(Entity entity, T&& component);
-    template <typename... T> void                       createComponents(Entity entity);
-    template <typename... T> void                       createComponents(Entity entity, T&&... components);
-    template <typename T> T&                            getComponent(Entity entity);
-    template <typename T> bool                          hasComponent(Entity entity) const;
+    /**
+     * Retrieve entities and their components matching the query.
+     * Usage: for (auto [e,a,b] : world.get<A,B>()) { ... }
+     *
+     * @return Vector of tuples; empty if no match.
+     */
+    template <typename... Cs> std::vector<std::tuple<Entity, Cs*...>> get();
 
+    /**
+     * Retrieve components for a specific entity.
+     * Usage: auto [e,a,b] = world.getFrom<A,B>(entity);
+     *
+     * @warning If the entity does not have all requested components, entity will be 0 and pointers will be nullptr.
+     */
+    template <typename... Cs> std::tuple<Entity, Cs*...> getFrom(Entity entity);
+
+    /**
+     * Retrieve entities and their components matching the query at a specific index.
+     * Usage: auto [e,a,b] = world.getAt<A,B>(0);
+     *
+     * @warning If the index is out of range, entity will be 0 and pointers will be nullptr.
+     */
+    template <typename... Cs> std::tuple<Entity, Cs*...> getAt(size_t index);
+
+    /**
+     * Add components to an entity.
+     */
+    template <typename... Cs> void add(Entity entity, Cs&&... components);
+
+    /**
+     * Check if an entity has all specified components.
+     */
+    template <typename... Cs> bool has(Entity entity) const;
+
+    /**
+     * Access a service instance. If the service does not exist, it will be created.
+     */
     template <ServiceType T> T& Serv();
 
   private:
+    Entity                                           allocateEntity();
     template <typename T> ComponentStorage<T>&       registry();
     template <typename T> const ComponentStorage<T>* tryRegistry() const;
 
   private:
-    int                 m_entityIndex = 0;
+    int                 m_entityIndex = 1;
     std::queue<int>     m_freeIndices;
     std::vector<Entity> m_entities;
 
@@ -83,68 +80,57 @@ class World
     std::unordered_map<std::type_index, std::unique_ptr<Service>> m_services;
 };
 
-template <typename... Cs> Entity World::createEntity(Cs&&... components)
+template <typename... Cs> Entity World::create(Cs&&... components)
 {
-    Entity entity = createEntity();
-    createComponents<Cs...>(entity, std::forward<Cs>(components)...);
+    Entity entity = allocateEntity();
+    add<Cs...>(entity, std::forward<Cs>(components)...);
     return entity;
 }
 
-template <typename T> const std::vector<Entity> World::getEntitiesWithComponent() const
+template <typename... Cs> std::vector<std::tuple<Entity, Cs*...>> World::get()
 {
-    const ComponentStorage<T>* storage = tryRegistry<T>();
-    if (!storage)
-        return {};
-
-    return storage->getEntities();
-}
-
-template <typename... Cs> const std::vector<Entity> World::getEntitiesWithComponents() const
-{
-    std::vector<Entity> entitiesWithAllComponents;
+    std::vector<std::tuple<Entity, Cs*...>> result;
 
     for (const Entity& entity : m_entities) {
-        bool hasAll = (hasComponent<Cs>(entity) && ...);
-        if (hasAll) {
-            entitiesWithAllComponents.push_back(entity);
+        if ((has<Cs>(entity) && ...)) {
+            result.emplace_back(entity, registry<Cs>().get(entity)...);
         }
     }
 
-    return entitiesWithAllComponents;
+    return result;
 }
 
-template <typename T> T& World::createComponent(Entity entity)
+template <typename... Cs> std::tuple<Entity, Cs*...> World::getFrom(Entity entity)
 {
-    return registry<T>().emplace(entity, T{});
+    if (!(has<Cs>(entity) && ...)) {
+        return {};
+    }
+    return std::make_tuple(entity, registry<Cs>().get(entity)...);
 }
 
-template <typename T> T& World::createComponent(Entity entity, T&& component)
+template <typename... Cs> std::tuple<Entity, Cs*...> World::getAt(size_t index)
 {
-    return registry<T>().emplace(entity, std::forward<T>(component));
+    std::vector<std::tuple<Entity, Cs*...>> result = get<Cs...>();
+
+    if (index < result.size()) {
+        return result[index];
+    } else {
+        return {};
+    }
 }
 
-template <typename... T> void World::createComponents(Entity entity)
+template <typename... Cs> void World::add(Entity entity, Cs&&... components)
 {
-    (createComponent<T>(entity), ...);
+    (registry<Cs>().emplace(entity, std::forward<Cs>(components)), ...);
 }
 
-template <typename... T> void World::createComponents(Entity entity, T&&... components)
+template <typename... Cs> bool World::has(Entity entity) const
 {
-    (createComponent<T>(entity, std::forward<T>(components)), ...);
-}
-
-template <typename T> T& World::getComponent(Entity entity)
-{
-    auto* ptr = registry<T>().get(entity);
-    if (!ptr)
-        throw std::runtime_error("Component not found");
-
-    return *ptr;
-}
-
-template <typename T> bool World::hasComponent(Entity entity) const
-{
-    return tryRegistry<T>() && tryRegistry<T>()->has(entity);
+    return (([&] {
+                auto reg = tryRegistry<Cs>();
+                return reg && reg->has(entity);
+            }()) &&
+            ...);
 }
 
 template <ServiceType T> T& World::Serv()

@@ -29,18 +29,15 @@ glm::mat4 getViewMatrix(const glm::vec3& position, const glm::vec3& rotation)
     return view;
 }
 
-void TransformSystem::update(World& world, double deltaTime)
+void TransformSystem::update(World& world, double /*deltaTime*/)
 {
-    for (const Entity& entity : world.getEntitiesWithComponent<CTransform>()) {
-        auto& transform = world.getComponent<CTransform>(entity);
-        if (!world.hasComponent<CTransformCache>(entity)) {
-            world.createComponent<CTransformCache>(entity);
+    for (const auto& [entity, transform] : world.get<CTransform>()) {
+        if (!world.has<CTransformCache>(entity)) {
+            world.add(entity, CTransformCache{});
         }
 
-        auto& transformCache       = world.getComponent<CTransformCache>(entity);
-        transformCache.modelMatrix = getModelMatrix(transform);
-        transformCache.viewMatrix  = getViewMatrix(transform.position, transform.rotation);
+        const auto& [_, transformCache] = world.getFrom<CTransformCache>(entity);
+        transformCache->modelMatrix     = getModelMatrix(*transform);
+        transformCache->viewMatrix      = getViewMatrix(transform->position, transform->rotation);
     }
-
-    deltaTime; // Unused parameter
 }

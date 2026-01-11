@@ -14,35 +14,24 @@
 
 #include <engine/World.hpp>
 
-void RenderSystem::update(World& world, double deltaTime)
+void RenderSystem::update(World& world, double /*deltaTime*/)
 {
-    auto cameraEntities = world.getEntitiesWithComponents<CTransformCache, CCameraCache>();
-    if (cameraEntities.empty())
+    const auto& [cameraEntity, cameraCache, cameraTransform] = world.getAt<CCameraCache, CTransformCache>(0);
+
+    if (!cameraEntity)
         return;
 
-    const auto& cameraCache     = world.getComponent<CCameraCache>(cameraEntities[0]);
-    const auto& cameraTransform = world.getComponent<CTransformCache>(cameraEntities[0]);
+    for (const auto& [entity, meshRenderer, transform] : world.get<CMeshRenderer, CTransformCache>()) {
+        auto& model    = meshRenderer->model;
+        auto& material = meshRenderer->material;
 
-    for (const Entity& entity : world.getEntitiesWithComponents<CMeshRenderer, CTransformCache>()) {
-        auto& transform    = world.getComponent<CTransformCache>(entity);
-        auto& meshRenderer = world.getComponent<CMeshRenderer>(entity);
-        auto& model        = meshRenderer.model;
-        auto& material     = meshRenderer.material;
-
-        material->setUniform("view", cameraTransform.viewMatrix);
-        material->setUniform("projection", cameraCache.projectionMatrix);
-        material->setUniform("model", transform.modelMatrix);
+        material->setUniform("view", cameraTransform->viewMatrix);
+        material->setUniform("projection", cameraCache->projectionMatrix);
+        material->setUniform("model", transform->modelMatrix);
         material->applyUniforms();
 
         material->bindTextures();
 
-        // Debug vertices position
-        // for (const auto &vertex : mesh.vertices)
-        // {
-        //     printf("Vertex position: %f, %f, %f\n", vertex.position.x, vertex.position.y, vertex.position.z);
-        // }
-        model.Draw(material->getShader(), transform.modelMatrix);
+        model.Draw(material->getShader(), transform->modelMatrix);
     }
-
-    deltaTime; // Unused parameter
 }

@@ -1,6 +1,6 @@
 #include <engine/World.hpp>
 
-Entity World::createEntity()
+Entity World::allocateEntity()
 {
     Entity entity;
     if (!m_freeIndices.empty()) {

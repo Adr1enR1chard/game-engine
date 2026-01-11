@@ -15,24 +15,23 @@ glm::mat4 getProjectionMatrix(float fov, float aspectRatio, float nearPlane, flo
 
 void CameraSystem::update(World& world, double deltaTime)
 {
-    for (const Entity& entity : world.getEntitiesWithComponent<CCamera>()) {
-        auto& cameraComponent = world.getComponent<CCamera>(entity);
-        if (!cameraComponent.isActive)
+    for (const auto& [entity, cameraComponent] : world.get<CCamera>()) {
+        if (!cameraComponent->isActive)
             continue;
 
-        if (!world.hasComponent<CCameraCache>(entity)) {
-            world.createComponent<CCameraCache>(entity);
+        if (!world.has<CCameraCache>(entity)) {
+            world.add(entity, CCameraCache{});
         }
 
         int width, height;
         world.Serv<Window>().getSize(width, height);
 
-        auto& cameraCache = world.getComponent<CCameraCache>(entity);
-        cameraCache.projectionMatrix =
-            getProjectionMatrix(cameraComponent.fov, static_cast<float>(width) / static_cast<float>(height),
-                                cameraComponent.nearPlane, cameraComponent.farPlane);
+        const auto& [_, cameraCache] = world.getFrom<CCameraCache>(entity);
+        cameraCache->projectionMatrix =
+            getProjectionMatrix(cameraComponent->fov, static_cast<float>(width) / static_cast<float>(height),
+                                cameraComponent->nearPlane, cameraComponent->farPlane);
 
-        cameraComponent.dirty = false;
+        cameraComponent->dirty = false;
         break; // Only one active camera is supported
     }
 
