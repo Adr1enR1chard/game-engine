@@ -9,77 +9,60 @@ const int kVertexAttributeCount = 8;
 
 const std::vector<Vertex> kCubeVertices = {
     // Back face (0, 0, -1)
-    {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
-    {{0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}},
-    {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 1.0f}},
-    {{-0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}},
+    {{-0.5f, -0.5f, -0.5f}, {0, 0, -1}, {0, 0}, {1, 0, 0}, {0, 1, 0}},
+    {{0.5f, -0.5f, -0.5f}, {0, 0, -1}, {1, 0}, {1, 0, 0}, {0, 1, 0}},
+    {{0.5f, 0.5f, -0.5f}, {0, 0, -1}, {1, 1}, {1, 0, 0}, {0, 1, 0}},
+    {{-0.5f, 0.5f, -0.5f}, {0, 0, -1}, {0, 1}, {1, 0, 0}, {0, 1, 0}},
 
     // Front face (0, 0, 1)
-    {{-0.5f, -0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
-    {{0.5f, -0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
-    {{0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-    {{-0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+    {{-0.5f, -0.5f, 0.5f}, {0, 0, 1}, {0, 0}, {1, 0, 0}, {0, 1, 0}},
+    {{0.5f, -0.5f, 0.5f}, {0, 0, 1}, {1, 0}, {1, 0, 0}, {0, 1, 0}},
+    {{0.5f, 0.5f, 0.5f}, {0, 0, 1}, {1, 1}, {1, 0, 0}, {0, 1, 0}},
+    {{-0.5f, 0.5f, 0.5f}, {0, 0, 1}, {0, 1}, {1, 0, 0}, {0, 1, 0}},
 
     // Left face (-1, 0, 0)
-    {{-0.5f, 0.5f, 0.5f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-    {{-0.5f, 0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
-    {{-0.5f, -0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
-    {{-0.5f, -0.5f, 0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+    {{-0.5f, 0.5f, 0.5f}, {-1, 0, 0}, {1, 0}, {0, 1, 0}, {0, 0, -1}},
+    {{-0.5f, 0.5f, -0.5f}, {-1, 0, 0}, {1, 1}, {0, 1, 0}, {0, 0, -1}},
+    {{-0.5f, -0.5f, -0.5f}, {-1, 0, 0}, {0, 1}, {0, 1, 0}, {0, 0, -1}},
+    {{-0.5f, -0.5f, 0.5f}, {-1, 0, 0}, {0, 0}, {0, 1, 0}, {0, 0, -1}},
 
     // Right face (1, 0, 0)
-    {{0.5f, 0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-    {{0.5f, 0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
-    {{0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
-    {{0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+    {{0.5f, 0.5f, 0.5f}, {1, 0, 0}, {1, 0}, {0, 1, 0}, {0, 0, -1}},
+    {{0.5f, 0.5f, -0.5f}, {1, 0, 0}, {1, 1}, {0, 1, 0}, {0, 0, -1}},
+    {{0.5f, -0.5f, -0.5f}, {1, 0, 0}, {0, 1}, {0, 1, 0}, {0, 0, -1}},
+    {{0.5f, -0.5f, 0.5f}, {1, 0, 0}, {0, 0}, {0, 1, 0}, {0, 0, -1}},
 
     // Bottom face (0, -1, 0)
-    {{-0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}, {0.0f, 1.0f}},
-    {{0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 1.0f}},
-    {{0.5f, -0.5f, 0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f}},
-    {{-0.5f, -0.5f, 0.5f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
+    {{-0.5f, -0.5f, -0.5f}, {0, -1, 0}, {0, 1}, {1, 0, 0}, {0, 0, 1}},
+    {{0.5f, -0.5f, -0.5f}, {0, -1, 0}, {1, 1}, {1, 0, 0}, {0, 0, 1}},
+    {{0.5f, -0.5f, 0.5f}, {0, -1, 0}, {1, 0}, {1, 0, 0}, {0, 0, 1}},
+    {{-0.5f, -0.5f, 0.5f}, {0, -1, 0}, {0, 0}, {1, 0, 0}, {0, 0, 1}},
 
     // Top face (0, 1, 0)
-    {{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
-    {{0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
-    {{0.5f, 0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-    {{-0.5f, 0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+    {{-0.5f, 0.5f, -0.5f}, {0, 1, 0}, {0, 1}, {1, 0, 0}, {0, 0, 1}},
+    {{0.5f, 0.5f, -0.5f}, {0, 1, 0}, {1, 1}, {1, 0, 0}, {0, 0, 1}},
+    {{0.5f, 0.5f, 0.5f}, {0, 1, 0}, {1, 0}, {1, 0, 0}, {0, 0, 1}},
+    {{-0.5f, 0.5f, 0.5f}, {0, 1, 0}, {0, 0}, {1, 0, 0}, {0, 0, 1}},
 };
 
 const std::vector<uint32_t> kCubeIndices = {
-    0,  1,  2,  2,  3,  0,  // Back
-    4,  5,  6,  6,  7,  4,  // Front
-    8,  9,  10, 10, 11, 8,  // Left
-    12, 13, 14, 14, 15, 12, // Right
-    16, 17, 18, 18, 19, 16, // Bottom
-    20, 21, 22, 22, 23, 20  // Top
-};
+    // Back face (-Z)
+    0, 2, 1, 0, 3, 2,
 
-// Mesh::Mesh(const Vertex *vertices, size_t vertexCount) : vertices(vertices)
-// {
-//     glGenVertexArrays(1, &VAO);
-//     glGenBuffers(1, &VBO);
-//     glGenBuffers(1, &EBO);
+    // Front face (+Z)
+    4, 5, 6, 4, 6, 7,
 
-//     glBindVertexArray(VAO);
+    // Left face (-X)
+    9, 10, 8, 10, 11, 8,
 
-//     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-//     glBufferData(GL_ARRAY_BUFFER, vertexCount * kVertexAttributeCount * sizeof(float), vertices, GL_STATIC_DRAW);
+    // Right face (+X)
+    14, 13, 12, 15, 14, 12,
 
-//     // Vertex positions
-//     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, kVertexAttributeCount * sizeof(float), (void *)0);
-//     glEnableVertexAttribArray(0);
+    // Bottom face (-Y)
+    17, 18, 16, 18, 19, 16,
 
-//     // Vertex normals
-//     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, kVertexAttributeCount * sizeof(float), (void *)(3 *
-//     sizeof(float))); glEnableVertexAttribArray(1);
-
-//     // Vertex UVs coordinates
-//     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, kVertexAttributeCount * sizeof(float), (void *)(6 *
-//     sizeof(float))); glEnableVertexAttribArray(2);
-
-//     glBindBuffer(GL_ARRAY_BUFFER, 0);
-//     glBindVertexArray(0);
-// }
+    // Top face (+Y)
+    22, 21, 20, 23, 22, 20};
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, const glm::mat4& localModel)
     : vertexCount(vertices.size()), indexCount(indices.size()), localModel(localModel)
@@ -105,6 +88,12 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, cons
     // vertex texture coords
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
+    // vertex tangents
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
+    // vertex bitangents
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, bitangent));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);

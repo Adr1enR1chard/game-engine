@@ -1,16 +1,15 @@
 #include <engine/Texture.hpp>
 
 #include <glad/glad.h>
-#include <stb_image/stb_image.h>
 #include <iostream>
+#include <stb_image/stb_image.h>
 
-Texture::Texture(const char *imagePath)
+Texture::Texture(const char* imagePath)
 {
     int width, height, nrChannels;
 
-    unsigned char *data = stbi_load(imagePath, &width, &height, &nrChannels, 0);
-    if (data)
-    {
+    unsigned char* data = stbi_load(imagePath, &width, &height, &nrChannels, 0);
+    if (data) {
         glGenTextures(1, &ID);
         glBindTexture(GL_TEXTURE_2D, ID);
 
@@ -20,31 +19,22 @@ Texture::Texture(const char *imagePath)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        GLenum format = GL_RGB;
+        GLenum format         = GL_RGB;
         GLenum internalFormat = GL_RGB8;
 
-        if (nrChannels == 1)
-        {
-            format = GL_RED;
+        if (nrChannels == 1) {
+            format         = GL_RED;
             internalFormat = GL_R8;
-        }
-        else if (nrChannels == 2)
-        {
-            format = GL_RG;
+        } else if (nrChannels == 2) {
+            format         = GL_RG;
             internalFormat = GL_RG8;
-        }
-        else if (nrChannels == 3)
-        {
-            format = GL_RGB;
+        } else if (nrChannels == 3) {
+            format         = GL_RGB;
             internalFormat = GL_RGB8;
-        }
-        else if (nrChannels == 4)
-        {
-            format = GL_RGBA;
+        } else if (nrChannels == 4) {
+            format         = GL_RGBA;
             internalFormat = GL_RGBA8;
-        }
-        else
-        {
+        } else {
             std::cout << "Unexpected channel count (" << nrChannels << ") for " << imagePath << "\n";
             stbi_image_free(data);
             return;
@@ -53,9 +43,7 @@ Texture::Texture(const char *imagePath)
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);
-    }
-    else
-    {
+    } else {
         std::cout << "TextureHandle: Failed to load texture at path: " << imagePath << std::endl;
     }
     stbi_image_free(data);
@@ -79,6 +67,26 @@ Texture Texture::White()
     glBindTexture(GL_TEXTURE_2D, 0);
 
     return Texture(whiteTextureID);
+}
+
+Texture Texture::DefaultNormalMap()
+{
+    unsigned int normalTextureID;
+    glGenTextures(1, &normalTextureID);
+    glBindTexture(GL_TEXTURE_2D, normalTextureID);
+
+    unsigned char normalPixel[4] = {128, 128, 255, 255};
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, normalPixel);
+
+    // default texture wrapping and filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    return Texture(normalTextureID);
 }
 
 void Texture::filteringParameters(unsigned int minFilter, unsigned int magFilter) const

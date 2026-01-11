@@ -3,22 +3,23 @@
 
 class Texture
 {
-public:
+  public:
     unsigned int ID;
-    Texture(const char *imagePath);
-    Texture() = default;
+    Texture(const char* imagePath);
+    Texture()  = default;
     ~Texture() = default;
 
     static Texture White();
+    static Texture DefaultNormalMap();
 
     void filteringParameters(unsigned int minFilter, unsigned int magFilter) const;
 
-private:
+  private:
     void bind() const;
 
     friend class Material;
 
-private:
+  private:
     Texture(unsigned int ID) : ID(ID) {};
 };
 

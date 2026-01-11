@@ -18,6 +18,7 @@ MaterialInstance MaterialInstance::Default(const DefaultMaterialParameters& para
     material.setTexture("material.metallicMap", params.metallicMap);
     material.setTexture("material.roughnessMap", params.roughnessMap);
     material.setTexture("material.aoMap", params.aoMap);
+    material.setTexture("material.normalMap", params.normalMap);
 
     return material;
 }

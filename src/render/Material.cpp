@@ -13,10 +13,13 @@ constexpr const char* kDefaultVertexShader = R"(
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aUV;
+layout (location = 3) in vec3 aTangent;
+layout (location = 4) in vec3 aBitangent;
 
 out vec2 vUV;
-out vec3 vNormal;
 out vec3 vWorldPos;
+out vec3 vWorldNormal;
+out mat3 vTBN;
 
 // ------ WORLD UNIFORMS ------
 // -- Set in the RenderSystem -
@@ -28,10 +31,17 @@ uniform mat4 projection;
 void main()
 {
     vUV = aUV;
-    vNormal = mat3(transpose(inverse(model))) * aNormal;
     vWorldPos = vec3(model * vec4(aPos, 1.0));
-    
+    vWorldNormal = normalize(mat3(transpose(inverse(model))) * aNormal);
     gl_Position = projection * view * model * vec4(aPos, 1.0);
+
+    
+    vec3 T = normalize(vec3(model * vec4(aTangent, 0.0)));
+    vec3 N = normalize(vec3(model * vec4(aNormal, 0.0)));
+    T = normalize(T - dot(T, N) * N);
+    vec3 B = cross(N, T);
+
+    vTBN = mat3(T, B, N);
 }
 )";
 
@@ -59,13 +69,15 @@ struct Material {
     sampler2D metallicMap;
     sampler2D roughnessMap;
     sampler2D aoMap;
+    sampler2D normalMap;
 };
 
 out vec4 FragColor;
 
 in vec2 vUV;
-in vec3 vNormal;
 in vec3 vWorldPos;
+in vec3 vWorldNormal;
+in mat3 vTBN;
 
 // ------ MATERIAL UNIFORMS -------
 // --- Require defaults value per -
@@ -126,7 +138,7 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 vec3 CalcDirLight(DirLight light, vec3 N, vec3 V, vec3 albedo, float metallic, float roughness, float ao)
 {
     vec3 L = normalize(-light.direction);
-    vec3 H = normalize(N + L);
+    vec3 H = normalize(V + L);
 
     vec3 radiance = light.color * light.intensity;
     
@@ -177,7 +189,8 @@ vec3 CalcPointLight(PointLight light, vec3 N, vec3 worldPos, vec3 V, vec3 albedo
 
 void main()
 {
-    vec3 N = normalize(vNormal);
+    vec3 N = texture(material.normalMap, vUV).rgb;
+    N = normalize(vTBN * (N * 2.0 - 1.0));
     vec3 V = normalize(viewPos - vWorldPos);
 
     vec3 albedo     = pow(texture(material.albedoMap, vUV).rgb * material.albedo, vec3(2.2));
@@ -273,6 +286,10 @@ std::shared_ptr<Material> Material::FromSource(const char* vertexSource, const c
         glGetProgramInfoLog(ID, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
 
     // delete the shaders as they're linked into our program now and no longer necessary
     glDeleteShader(vertex);

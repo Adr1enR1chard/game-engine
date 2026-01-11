@@ -19,6 +19,7 @@ struct DefaultMaterialParameters {
     Texture   metallicMap  = Texture::White();
     Texture   roughnessMap = Texture::White();
     Texture   aoMap        = Texture::White();
+    Texture   normalMap    = Texture::DefaultNormalMap();
 };
 
 class MaterialInstance

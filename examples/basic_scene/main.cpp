@@ -1,8 +1,5 @@
 #include <engine/Core.hpp>
 
-struct CBackpack {
-};
-
 class MovingPointLightSystem : public System
 {
   public:
@@ -15,11 +12,6 @@ class MovingPointLightSystem : public System
             transform->position = pos;
         }
         timeAccumulator += static_cast<float>(deltaTime);
-
-        // const auto& [entity, backpack, transform] = world.getAt<CBackpack, CTransform>(0);
-        // if (entity) {
-        //     transform->rotation.y += 50.0f * static_cast<float>(deltaTime);
-        // }
     }
 
   private:
@@ -38,12 +30,28 @@ class StartupSystem : public System
                                        .ambient   = 0.2f,
                                        .intensity = 0.0f});
 
-        world.create(CPointLight{.color = glm::vec3(1.0f, 0.2f, 0.2f), .intensity = 100.0f},
+        world.create(CPointLight{.color = glm::vec3(1.0f, 1.0f, 1.0f), .intensity = 500.0f},
                      CTransform{.position = glm::vec3(-2.0f, 2.0f, -2.0f), .scale = glm::vec3(0.2f)},
                      CMeshRenderer{
                          .mesh     = Mesh::Cube(),
-                         .material = MaterialInstance::Default(),
+                         .material = MaterialInstance::Default({
+                             .albedo    = glm::vec3(1.0f, 1.0f, 1.0f),
+                             .metallic  = 0.0f,
+                             .roughness = 1.0f,
+                         }),
                      });
+
+        world.create(
+            CMeshRenderer{
+                .mesh     = Mesh::Cube(),
+                .material = MaterialInstance::Default({.metallic     = 0.0f,
+                                                       .ao           = 0.1f,
+                                                       .albedoMap    = Texture("assets/textures/wall/diffuse.png"),
+                                                       .roughnessMap = Texture("assets/textures/wall/roughness.png"),
+                                                       .aoMap        = Texture("assets/textures/wall/ao.png"),
+                                                       .normalMap    = Texture("assets/textures/wall/normal.png")}),
+            },
+            CTransform{.position = glm::vec3(0.0f, 0.0f, -10.0f), .scale = glm::vec3(20.0f, 20.0f, 1.0f)});
 
         world.create(CTransform{.position = glm::vec3(0.0f, 0, -6.0f), .scale = glm::vec3(0.01f)},
                      CModelRenderer{
@@ -53,9 +61,9 @@ class StartupSystem : public System
                              .albedoMap    = Texture("assets/textures/backpack/albedo.jpeg"),
                              .metallicMap  = Texture("assets/textures/backpack/metallic.png"),
                              .roughnessMap = Texture("assets/textures/backpack/roughness.png"),
+                             .normalMap    = Texture("assets/textures/backpack/normal.png"),
                          })},
-                     },
-                     CBackpack{});
+                     });
     }
 };
 
