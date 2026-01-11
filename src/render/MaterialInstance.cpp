@@ -10,10 +10,14 @@ MaterialInstance MaterialInstance::Default(const DefaultMaterialParameters& para
 {
     MaterialInstance material = MaterialInstance(Material::Default());
 
-    // Set default uniforms
-    material.setUniform("albedo", params.albedo);
-    material.setUniform("shininess", params.shininess);
-    material.setTexture("albedoMap", params.albedoMap);
+    material.setUniform("material.albedo", params.albedo);
+    material.setUniform("material.metallic", params.metallic);
+    material.setUniform("material.roughness", params.roughness);
+    material.setUniform("material.ao", params.ao);
+    material.setTexture("material.albedoMap", params.albedoMap);
+    material.setTexture("material.metallicMap", params.metallicMap);
+    material.setTexture("material.roughnessMap", params.roughnessMap);
+    material.setTexture("material.aoMap", params.aoMap);
 
     return material;
 }
@@ -38,12 +42,10 @@ MaterialInstance& MaterialInstance::setUniform(const std::string& name, const Un
                 setUniform(name + ".direction", v.direction);
                 setUniform(name + ".color", v.color);
                 setUniform(name + ".intensity", v.intensity);
-                setUniform(name + ".ambient", v.ambient);
             } else if constexpr (std::is_same_v<T, UPointLight>) {
                 setUniform(name + ".position", v.position);
                 setUniform(name + ".color", v.color);
                 setUniform(name + ".intensity", v.intensity);
-                setUniform(name + ".radius", v.radius);
             } else {
                 uint32_t location = glGetUniformLocation(m_material->ID, name.c_str());
                 if (location != static_cast<uint32_t>(-1)) {

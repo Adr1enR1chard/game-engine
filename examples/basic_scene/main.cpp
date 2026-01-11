@@ -16,10 +16,10 @@ class MovingPointLightSystem : public System
         }
         timeAccumulator += static_cast<float>(deltaTime);
 
-        const auto& [entity, backpack, transform] = world.getAt<CBackpack, CTransform>(0);
-        if (entity) {
-            transform->rotation.y += 50.0f * static_cast<float>(deltaTime);
-        }
+        // const auto& [entity, backpack, transform] = world.getAt<CBackpack, CTransform>(0);
+        // if (entity) {
+        //     transform->rotation.y += 50.0f * static_cast<float>(deltaTime);
+        // }
     }
 
   private:
@@ -36,9 +36,9 @@ class StartupSystem : public System
         world.create(CDirectionalLight{.direction = glm::vec3(-0.2f, -1.0f, -0.3f),
                                        .color     = glm::vec3(1.0f, 1.0f, 1.0f),
                                        .ambient   = 0.2f,
-                                       .intensity = 0.6f});
+                                       .intensity = 0.0f});
 
-        world.create(CPointLight{.color = glm::vec3(1.0f, 0.5f, 0.5f), .intensity = 5.0f, .radius = 1.0f},
+        world.create(CPointLight{.color = glm::vec3(1.0f, 0.2f, 0.2f), .intensity = 100.0f},
                      CTransform{.position = glm::vec3(-2.0f, 2.0f, -2.0f), .scale = glm::vec3(0.2f)},
                      CMeshRenderer{
                          .mesh     = Mesh::Cube(),
@@ -49,7 +49,10 @@ class StartupSystem : public System
                      CModelRenderer{
                          .model             = Model("assets/models/backpack.gltf"),
                          .materialOverrides = std::vector<MaterialInstance>{MaterialInstance::Default({
-                             .albedoMap = Texture("assets/textures/backpack/baseColor.jpeg"),
+                             .ao           = 0.0f,
+                             .albedoMap    = Texture("assets/textures/backpack/albedo.jpeg"),
+                             .metallicMap  = Texture("assets/textures/backpack/metallic.png"),
+                             .roughnessMap = Texture("assets/textures/backpack/roughness.png"),
                          })},
                      },
                      CBackpack{});

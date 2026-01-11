@@ -11,9 +11,14 @@
 class Material;
 
 struct DefaultMaterialParameters {
-    Texture   albedoMap = Texture::White();
-    glm::vec3 albedo    = glm::vec3(1.0f, 1.0f, 1.0f);
-    float     shininess = 32.0f;
+    glm::vec3 albedo       = glm::vec3(1.0f);
+    float     metallic     = 1.0f;
+    float     roughness    = 1.0f;
+    float     ao           = 1.0f;
+    Texture   albedoMap    = Texture::White();
+    Texture   metallicMap  = Texture::White();
+    Texture   roughnessMap = Texture::White();
+    Texture   aoMap        = Texture::White();
 };
 
 class MaterialInstance

@@ -28,7 +28,6 @@ void LightSystem::update(World& world, double /*deltaTime*/)
                                                         cDirLight->direction, // direction
                                                         cDirLight->color,     // color
                                                         cDirLight->intensity, // intensity
-                                                        cDirLight->ambient    // ambient
                                                     });
         }
 
@@ -41,7 +40,6 @@ void LightSystem::update(World& world, double /*deltaTime*/)
                                                       cPointLightTransform->position, // position
                                                       cPointLight->color,             // color
                                                       cPointLight->intensity,         // intensity
-                                                      cPointLight->radius             // radius
                                                   });
         }
     }

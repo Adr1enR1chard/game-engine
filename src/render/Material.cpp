@@ -16,7 +16,7 @@ layout (location = 2) in vec2 aUV;
 
 out vec2 vUV;
 out vec3 vNormal;
-out vec3 vFragPos;
+out vec3 vWorldPos;
 
 // ------ WORLD UNIFORMS ------
 // -- Set in the RenderSystem -
@@ -29,7 +29,7 @@ void main()
 {
     vUV = aUV;
     vNormal = mat3(transpose(inverse(model))) * aNormal;
-    vFragPos = vec3(model * vec4(aPos, 1.0));
+    vWorldPos = vec3(model * vec4(aPos, 1.0));
     
     gl_Position = projection * view * model * vec4(aPos, 1.0);
 }
@@ -39,68 +39,37 @@ constexpr const char* kDefaultFragmentShader = R"(
 #version 330 core
 
 struct DirLight {
-    vec3 direction; 
+    vec3 direction;
     vec3 color;
-    float ambient;
     float intensity;
-};
+};  
 
-struct PointLight {
+struct PointLight {    
     vec3 position;
     vec3 color;
     float intensity;
-    float radius;
+}; 
+
+struct Material {
+    vec3 albedo;
+    float metallic;
+    float roughness;
+    float ao;
+    sampler2D albedoMap;
+    sampler2D metallicMap;
+    sampler2D roughnessMap;
+    sampler2D aoMap;
 };
-
-vec3 shadeDirLight(DirLight light, vec3 worldPos, vec3 N, vec3 viewPos, float shininess)
-{
-    vec3 V = normalize(viewPos - worldPos);
-
-    vec3 L = normalize(-light.direction);
-
-    float NdotL = max(dot(N, L), 0.0);
-
-    vec3 R = reflect(-L, N);
-    float spec = pow(max(dot(R, V), 0.0), shininess);
-
-    vec3 diffuse  = light.color * NdotL;
-    vec3 specular = light.color * spec;
-    vec3 ambient  = light.color * light.ambient;
-
-    return ambient + (diffuse + specular) * light.intensity;
-}
-
-vec3 shadePointLight(PointLight light, vec3 worldPos, vec3 N, vec3 viewPos, float shininess)
-{
-    vec3 V = normalize(viewPos - worldPos);
-
-    vec3 L = normalize(light.position - worldPos);
-    float distance = length(light.position - worldPos);
-    float attenuation = 1.0 / (1.0 + (distance / light.radius) * (distance / light.radius));
-
-    float NdotL = max(dot(N, L), 0.0);
-
-    vec3 R = reflect(-L, N);
-    float spec = pow(max(dot(R, V), 0.0), shininess);
-
-    vec3 diffuse  = light.color * NdotL;
-    vec3 specular = light.color * spec;
-
-    return (diffuse + specular) * light.intensity * attenuation;
-}
 
 out vec4 FragColor;
 
 in vec2 vUV;
 in vec3 vNormal;
-in vec3 vFragPos;
+in vec3 vWorldPos;
 
 // ------ MATERIAL UNIFORMS -------
 // --- Require defaults value per -
-// --------  material -------------
-uniform sampler2D albedoMap;
-uniform vec3 albedo = vec3(1.0, 1.0, 1.0);
-uniform float shininess = 12.0;
+uniform Material material;
 // -------------------------------
 
 // ------ LIGHT UNIFORMS ------
@@ -112,18 +81,122 @@ uniform int pointLightCount;
 // ------ WORLD UNIFORM ------
 uniform vec3 viewPos; // Set in the LightSystem
 // ----------------------------
+const float PI = 3.14159265359;
+
+vec3 fresnelSchlick(float cosTheta, vec3 F0)
+{
+    return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+} 
+    
+float DistributionGGX(vec3 N, vec3 H, float roughness)
+{
+    float a      = roughness*roughness;
+    float a2     = a*a;
+    float NdotH  = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH*NdotH;
+	
+    float num   = a2;
+    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom = PI * denom * denom;
+	
+    return num / denom;
+}
+
+float GeometrySchlickGGX(float NdotV, float roughness)
+{
+    float r = (roughness + 1.0);
+    float k = (r*r) / 8.0;
+
+    float num   = NdotV;
+    float denom = NdotV * (1.0 - k) + k;
+	
+    return num / denom;
+}
+
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
+{
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    float ggx2  = GeometrySchlickGGX(NdotV, roughness);
+    float ggx1  = GeometrySchlickGGX(NdotL, roughness);
+	
+    return ggx1 * ggx2;
+}
+
+vec3 CalcDirLight(DirLight light, vec3 N, vec3 V, vec3 albedo, float metallic, float roughness, float ao)
+{
+    vec3 L = normalize(-light.direction);
+    vec3 H = normalize(N + L);
+
+    vec3 radiance = light.color * light.intensity;
+    
+    vec3 F0 = vec3(0.04); 
+    F0      = mix(F0, albedo, metallic);
+    vec3 F  = fresnelSchlick(max(dot(H, V), 0.0), F0);
+
+    float NDF = DistributionGGX(N, H, roughness);       
+    float G   = GeometrySmith(N, V, L, roughness);  
+    vec3 numerator    = NDF * G * F;
+    float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0)  + 0.0001;
+    vec3 specular     = numerator / denominator; 
+    vec3 kS = F;
+    vec3 kD = vec3(1.0) - kS;
+    
+    kD *= 1.0 - metallic;
+  
+    float NdotL = max(dot(N, L), 0.0);        
+    return (kD * albedo / PI + specular) * radiance * NdotL;
+}
+
+vec3 CalcPointLight(PointLight light, vec3 N, vec3 worldPos, vec3 V, vec3 albedo, float metallic, float roughness, float ao)
+{
+    vec3 L = normalize(light.position - worldPos);
+    vec3 H = normalize(V + L);
+
+    float distance    = length(light.position - worldPos);
+    float attenuation = 1.0 / (distance * distance);
+    vec3 radiance    = light.color * light.intensity * attenuation;
+    
+    vec3 F0 = vec3(0.04); 
+    F0      = mix(F0, albedo, metallic);
+    vec3 F  = fresnelSchlick(max(dot(H, V), 0.0), F0);
+
+    float NDF = DistributionGGX(N, H, roughness);       
+    float G   = GeometrySmith(N, V, L, roughness);  
+    vec3 numerator    = NDF * G * F;
+    float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0)  + 0.0001;
+    vec3 specular     = numerator / denominator; 
+    vec3 kS = F;
+    vec3 kD = vec3(1.0) - kS;
+    
+    kD *= 1.0 - metallic;
+
+    float NdotL = max(dot(N, L), 0.0);        
+    return (kD * albedo / PI + specular) * radiance * NdotL;
+} 
 
 void main()
 {
-    vec3 norm = normalize(vNormal);
-    vec3 albedoColor = texture(albedoMap, vUV).rgb * albedo;
-    vec3 lighting = shadeDirLight(dirLight, vFragPos, norm, viewPos, shininess);
+    vec3 N = normalize(vNormal);
+    vec3 V = normalize(viewPos - vWorldPos);
 
+    vec3 albedo     = pow(texture(material.albedoMap, vUV).rgb * material.albedo, vec3(2.2));
+    float metallic  = texture(material.metallicMap, vUV).r * material.metallic;
+    float roughness = texture(material.roughnessMap, vUV).r * material.roughness;
+    float ao        = texture(material.aoMap, vUV).r * material.ao;
+    
+    vec3 Lo = CalcDirLight(dirLight, N, V, albedo, metallic, roughness, ao);
     for (int i = 0; i < pointLightCount; ++i) {
-        lighting += shadePointLight(pointLights[i], vFragPos, norm, viewPos, shininess);
+        Lo += CalcPointLight(pointLights[i], N, vWorldPos, V, albedo, metallic, roughness, ao);
     }
 
-    FragColor = vec4(lighting * albedoColor, 1.0);
+    vec3 ambient = vec3(0.03) * material.albedo * material.ao;
+    vec3 color   = ambient + Lo;  
+    
+    color = color / (color + vec3(1.0));
+    color = pow(color, vec3(1.0/2.2)); 
+
+    FragColor = vec4(color, 1.0);
 }
 )";
 

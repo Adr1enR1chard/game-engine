@@ -16,16 +16,14 @@ concept ServiceType = std::derived_from<T, Service>;
 
 struct UDirectionalLight {
     glm::vec3 direction;
-    glm::vec3 color;
-    float     intensity;
-    float     ambient;
+    glm::vec3 color     = glm::vec3(1.0f);
+    float     intensity = 1.0f;
 };
 
 struct UPointLight {
     glm::vec3 position;
-    glm::vec3 color;
-    float     intensity;
-    float     radius;
+    glm::vec3 color     = glm::vec3(1.0f);
+    float     intensity = 1.0f;
 };
 
 using UniformValue =
