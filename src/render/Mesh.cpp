@@ -1,5 +1,7 @@
 #include <engine/Mesh.hpp>
 
+#include <engine/MaterialInstance.hpp>
+
 #include <glad/glad.h>
 #include <iostream>
 
@@ -44,9 +46,9 @@ const std::vector<Vertex> kCubeVertices = {
 };
 
 const std::vector<uint32_t> kCubeIndices = {
-    0, 1, 2, 2, 3, 0,       // Back
-    4, 5, 6, 6, 7, 4,       // Front
-    8, 9, 10, 10, 11, 8,    // Left
+    0,  1,  2,  2,  3,  0,  // Back
+    4,  5,  6,  6,  7,  4,  // Front
+    8,  9,  10, 10, 11, 8,  // Left
     12, 13, 14, 14, 15, 12, // Right
     16, 17, 18, 18, 19, 16, // Bottom
     20, 21, 22, 22, 23, 20  // Top
@@ -68,18 +70,19 @@ const std::vector<uint32_t> kCubeIndices = {
 //     glEnableVertexAttribArray(0);
 
 //     // Vertex normals
-//     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, kVertexAttributeCount * sizeof(float), (void *)(3 * sizeof(float)));
-//     glEnableVertexAttribArray(1);
+//     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, kVertexAttributeCount * sizeof(float), (void *)(3 *
+//     sizeof(float))); glEnableVertexAttribArray(1);
 
 //     // Vertex UVs coordinates
-//     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, kVertexAttributeCount * sizeof(float), (void *)(6 * sizeof(float)));
-//     glEnableVertexAttribArray(2);
+//     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, kVertexAttributeCount * sizeof(float), (void *)(6 *
+//     sizeof(float))); glEnableVertexAttribArray(2);
 
 //     glBindBuffer(GL_ARRAY_BUFFER, 0);
 //     glBindVertexArray(0);
 // }
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices) : vertexCount(vertices.size()), indexCount(indices.size())
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, const glm::mat4& localModel)
+    : vertexCount(vertices.size()), indexCount(indices.size()), localModel(localModel)
 {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -91,25 +94,26 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices) : ve
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
-                 indices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
     // vertex positions
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
     // vertex normals
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, normal));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
     // vertex texture coords
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, texCoords));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 
-void Mesh::Draw() const
+void Mesh::Draw(MaterialInstance& materialInstance, glm::mat4 modelMatrix) const
 {
+    materialInstance.link(modelMatrix * localModel);
+
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);

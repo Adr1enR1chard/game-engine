@@ -5,39 +5,54 @@
 #include <variant>
 #include <vector>
 
-#include <engine/Shader.hpp>
+#include <engine/Mesh.hpp>
 #include <engine/Texture.hpp>
+#include <glm/glm.hpp>
 
-using UniformValue = std::variant<int, float, glm::vec2, glm::vec3, glm::vec4, glm::mat4>;
-
-struct UniformWrapper {
-    uint32_t     location;
-    UniformValue value;
+struct UDirectionalLight {
+    glm::vec3 direction;
+    glm::vec3 color;
+    float     intensity;
+    float     ambient;
 };
 
-class Material : public std::enable_shared_from_this<Material>
+struct UPointLight {
+    glm::vec3 position;
+    glm::vec3 color;
+    float     intensity;
+    float     radius;
+};
+
+using UniformValue =
+    std::variant<int, float, glm::vec2, glm::vec3, glm::vec4, glm::mat4, UDirectionalLight, UPointLight>;
+
+class Material
 {
   public:
-    Material(Shader shader) : shaderProgram(shader) {};
-    Material() : shaderProgram(Shader::Default()) {};
-    ~Material() = default;
     static std::shared_ptr<Material> Default();
 
-    std::shared_ptr<Material> setTexture(std::string name, const Texture& texture);
-    std::shared_ptr<Material> setUniform(const std::string& name, const UniformValue& value);
+  public:
+    Material(unsigned int id) : ID(id) {};
+    ~Material();
+
+    void use(std::unordered_map<uint32_t, UniformValue>* uniforms, std::unordered_map<std::string, Texture>* textures,
+             glm::mat4 viewMatrix, glm::mat4 projectionMatrix) const;
+
+    void setDirectionalLight(const glm::vec3& direction, const glm::vec3& color, float intensity, float ambient) const;
+    bool setBool(const std::string& name, bool value) const;
+    bool setInt(const std::string& name, int value) const;
+    bool setFloat(const std::string& name, float value) const;
+    bool setMat4(const std::string& name, const glm::mat4 mat) const;
+    bool setVec3(const std::string& name, const glm::vec3& value) const;
 
   private:
-    void applyUniforms();
-    void bindTextures() const;
+    static std::shared_ptr<Material> FromFiles(const char* vertexPath, const char* fragmentPath);
+    static std::shared_ptr<Material> FromSource(const char* vertexSource, const char* fragmentSource);
 
-    Shader& setShader(const Shader& shaderHandle);
-    Shader& getShader();
+    void checkCompileErrors(unsigned int shader, std::string type);
 
-    friend class RenderSystem;
-    friend class LightSystem;
+    static std::shared_ptr<Material> m_defaultMaterial;
 
-  private:
-    std::unordered_map<std::string, Texture>   textureMap;
-    Shader                                     shaderProgram;
-    std::unordered_map<uint32_t, UniformValue> uniforms;
+  public:
+    unsigned int ID;
 };

@@ -5,8 +5,7 @@
 #include <glm/glm.hpp>
 #include <string>
 
-struct Vertex
-{
+struct Vertex {
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec2 texCoords;
@@ -14,42 +13,47 @@ struct Vertex
 
 class Mesh
 {
-public:
-    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
+  public:
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices,
+         const glm::mat4& localModel = glm::mat4(1.0f));
 
-    Mesh(const Mesh &) = delete;
-    Mesh &operator=(const Mesh &) = delete;
+    Mesh(const Mesh&)            = delete;
+    Mesh& operator=(const Mesh&) = delete;
 
-    Mesh(Mesh &&other) noexcept
+    Mesh(Mesh&& other) noexcept
     {
-        VAO = other.VAO;
-        VBO = other.VBO;
-        EBO = other.EBO;
+        VAO         = other.VAO;
+        VBO         = other.VBO;
+        EBO         = other.EBO;
         vertexCount = other.vertexCount;
-        indexCount = other.indexCount;
+        indexCount  = other.indexCount;
     }
 
-    void Draw() const;
+    void Draw(class MaterialInstance& materialInstance, glm::mat4 modelMatrix) const;
 
-public:
+  public:
     static std::shared_ptr<Mesh> Cube();
 
     ~Mesh();
 
-    unsigned int getVertexCount() const { return vertexCount; }
-    unsigned int getIndexCount() const { return indexCount; }
+    unsigned int getVertexCount() const
+    {
+        return vertexCount;
+    }
+    unsigned int getIndexCount() const
+    {
+        return indexCount;
+    }
 
-public:
+  private:
     glm::mat4 localModel = glm::mat4(1.0f);
 
-private:
     unsigned int vertexCount;
     unsigned int indexCount;
 
-private:
+  private:
+    friend class RenderSystem;
     unsigned int VAO;
     unsigned int VBO;
     unsigned int EBO;
-
-    friend class RenderSystem;
 };

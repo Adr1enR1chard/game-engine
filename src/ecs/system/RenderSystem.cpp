@@ -22,16 +22,24 @@ void RenderSystem::update(World& world, double /*deltaTime*/)
         return;
 
     for (const auto& [entity, meshRenderer, transform] : world.get<CMeshRenderer, CTransformCache>()) {
-        auto& model    = meshRenderer->model;
-        auto& material = meshRenderer->material;
+        auto& mesh             = meshRenderer->mesh;
+        auto& materialInstance = meshRenderer->material;
 
-        material->setUniform("view", cameraTransform->viewMatrix);
-        material->setUniform("projection", cameraCache->projectionMatrix);
-        material->setUniform("model", transform->modelMatrix);
-        material->applyUniforms();
+        materialInstance.setup(cameraTransform->viewMatrix, cameraCache->projectionMatrix);
 
-        material->bindTextures();
+        mesh->Draw(materialInstance, transform->modelMatrix);
+    }
 
-        model.Draw(material->getShader(), transform->modelMatrix);
+    for (const auto& [entity, modelRenderer, transform] : world.get<CModelRenderer, CTransformCache>()) {
+        auto& model            = modelRenderer->model;
+        auto& materialInstance = modelRenderer->materialOverrides;
+
+        if (!materialInstance.empty()) {
+            materialInstance[0].setup(cameraTransform->viewMatrix, cameraCache->projectionMatrix);
+
+            model.Draw(
+                materialInstance[0],
+                transform->modelMatrix); // TODO: single material for now, must be handled inside model class late
+        }
     }
 }

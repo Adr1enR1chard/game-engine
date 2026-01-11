@@ -36,9 +36,8 @@ class StartupSystem : public System
         world.create(CDirectionalLight{.direction = glm::vec3(-0.2f, -1.0f, -0.3f),
                                        .color     = glm::vec3(1.0f, 1.0f, 1.0f),
                                        .ambient   = 0.2f,
-                                       .intensity = 0.7f});
+                                       .intensity = 0.6f});
 
-        // TODO: Fix Mesh rendering. Actually only models are rendered properly.
         world.create(CPointLight{.color = glm::vec3(1.0f, 0.5f, 0.5f), .intensity = 5.0f, .radius = 1.0f},
                      CTransform{.position = glm::vec3(-2.0f, 2.0f, -2.0f), .scale = glm::vec3(0.2f)},
                      CMeshRenderer{
@@ -47,10 +46,11 @@ class StartupSystem : public System
                      });
 
         world.create(CTransform{.position = glm::vec3(0.0f, 0, -6.0f), .scale = glm::vec3(0.01f)},
-                     CMeshRenderer{
-                         .material = Material::Default()->setTexture(
-                             "albedoMap", Texture("assets/textures/backpack/baseColor.jpeg")),
-                         .model = Model("assets/models/backpack.gltf"),
+                     CModelRenderer{
+                         .model             = Model("assets/models/backpack.gltf"),
+                         .materialOverrides = std::vector<MaterialInstance>{MaterialInstance::Default({
+                             .albedoMap = Texture("assets/textures/backpack/baseColor.jpeg"),
+                         })},
                      },
                      CBackpack{});
     }

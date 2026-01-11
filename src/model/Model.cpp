@@ -1,9 +1,10 @@
 #include <engine/Model.hpp>
-#include <engine/Shader.hpp>
+
+#include <engine/MaterialInstance.hpp>
 
 #include <iostream>
 
-glm::mat4 AiMatrixToGlmMat4(const aiMatrix4x4 &from)
+glm::mat4 AiMatrixToGlmMat4(const aiMatrix4x4& from)
 {
     glm::mat4 to;
     to[0][0] = from.a1;
@@ -25,22 +26,27 @@ glm::mat4 AiMatrixToGlmMat4(const aiMatrix4x4 &from)
     return to;
 }
 
-void Model::Draw(Shader &shader, glm::mat4 modelMatrix) const
+void Model::Draw(MaterialInstance& materialInstance, glm::mat4 modelMatrix) const
 {
-    for (const auto &mesh : meshes)
-    {
-        shader.setMat4("model", modelMatrix * mesh->localModel);
-        mesh->Draw();
+    for (const auto& mesh : meshes) {
+        mesh->Draw(materialInstance, modelMatrix);
     }
 }
+
+// void Model::DrawWithExternalShader(Shader& shader, glm::mat4 modelMatrix) const
+// {
+//     for (const auto& mesh : meshes) {
+//         shader.setMat4("model", modelMatrix * mesh->localModel);
+//         mesh->Draw();
+//     }
+// }
 
 void Model::loadModel(std::string path)
 {
     Assimp::Importer import;
-    const aiScene *scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+    const aiScene*   scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-    {
+    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
         return;
     }
@@ -49,58 +55,52 @@ void Model::loadModel(std::string path)
     processNode(scene->mRootNode, scene);
 }
 
-void Model::processNode(aiNode *node, const aiScene *scene, const glm::mat4 &parentTransform)
+void Model::processNode(aiNode* node, const aiScene* scene, const glm::mat4& parentTransform)
 {
     glm::mat4 nodeTransform = parentTransform * AiMatrixToGlmMat4(node->mTransformation);
 
     // process all the node's meshes (if any)
-    for (unsigned int i = 0; i < node->mNumMeshes; i++)
-    {
-        aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-        auto processedMesh = processMesh(mesh, scene);
-        processedMesh->localModel = nodeTransform;
+    for (unsigned int i = 0; i < node->mNumMeshes; i++) {
+        aiMesh* mesh          = scene->mMeshes[node->mMeshes[i]];
+        auto    processedMesh = processMesh(mesh, scene, nodeTransform);
         meshes.push_back(processedMesh);
     }
     // then do the same for each of its children
-    for (unsigned int i = 0; i < node->mNumChildren; i++)
-    {
+    for (unsigned int i = 0; i < node->mNumChildren; i++) {
         processNode(node->mChildren[i], scene, nodeTransform);
     }
 }
 
-std::shared_ptr<Mesh> Model::processMesh(aiMesh *mesh, const aiScene * /*scene*/)
+std::shared_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* /*scene*/, const glm::mat4& nodeTransform)
 {
-    std::vector<Vertex> vertices;
+    std::vector<Vertex>       vertices;
     std::vector<unsigned int> indices;
-    std::vector<Texture> textures;
+    std::vector<Texture>      textures;
 
-    for (unsigned int i = 0; i < mesh->mNumVertices; i++)
-    {
-        Vertex vertex;
+    for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
+        Vertex    vertex;
         glm::vec3 vector;
-        vector.x = mesh->mVertices[i].x;
-        vector.y = mesh->mVertices[i].y;
-        vector.z = mesh->mVertices[i].z;
+        vector.x        = mesh->mVertices[i].x;
+        vector.y        = mesh->mVertices[i].y;
+        vector.z        = mesh->mVertices[i].z;
         vertex.position = vector;
-        vector.x = mesh->mNormals[i].x;
-        vector.y = mesh->mNormals[i].y;
-        vector.z = mesh->mNormals[i].z;
-        vertex.normal = vector;
+        vector.x        = mesh->mNormals[i].x;
+        vector.y        = mesh->mNormals[i].y;
+        vector.z        = mesh->mNormals[i].z;
+        vertex.normal   = vector;
         if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
         {
             glm::vec2 vec;
-            vec.x = mesh->mTextureCoords[0][i].x;
-            vec.y = mesh->mTextureCoords[0][i].y;
+            vec.x            = mesh->mTextureCoords[0][i].x;
+            vec.y            = mesh->mTextureCoords[0][i].y;
             vertex.texCoords = vec;
-        }
-        else
+        } else
             vertex.texCoords = glm::vec2(0.0f, 0.0f);
         // process vertex positions, normals and texture coordinates
         vertices.push_back(vertex);
     }
     // process indices
-    for (unsigned int i = 0; i < mesh->mNumFaces; i++)
-    {
+    for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
         aiFace face = mesh->mFaces[i];
         for (unsigned int j = 0; j < face.mNumIndices; j++)
             indices.push_back(face.mIndices[j]);
@@ -117,10 +117,10 @@ std::shared_ptr<Mesh> Model::processMesh(aiMesh *mesh, const aiScene * /*scene*/
     //     textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
     // }
 
-    return std::make_shared<Mesh>(vertices, indices);
+    return std::make_shared<Mesh>(vertices, indices, nodeTransform);
 }
 
-std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName)
+std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
 {
     mat;
     type;

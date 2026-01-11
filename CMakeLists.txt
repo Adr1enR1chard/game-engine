@@ -36,10 +36,10 @@ target_include_directories(engine_ecs PUBLIC
 # Library: Rendering
 add_library(engine_render
     src/render/Window.cpp
-    src/render/Shader.cpp
     src/render/Mesh.cpp
     src/render/Texture.cpp
     src/render/Material.cpp
+    src/render/MaterialInstance.cpp
 )
 target_include_directories(engine_render PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include

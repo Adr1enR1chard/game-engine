@@ -10,38 +10,39 @@
 void LightSystem::update(World& world, double /*deltaTime*/)
 {
 
-    const auto& [cameraEntity, cameraComponent, cameraTransform] = world.getAt<CCamera, CTransform>(0);
+    const auto& [eCamera, cCamera, cCameraTransform] = world.getAt<CCamera, CTransform>(0);
 
-    if (!cameraEntity)
+    if (!eCamera)
         return;
 
-    const auto& [dirLightEntity, dirLight] = world.getAt<CDirectionalLight>(0);
+    const auto& [eDirLight, cDirLight] = world.getAt<CDirectionalLight>(0);
 
     const auto& pointLights = world.get<CPointLight, CTransform>();
 
-    for (const auto& [entity, meshRenderer] : world.get<CMeshRenderer>()) {
-        auto& material = meshRenderer->material;
-        auto& shader   = material->getShader();
-        material->setUniform("viewPos", cameraTransform->position);
+    for (const auto& [eMeshRenderer, cMeshRenderer] : world.get<CMeshRenderer>()) {
+        auto& materialInstance = cMeshRenderer->material;
+        materialInstance.setUniform("viewPos", cCameraTransform->position);
 
-        if (dirLight) {
-            shader.setDirectionalLight(dirLight->direction, // direction
-                                       dirLight->color,     // color
-                                       dirLight->intensity, // intensity
-                                       dirLight->ambient    // ambient
-            );
+        if (cDirLight) {
+            materialInstance.setUniform("dirLight", UDirectionalLight{
+                                                        cDirLight->direction, // direction
+                                                        cDirLight->color,     // color
+                                                        cDirLight->intensity, // intensity
+                                                        cDirLight->ambient    // ambient
+                                                    });
         }
 
-        material->setUniform("pointLightCount", static_cast<int>(pointLights.size()));
+        materialInstance.setUniform("pointLightCount", static_cast<int>(pointLights.size()));
         int i = 0;
-        for (const auto& [lightEntity, pointLight, lightTransform] : pointLights) {
+        for (const auto& [ePointLight, cPointLight, cPointLightTransform] : pointLights) {
             std::string baseName = "pointLights[" + std::to_string(i) + "]";
 
-            material->setUniform(baseName + ".position", lightTransform->position);
-            material->setUniform(baseName + ".color", pointLight->color);
-            material->setUniform(baseName + ".intensity", pointLight->intensity);
-            material->setUniform(baseName + ".radius", pointLight->radius);
-            i++;
+            materialInstance.setUniform(baseName, UPointLight{
+                                                      cPointLightTransform->position, // position
+                                                      cPointLight->color,             // color
+                                                      cPointLight->intensity,         // intensity
+                                                      cPointLight->radius             // radius
+                                                  });
         }
     }
 }
