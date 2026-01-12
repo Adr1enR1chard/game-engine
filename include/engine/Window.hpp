@@ -14,7 +14,7 @@ class Window : public Service
     ~Window();
 
   private:
-    void init(int width, int height, const char* title);
+    void init(int width, int height, const char* title, bool fullscreen = false);
     bool shouldClose() const;
     void makeContextCurrent();
     void swapBuffers();

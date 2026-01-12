@@ -19,7 +19,7 @@ Window::~Window()
     glfwTerminate();
 }
 
-void Window::init(int width, int height, const char* title)
+void Window::init(int width, int height, const char* title, bool fullscreen)
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -32,7 +32,7 @@ void Window::init(int width, int height, const char* title)
 
     // glfw window creation
     // --------------------
-    GLFWwindow* window = glfwCreateWindow(width, height, title, NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(width, height, title, fullscreen ? glfwGetPrimaryMonitor() : NULL, NULL);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();

@@ -2,19 +2,26 @@
 #include <chrono>
 #include <thread>
 
+#include <engine/Bundle.hpp>
 #include <engine/Window.hpp>
 #include <engine/World.hpp>
 
 #include "ecs/system/SystemScheduler.hpp"
+#include "utils/types.hpp"
 
 class Engine
 {
   public:
-    Engine(int width, int height, const char* title)
+    Engine(int width, int height, const char* title, bool fullscreen = false)
     {
-        m_world.Serv<Window>().init(width, height, title);
+        m_world.Serv<Window>().init(width, height, title, fullscreen);
     }
-    ~Engine() = default;
+    ~Engine()
+    {
+        for (auto& bundle : m_bundles) {
+            delete bundle;
+        }
+    };
 
     void run()
     {
@@ -42,17 +49,30 @@ class Engine
         }
     }
 
-    World& world()
+    template <BundleType B> Engine& use()
     {
-        return m_world;
+        B* bundle = new B();
+        bundle->apply(m_systemScheduler);
+
+        m_bundles.push_back(std::move(bundle));
+
+        return *this;
     }
 
-    SystemScheduler& systems()
+    template <SystemType... T> Engine& add()
     {
-        return m_systemScheduler;
+        (m_systemScheduler.registerSystem<T>(), ...);
+        return *this;
+    }
+
+    template <SystemType... T> Engine& remove()
+    {
+        (m_systemScheduler.unregisterSystem<T>(), ...);
+        return *this;
     }
 
   private:
-    World           m_world;
-    SystemScheduler m_systemScheduler;
+    World                m_world;
+    SystemScheduler      m_systemScheduler;
+    std::vector<Bundle*> m_bundles;
 };

@@ -5,6 +5,7 @@
 
 #include <glm/glm.hpp>
 
+#include <engine/Bundle.hpp>
 #include <engine/Service.hpp>
 #include <engine/System.hpp>
 

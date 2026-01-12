@@ -8,14 +8,14 @@
 
 void SystemScheduler::startSystems(World& world)
 {
-    for (auto& [typeIndex, system] : m_startSystems) {
+    for (auto& [typeIndex, system] : m_systems) {
         system->start(world);
     }
 }
 
 void SystemScheduler::updateSystems(World& world, double deltaTime)
 {
-    for (auto& [typeIndex, system] : m_updateSystems) {
+    for (auto& [typeIndex, system] : m_systems) {
         system->update(world, deltaTime);
     }
 }
