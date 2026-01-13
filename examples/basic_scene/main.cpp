@@ -37,15 +37,60 @@ class BackPackSystem : public System
     }
 
   public:
-    void update(World& world, double /*deltaTime*/) override
+    void update(World& world, double deltaTime) override
     {
+        float dt = static_cast<float>(deltaTime);
         if (auto [entity, transform] = world.getFrom<CTransform>(backpackEntity); entity != 0) {
-            transform->rotation.y += 0.5f;
+            transform->rotation.y += 100.0f * dt;
         }
     }
 
   private:
     Entity backpackEntity;
+};
+
+class CameraControlSystem : public System
+{
+  public:
+    void update(World& world, double deltaTime) override
+    {
+        float dt = static_cast<float>(deltaTime);
+        if (auto [entity, cCam, transform] = world.getAt<CCamera, CTransform>(0); entity != 0) {
+            Input& input = world.Serv<Input>();
+            transform->rotation.y += -input.getMouseDelta().x * 0.1f;
+            transform->rotation.x += -input.getMouseDelta().y * 0.1f;
+
+            transform->rotation.x = glm::clamp(transform->rotation.x, -89.0f, 89.0f);
+
+            float yaw   = glm::radians(transform->rotation.y);
+            float pitch = glm::radians(transform->rotation.x);
+
+            glm::vec3 forward;
+            forward.x = -cos(pitch) * sin(yaw);
+            forward.y = sin(pitch);
+            forward.z = -cos(pitch) * cos(yaw);
+
+            forward = glm::normalize(forward);
+
+            glm::vec3 right = glm::normalize(glm::cross(forward, glm::vec3(0, 1, 0)));
+
+            glm::vec2 direction(0.0f);
+
+            if (input.isKeyDown(Key::A))
+                direction.x = -1;
+            if (input.isKeyDown(Key::D))
+                direction.x = 1;
+            if (input.isKeyDown(Key::W))
+                direction.y = 1;
+            if (input.isKeyDown(Key::S))
+                direction.y = -1;
+
+            float speed = 5.0f * dt;
+
+            transform->position += forward * direction.y * speed;
+            transform->position += right * direction.x * speed;
+        }
+    }
 };
 
 class StartupSystem : public System
@@ -87,9 +132,9 @@ class StartupSystem : public System
 
 int main()
 {
-    Engine engine(1920, 1080, "Game Engine");
+    Engine engine(800, 600, "Game Engine");
 
-    engine.use<DefaultBundle>().add<MovingPointLightSystem, StartupSystem, BackPackSystem>().run();
+    engine.use<DefaultBundle>().add<MovingPointLightSystem, StartupSystem, BackPackSystem, CameraControlSystem>().run();
 
     return 0;
 }

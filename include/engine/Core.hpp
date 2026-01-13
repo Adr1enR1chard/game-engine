@@ -1,7 +1,9 @@
 #pragma once
 
 #include <engine/Engine.hpp>
+#include <engine/Input.hpp>
 #include <engine/Model.hpp>
+#include <engine/Window.hpp>
 #include <engine/component/CCamera.hpp>
 #include <engine/component/CDirectionalLight.hpp>
 #include <engine/component/CMeshRenderer.hpp>

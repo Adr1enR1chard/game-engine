@@ -1,8 +1,12 @@
+#include <engine/Input.hpp>
 #include <engine/Window.hpp>
 
-#include <GLFW/glfw3.h>
 #include <glad/glad.h>
+
+#include <GLFW/glfw3.h>
 #include <iostream>
+
+#include "render/KeyMap.cpp"
 
 void Window::framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -48,7 +52,16 @@ void Window::init(int width, int height, const char* title, bool fullscreen)
         return;
     }
 
-    glfwSwapInterval(0); // Disable V-Sync
+    glfwSetKeyCallback(window, [](GLFWwindow* /*wnd*/, int key, int scancode, int action, int mods) {
+        Input::KeyCallback(GLFWKeyToEngineKey(key), GLFWKeyToEngineKey(scancode), GLFWActionToEngineAction(action),
+                           mods);
+    });
+    glfwSetCursorPosCallback(
+        window, [](GLFWwindow* /*wnd*/, double xpos, double ypos) { Input::MousePositionCallback(xpos, ypos); });
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    glfwSwapInterval(1); // Enable vsync
     glEnable(GL_DEPTH_TEST);
 
     this->m_window = window;

@@ -28,6 +28,8 @@ add_library(engine_ecs
     src/ecs/system/LightSystem.cpp
     src/ecs/World.cpp
     src/utils/Bundle.cpp
+    src/render/Engine.cpp
+    src/render/Input.cpp
 )
 target_include_directories(engine_ecs PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
