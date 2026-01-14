@@ -2,6 +2,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <engine/ServiceRegistry.hpp>
 #include <engine/World.hpp>
 
 #include <engine/Window.hpp>
@@ -13,7 +14,7 @@ glm::mat4 getProjectionMatrix(float fov, float aspectRatio, float nearPlane, flo
     return glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
 }
 
-void CameraSystem::update(World& world, double deltaTime)
+void CameraSystem::update(World& world, ServiceRegistry& services, double deltaTime)
 {
     for (const auto& [entity, cameraComponent] : world.get<CCamera>()) {
         if (!cameraComponent->isActive)
@@ -24,7 +25,7 @@ void CameraSystem::update(World& world, double deltaTime)
         }
 
         int width, height;
-        world.Serv<Window>().getSize(width, height);
+        services.get<Window>()->getSize(width, height);
 
         const auto& [_, cameraCache] = world.getFrom<CCameraCache>(entity);
         cameraCache->projectionMatrix =

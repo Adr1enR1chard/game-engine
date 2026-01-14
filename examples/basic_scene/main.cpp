@@ -3,7 +3,7 @@
 class MovingPointLightSystem : public System
 {
   public:
-    void update(World& world, double deltaTime) override
+    void update(World& world, ServiceRegistry& /*services*/, double deltaTime) override
     {
         for (const auto& [entity, transform, pointLight] : world.get<CTransform, CPointLight>()) {
             glm::vec3 pos       = transform->position;
@@ -21,7 +21,7 @@ class MovingPointLightSystem : public System
 class BackPackSystem : public System
 {
   public:
-    void start(World& world) override
+    void start(World& world, ServiceRegistry& /*services*/) override
     {
         backpackEntity = world.create(CTransform{.position = glm::vec3(0.0f, 0, -6.0f), .scale = glm::vec3(0.01f)},
                                       CModelRenderer{
@@ -37,7 +37,7 @@ class BackPackSystem : public System
     }
 
   public:
-    void update(World& world, double deltaTime) override
+    void update(World& world, ServiceRegistry& /*services*/, double deltaTime) override
     {
         float dt = static_cast<float>(deltaTime);
         if (auto [entity, transform] = world.getFrom<CTransform>(backpackEntity); entity != 0) {
@@ -52,13 +52,13 @@ class BackPackSystem : public System
 class CameraControlSystem : public System
 {
   public:
-    void update(World& world, double deltaTime) override
+    void update(World& world, ServiceRegistry& services, double deltaTime) override
     {
         float dt = static_cast<float>(deltaTime);
         if (auto [entity, cCam, transform] = world.getAt<CCamera, CTransform>(0); entity != 0) {
-            Input& input = world.Serv<Input>();
-            transform->rotation.y += -input.getMouseDelta().x * 0.1f;
-            transform->rotation.x += -input.getMouseDelta().y * 0.1f;
+            Input* input = services.get<Input>();
+            transform->rotation.y += -input->getMouseDelta().x * 0.1f;
+            transform->rotation.x += -input->getMouseDelta().y * 0.1f;
 
             transform->rotation.x = glm::clamp(transform->rotation.x, -89.0f, 89.0f);
 
@@ -76,13 +76,13 @@ class CameraControlSystem : public System
 
             glm::vec2 direction(0.0f);
 
-            if (input.isKeyDown(Key::A))
+            if (input->isKeyDown(Key::A))
                 direction.x = -1;
-            if (input.isKeyDown(Key::D))
+            if (input->isKeyDown(Key::D))
                 direction.x = 1;
-            if (input.isKeyDown(Key::W))
+            if (input->isKeyDown(Key::W))
                 direction.y = 1;
-            if (input.isKeyDown(Key::S))
+            if (input->isKeyDown(Key::S))
                 direction.y = -1;
 
             float speed = 5.0f * dt;
@@ -96,9 +96,9 @@ class CameraControlSystem : public System
 class StartupSystem : public System
 {
   public:
-    void start(World& world) override
+    void start(World& world, ServiceRegistry& services) override
     {
-        world.Serv<Window>().setClearColor(glm::vec3(0.1f, 0.1f, 0.1f));
+        services.get<Window>()->setClearColor(glm::vec3(0.1f, 0.1f, 0.1f));
         world.create(CCamera{}, CTransform{.position = glm::vec3(0.0f, 0.0f, 3.0f)});
         world.create(CDirectionalLight{.direction = glm::vec3(-0.2f, -1.0f, -0.3f),
                                        .color     = glm::vec3(1.0f, 1.0f, 1.0f),
@@ -132,9 +132,10 @@ class StartupSystem : public System
 
 int main()
 {
-    Engine engine(800, 600, "Game Engine");
-
-    engine.use<DefaultBundle>().add<MovingPointLightSystem, StartupSystem, BackPackSystem, CameraControlSystem>().run();
+    Engine engine = Engine();
+    engine.addBundle<DefaultBundle>();
+    engine.addSystems<MovingPointLightSystem, StartupSystem, BackPackSystem, CameraControlSystem>();
+    engine.run<Window>(1280, 720, "Basic Scene Example", false);
 
     return 0;
 }

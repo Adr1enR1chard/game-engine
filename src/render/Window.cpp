@@ -8,15 +8,19 @@
 
 #include "render/KeyMap.cpp"
 
-void Window::framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    if (width == 0 || height == 0)
-        return;
+struct Window::WindowImpl {
+    struct GLFWwindow* m_window;
 
-    glViewport(0, 0, width, height);
+    static void framebuffer_size_callback(GLFWwindow* /*window*/, int width, int height)
+    {
+        if (width == 0 || height == 0)
+            return;
 
-    window;
-}
+        glViewport(0, 0, width, height);
+    }
+};
+
+Window::Window() : m_impl(std::make_unique<WindowImpl>()) {}
 
 Window::~Window()
 {
@@ -43,7 +47,7 @@ void Window::init(int width, int height, const char* title, bool fullscreen)
         return;
     }
     glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetFramebufferSizeCallback(window, Window::WindowImpl::framebuffer_size_callback);
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -64,22 +68,22 @@ void Window::init(int width, int height, const char* title, bool fullscreen)
     glfwSwapInterval(1); // Enable vsync
     glEnable(GL_DEPTH_TEST);
 
-    this->m_window = window;
+    m_impl->m_window = window;
 }
 
 bool Window::shouldClose() const
 {
-    return glfwWindowShouldClose(this->m_window);
+    return glfwWindowShouldClose(m_impl->m_window);
 }
 
 void Window::makeContextCurrent()
 {
-    glfwMakeContextCurrent(this->m_window);
+    glfwMakeContextCurrent(m_impl->m_window);
 }
 
 void Window::swapBuffers()
 {
-    glfwSwapBuffers(this->m_window);
+    glfwSwapBuffers(m_impl->m_window);
 }
 
 void Window::pollEvents()
@@ -95,5 +99,5 @@ void Window::clear()
 
 void Window::getSize(int& width, int& height) const
 {
-    glfwGetFramebufferSize(this->m_window, &width, &height);
+    glfwGetFramebufferSize(m_impl->m_window, &width, &height);
 }

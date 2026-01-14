@@ -23,12 +23,10 @@ enable_testing()
 add_library(engine_ecs
     src/ecs/system/RenderSystem.cpp
     src/ecs/system/CameraSystem.cpp
-    src/ecs/system/SystemScheduler.cpp
     src/ecs/system/TransformSystem.cpp
     src/ecs/system/LightSystem.cpp
     src/ecs/World.cpp
     src/utils/Bundle.cpp
-    src/render/Engine.cpp
     src/render/Input.cpp
 )
 target_include_directories(engine_ecs PUBLIC

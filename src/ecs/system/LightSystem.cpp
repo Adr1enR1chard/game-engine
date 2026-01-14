@@ -7,7 +7,7 @@
 #include <engine/component/CPointLight.hpp>
 #include <engine/component/CTransform.hpp>
 
-void LightSystem::update(World& world, double /*deltaTime*/)
+void LightSystem::update(World& world, ServiceRegistry& /*services*/, double /*deltaTime*/)
 {
 
     const auto& [eCamera, cCamera, cCameraTransform] = world.getAt<CCamera, CTransform>(0);

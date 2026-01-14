@@ -14,7 +14,7 @@
 
 #include <engine/World.hpp>
 
-void RenderSystem::update(World& world, double /*deltaTime*/)
+void RenderSystem::render(World& world, ServiceRegistry& /*services*/, double /*deltaTime*/)
 {
     const auto& [cameraEntity, cameraCache, cameraTransform] = world.getAt<CCameraCache, CTransformCache>(0);
 

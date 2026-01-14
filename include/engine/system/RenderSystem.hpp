@@ -4,8 +4,11 @@
 
 #include <engine/System.hpp>
 
+class World;
+class ServiceRegistry;
+
 class RenderSystem : public System
 {
   public:
-    void update(World& engineContext, double deltaTime) override;
+    void render(World& world, ServiceRegistry& services, double deltaTime) override;
 };

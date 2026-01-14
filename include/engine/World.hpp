@@ -61,11 +61,6 @@ class World
      */
     template <typename... Cs> bool has(Entity entity) const;
 
-    /**
-     * Access a service instance. If the service does not exist, it will be created.
-     */
-    template <ServiceType T> T& Serv();
-
   private:
     Entity                                           allocateEntity();
     template <typename T> ComponentStorage<T>&       registry();
@@ -76,8 +71,7 @@ class World
     std::queue<int>     m_freeIndices;
     std::vector<Entity> m_entities;
 
-    std::unordered_map<std::type_index, std::any>                 m_components;
-    std::unordered_map<std::type_index, std::unique_ptr<Service>> m_services;
+    std::unordered_map<std::type_index, std::any> m_components;
 };
 
 template <typename... Cs> Entity World::create(Cs&&... components)
@@ -131,15 +125,6 @@ template <typename... Cs> bool World::has(Entity entity) const
                 return reg && reg->has(entity);
             }()) &&
             ...);
-}
-
-template <ServiceType T> T& World::Serv()
-{
-    auto it = m_services.find(std::type_index(typeid(T)));
-    if (it == m_services.end()) {
-        it = m_services.emplace(std::type_index(typeid(T)), std::make_unique<T>()).first;
-    }
-    return *static_cast<T*>(it->second.get());
 }
 
 template <typename T> ComponentStorage<T>& World::registry()

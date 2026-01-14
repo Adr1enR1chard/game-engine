@@ -29,7 +29,7 @@ glm::mat4 getViewMatrix(const glm::vec3& position, const glm::vec3& rotation)
     return view;
 }
 
-void TransformSystem::update(World& world, double /*deltaTime*/)
+void TransformSystem::update(World& world, ServiceRegistry& /*services*/, double /*deltaTime*/)
 {
     for (const auto& [entity, transform] : world.get<CTransform>()) {
         if (!world.has<CTransformCache>(entity)) {

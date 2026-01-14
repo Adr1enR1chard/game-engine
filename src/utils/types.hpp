@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 
 #include <engine/Bundle.hpp>
+#include <engine/IWindow.hpp>
 #include <engine/Service.hpp>
 #include <engine/System.hpp>
 
@@ -14,6 +15,9 @@ concept SystemType = std::derived_from<T, System>;
 
 template <typename T>
 concept ServiceType = std::derived_from<T, Service>;
+
+template <typename T>
+concept WindowType = std::derived_from<T, IWindow> && ServiceType<T>;
 
 struct UDirectionalLight {
     glm::vec3 direction;

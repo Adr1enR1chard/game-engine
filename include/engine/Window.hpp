@@ -1,27 +1,26 @@
 #pragma once
 
+#include <memory>
+
+#include "engine/IWindow.hpp"
 #include <glm/glm.hpp>
 
 #include "engine/Service.hpp"
 
-class Window : public Service
+class Window : public Service, public IWindow
 {
-  private:
-    static void framebuffer_size_callback(struct GLFWwindow* window, int width, int height);
-
   public:
-    Window() = default;
+    Window();
     ~Window();
 
-  private:
     void init(int width, int height, const char* title, bool fullscreen);
+
+  private:
     bool shouldClose() const;
     void makeContextCurrent();
     void swapBuffers();
     void pollEvents();
     void clear();
-
-    friend class Engine;
 
   public:
     void getSize(int& width, int& height) const;
@@ -31,6 +30,7 @@ class Window : public Service
     }
 
   private:
-    struct GLFWwindow* m_window;
-    glm::vec3          m_clearColor = glm::vec3(0.0f, 0.0f, 0.0f);
+    struct WindowImpl;
+    std::unique_ptr<WindowImpl> m_impl;
+    glm::vec3                   m_clearColor = glm::vec3(0.0f, 0.0f, 0.0f);
 };

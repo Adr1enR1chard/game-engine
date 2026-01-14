@@ -8,8 +8,9 @@ class SystemScheduler;
 class Bundle
 {
   public:
-    virtual ~Bundle()                                          = default;
-    virtual void apply(class SystemScheduler& scheduler) const = 0;
+    virtual ~Bundle()                               = default;
+    virtual void apply(class Engine& engine) const  = 0;
+    virtual void remove(class Engine& engine) const = 0;
 
   private:
     std::vector<std::type_index> m_systems;
@@ -18,7 +19,8 @@ class Bundle
 class DefaultBundle : public Bundle
 {
   public:
-    void apply(SystemScheduler& scheduler) const override;
+    void apply(class Engine& engine) const override;
+    void remove(class Engine& engine) const override;
 };
 
 #include <concepts>

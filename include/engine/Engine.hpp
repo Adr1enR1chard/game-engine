@@ -1,45 +1,141 @@
 #pragma once
 #include <chrono>
+#include <iostream>
 #include <thread>
+#include <typeindex>
+#include <unordered_map>
+#include <vector>
 
 #include <engine/Bundle.hpp>
+#include <engine/ServiceRegistry.hpp>
 #include <engine/World.hpp>
 
-#include "ecs/system/SystemScheduler.hpp"
+#include "IWindow.hpp"
 #include "utils/types.hpp"
+#include <engine/SystemRegistry.hpp>
 
 class Engine
 {
+
   public:
-    Engine(int width, int height, const char* title, bool fullscreen = false);
-    ~Engine();
+    Engine()  = default;
+    ~Engine() = default;
 
-    void run();
-
-    template <BundleType B> Engine& use()
+    /**
+     * Run the engine with the specified window service type.
+     */
+    template <WindowType T> void run(int width, int height, const char* title, bool fullscreen)
     {
-        B* bundle = new B();
-        bundle->apply(m_systemScheduler);
+        IWindow* window = tryWindow<T>();
+        if (!window) {
+            std::cerr
+                << "No window service found in the engine. Please add the window service before running the engine."
+                << std::endl;
+            return;
+        }
+
+        window->init(width, height, title, fullscreen);
+
+        using clock    = std::chrono::steady_clock;
+        auto lastFrame = clock::now();
+
+        m_systems.start(m_world, m_services);
+
+        float deltaTime = 0.0f;
+
+        while (!window->shouldClose()) {
+            auto                          frameStart = clock::now();
+            std::chrono::duration<double> delta      = frameStart - lastFrame;
+            lastFrame                                = frameStart;
+
+            deltaTime = static_cast<float>(delta.count());
+
+            // --- Engine loop ---
+            window->pollEvents();
+            m_systems.input(m_world, m_services, deltaTime);
+            m_systems.update(m_world, m_services, deltaTime);
+            window->clear();
+            m_systems.render(m_world, m_services, deltaTime);
+            window->swapBuffers();
+        }
+    }
+
+    /**
+     * Use a bundle to add a set of systems to the engine.
+     */
+    template <BundleType B> Engine& addBundle()
+    {
+        std::unique_ptr<Bundle> bundle = std::make_unique<B>();
+        bundle->apply(*this);
 
         m_bundles.push_back(std::move(bundle));
 
         return *this;
     }
 
-    template <SystemType... T> Engine& add()
+    /**
+     * Remove a bundle and its systems from the engine.
+     */
+    template <BundleType B> Engine& removeBundle()
     {
-        (m_systemScheduler.registerSystem<T>(), ...);
+        auto it =
+            std::find_if(m_bundles.begin(), m_bundles.end(), [](Bundle* b) { return dynamic_cast<B*>(b) != nullptr; });
+
+        if (it != m_bundles.end()) {
+            (*it)->remove(*this);
+            m_bundles.erase(it);
+        }
+
         return *this;
     }
 
-    template <SystemType... T> Engine& remove()
+    /**
+     * Add systems to the engine.
+     */
+    template <SystemType... Ts> Engine& addSystems()
     {
-        (m_systemScheduler.unregisterSystem<T>(), ...);
+        m_systems.add<Ts...>();
+
+        return *this;
+    }
+
+    /**
+     * Remove systems from the engine.
+     */
+    template <SystemType... Ts> Engine& removeSystems()
+    {
+        m_systems.remove<Ts...>();
+
+        return *this;
+    }
+
+    /**
+     * Add services to the engine.
+     */
+    template <ServiceType... Ts> Engine& addServices()
+    {
+        m_services.add<Ts...>();
+        return *this;
+    }
+
+    /**
+     * Remove services from the engine.
+     */
+    template <ServiceType... Ts> Engine& removeServices()
+    {
+        m_services.remove<Ts...>();
         return *this;
     }
 
   private:
-    World                m_world;
-    SystemScheduler      m_systemScheduler;
-    std::vector<Bundle*> m_bundles;
+    template <WindowType T> IWindow* tryWindow()
+    {
+        return m_services.get<T>();
+    }
+
+  private:
+    World                                m_world;
+    SystemRegistry                       m_systems;
+    ServiceRegistry                      m_services;
+    std::vector<std::unique_ptr<Bundle>> m_bundles;
 };
