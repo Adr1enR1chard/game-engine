@@ -6,6 +6,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+#include <engine/Engine.hpp>
 #include <engine/utils/key_mapping.hpp>
 
 struct Window::WindowImpl {
@@ -62,6 +63,7 @@ void Window::init(int width, int height, const char* title, bool fullscreen)
     });
     glfwSetCursorPosCallback(
         window, [](GLFWwindow* /*wnd*/, double xpos, double ypos) { Input::MousePositionCallback(xpos, ypos); });
+    glfwSetWindowCloseCallback(window, [](GLFWwindow* /*wnd*/) { Engine::Shutdown(); });
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 

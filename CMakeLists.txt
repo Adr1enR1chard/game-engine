@@ -38,6 +38,7 @@ target_include_directories(default_bundle PUBLIC
 
 # Library: Rendering
 add_library(engine_core
+    engine/src/Engine.cpp
     engine/src/registry/World.cpp
     engine/src/model/Texture.cpp
     engine/src/model/MaterialInstance.cpp

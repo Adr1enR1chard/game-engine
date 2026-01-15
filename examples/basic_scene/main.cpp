@@ -132,10 +132,10 @@ class StartupSystem : public System
 
 int main()
 {
-    Engine engine = Engine();
-    engine.addBundle<DefaultBundle>();
-    engine.addSystems<MovingPointLightSystem, StartupSystem, BackPackSystem, CameraControlSystem>();
-    engine.run<Window>(1280, 720, "Basic Scene Example", false);
+    Engine::Init()
+        .addBundle<DefaultBundle>()
+        .addSystems<MovingPointLightSystem, StartupSystem, BackPackSystem, CameraControlSystem>()
+        .run<Window>(1280, 720, "Basic Scene Example", false);
 
     return 0;
 }

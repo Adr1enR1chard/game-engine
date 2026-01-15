@@ -18,8 +18,30 @@ class Engine
 {
 
   public:
-    Engine()  = default;
-    ~Engine() = default;
+    static Engine& Init()
+    {
+        if (!m_instance) {
+            m_instance.reset(new Engine());
+        }
+        return *m_instance;
+    }
+
+    static void Shutdown()
+    {
+        if (!m_instance)
+            return;
+
+        m_instance->m_running = false;
+    }
+
+  private:
+    Engine() = default;
+
+    static std::unique_ptr<Engine> m_instance;
+
+  public:
+    Engine(const Engine&)            = delete;
+    Engine& operator=(const Engine&) = delete;
 
     /**
      * Run the engine with the specified window service type.
@@ -35,6 +57,7 @@ class Engine
         }
 
         window->init(width, height, title, fullscreen);
+        m_running = true;
 
         using clock    = std::chrono::steady_clock;
         auto lastFrame = clock::now();
@@ -43,7 +66,7 @@ class Engine
 
         float deltaTime = 0.0f;
 
-        while (!window->shouldClose()) {
+        while (m_running) {
             auto                          frameStart = clock::now();
             std::chrono::duration<double> delta      = frameStart - lastFrame;
             lastFrame                                = frameStart;
@@ -138,4 +161,5 @@ class Engine
     SystemRegistry                       m_systems;
     ServiceRegistry                      m_services;
     std::vector<std::unique_ptr<Bundle>> m_bundles;
+    bool                                 m_running = false;
 };
