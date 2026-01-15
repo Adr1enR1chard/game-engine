@@ -20,51 +20,55 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 enable_testing()
 
 # Library: ECS systems
-add_library(engine_ecs
-    src/ecs/system/RenderSystem.cpp
-    src/ecs/system/CameraSystem.cpp
-    src/ecs/system/TransformSystem.cpp
-    src/ecs/system/LightSystem.cpp
-    src/ecs/World.cpp
-    src/utils/Bundle.cpp
-    src/render/Input.cpp
+add_library(default_bundle
+    bundle/default/src/system/RenderSystem.cpp
+    bundle/default/src/system/CameraSystem.cpp
+    bundle/default/src/system/TransformSystem.cpp
+    bundle/default/src/system/LightSystem.cpp
+    bundle/default/src/system/LightSystem.cpp
+    bundle/default/src/service/Input.cpp
+    bundle/default/src/service/Window.cpp
 )
-target_include_directories(engine_ecs PUBLIC
+target_include_directories(default_bundle PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/engine/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/bundle/default/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/bundle/default/src
 )
 
 # Library: Rendering
-add_library(engine_render
-    src/render/Window.cpp
-    src/render/Mesh.cpp
-    src/render/Texture.cpp
-    src/render/Material.cpp
-    src/render/MaterialInstance.cpp
+add_library(engine_core
+    engine/src/registry/World.cpp
+    engine/src/model/Texture.cpp
+    engine/src/model/MaterialInstance.cpp
+    engine/src/model/Model.cpp
+    engine/src/utils/key_mapping.cpp
 )
-target_include_directories(engine_render PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
+target_include_directories(engine_core PUBLIC
+     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/engine/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/engine/src
 )
-target_compile_definitions(engine_render PUBLIC GLFW_INCLUDE_NONE)
-
+target_compile_definitions(engine_core PUBLIC GLFW_INCLUDE_NONE)
 # Library: Model loading
-add_library(engine_model
-    src/model/Model.cpp
+add_library(glfw_platform
+    engine/src/platform/glfw/Mesh.cpp
+    engine/src/platform/glfw/Material.cpp
 )
-target_include_directories(engine_model PUBLIC
+target_include_directories(glfw_platform PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/engine/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/engine/src
 )
 
 # Library: third-party single-file implementations (GLAD, stb_image)
 add_library(engine_vendor
-    src/third_party/glad/glad.c
-    src/third_party/stb_image/stb_image.cpp
+    engine/src/third_party/glad/glad.c
+    engine/src/third_party/stb_image/stb_image.cpp
 )
 target_include_directories(engine_vendor PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/engine/src
 )
 
 # Dependencies: GLFW via FetchContent
@@ -95,15 +99,15 @@ set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(assimp)
 
 # Link third-party to engine libraries
-target_link_libraries(engine_render PUBLIC
+target_link_libraries(glfw_platform PUBLIC
     glfw
     OpenGL::GL
 )
-target_link_libraries(engine_model PUBLIC
+target_link_libraries(engine_core PUBLIC
     assimp::assimp
 )
 if (WIN32)
-    target_link_libraries(engine_render PUBLIC opengl32)
+    target_link_libraries(glfw_platform PUBLIC opengl32)
 endif()
 
 # Executable: BasicScene sample
@@ -115,10 +119,10 @@ target_include_directories(BasicScene PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 target_link_libraries(BasicScene PRIVATE
-    engine_ecs
-    engine_render
-    engine_model
+    default_bundle
+    engine_core
     engine_vendor
+    glfw_platform
 )
 
 ## Note: dependencies are linked to engine_* libraries above
@@ -156,10 +160,9 @@ add_custom_command(TARGET BasicScene POST_BUILD
 # add_test(NAME SystemTests COMMAND SystemTests)
 
 
-enable_strict_warnings(engine_ecs)
-enable_strict_warnings(engine_render)
-enable_strict_warnings(engine_model)
+enable_strict_warnings(engine_core)
 enable_strict_warnings(engine_vendor)
+enable_strict_warnings(glfw_platform)
 enable_strict_warnings(BasicScene)
 # enable_strict_warnings(RegistryTests)
 # enable_strict_warnings(SystemTests)

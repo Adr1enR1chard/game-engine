@@ -1,115 +1,284 @@
-# C++ OpenGL Game Engine
+# Game Engine
 
-Cross‑platform, modern C++ game engine powered by OpenGL 3.3+, designed around a lightweight ECS (Entity‑Component‑System) architecture. Uses GLFW for windowing/input, GLAD for OpenGL function loading, GLM for math, Assimp for model loading, and stb_image for textures. Built with CMake.
+A lightweight, modular C++20 game engine built around an Entity-Component-System (ECS) architecture with OpenGL rendering.
 
-## Overview
-- Focuses on clarity and composability: systems operate over components in a `World`, the renderer consumes `Mesh`/`Model` + `Material` data to draw.
-- Batteries‑included example: [examples/basic_scene/main.cpp](examples/basic_scene/main.cpp) demonstrates cameras, lights, mesh rendering, model loading, and a simple animated light.
+## Project Description
 
-## Architecture
-- **ECS Core**: `World`, `Entity`, `System`
-  - Components: `CTransform`, `CCamera`, `CMeshRenderer`, `CModelRenderer`, `CPointLight`, `CDirectionalLight`, etc.
-  - Systems: `TransformSystem`, `CameraSystem`, `RenderSystem`, `LightSystem`, plus user systems.
-- **Rendering**:
-  - `Mesh::Cube()` and imported `Model` via Assimp (GLTF, OBJ, etc.)
-  - `Material` / `MaterialInstance` with optional texture maps (albedo, normal, etc.)
-  - Forward renderer with basic lighting (directional + point)
-- **Services**:
-  - `Window` service (GLFW) for context creation, input, clear color, viewport
-  - Asset loading: Assimp for models, stb_image for textures
+This game engine is designed to be minimalistic and extensible, providing the essential infrastructure for 3D game development while keeping the core lightweight. The engine provides:
 
-## Features
-- Window, input, and main loop management
-- Camera (position/orientation) and transform hierarchy
-- Static meshes and model loading
-- Directional and point lights
-- Simple material system with texture overrides
-- Extensible ECS systems and phases (`Start`, `Update`)
+- **ECS-based architecture** for efficient entity and component management
+- **OpenGL rendering pipeline** with PBR (Physically Based Rendering) material system
+- **GLFW-based window management** and input handling
+- **Asset loading** supporting GLTF models and various texture formats
+- **Modular bundle system** for organizing and reusing functionality
+- **Transform hierarchy** with automatic matrix computation
+- **Camera system** with view/projection matrix management
+- **Lighting system** supporting directional and point lights
 
-## Requirements
-- C++17 compiler (MSVC, Clang, or GCC)
-- CMake ≥ 3.20
-- OpenGL 3.3+ capable GPU/driver
-- Third‑party libraries: GLFW, GLM, GLAD, Assimp, stb_image (vendored via CMake)
+The engine leverages modern C++ features (C++20) and industry-standard libraries including GLFW, GLM, Assimp, and GLAD.
 
-## Build (Windows/MSVC)
-1. Configure a Visual Studio solution:
-   ```bash
-   cmake -S . -B build -G "Visual Studio 17 2022"
-   ```
-2. Build the example target:
-   ```bash
-   cmake --build build --target BasicScene --config Release
-   ```
+## Project Philosophy
 
-On Unix‑like systems:
-```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --config Release
+The engine's core is intentionally minimal, consisting of just two fundamental components:
+
+1. **ECS Registry (World)** - A type-safe, efficient storage system for entities and components
+2. **Game Loop** - A fixed-structure loop handling input, update, and render phases
+
+All additional functionality is provided through **Bundles** - modular packages that add systems, services, and components to the engine. This design allows:
+
+- **Modularity**: Add only the features you need
+- **Extensibility**: Create custom bundles for specific game requirements
+- **Reusability**: Share bundles across different projects
+- **Clarity**: Clear separation between engine core and feature implementations
+
+The `DefaultBundle` provides essential 3D rendering capabilities, but users can create specialized bundles for physics, audio, networking, or any other game-specific features.
+
+## Project Architecture
+
+### Core Structure
+
+```
+GameEngine/
+├── engine/                    # Engine core
+│   ├── include/
+│   │   ├── Engine.hpp        # Main engine class
+│   │   ├── registry/         # ECS registries
+│   │   │   ├── World.hpp            # Entity-Component storage
+│   │   │   ├── SystemRegistry.hpp   # System management
+│   │   │   ├── ServiceRegistry.hpp  # Service container
+│   │   │   └── ComponentStorage.hpp # Component storage implementation
+│   │   ├── model/            # Core abstractions
+│   │   │   ├── Entity.hpp           # Entity type definition
+│   │   │   ├── System.hpp           # System base class
+│   │   │   ├── Service.hpp          # Service base class
+│   │   │   ├── Bundle.hpp           # Bundle base class
+│   │   │   └── ...                  # Model, Mesh, Material, Texture
+│   │   └── utils/            # Utilities
+│   └── src/                  # Implementation files
+│
+├── bundle/                    # Bundle implementations
+│   └── default/              # Default rendering bundle
+│       ├── include/
+│       │   ├── DefaultBundle.hpp
+│       │   ├── component/    # Rendering components
+│       │   │   ├── CTransform.hpp
+│       │   │   ├── CCamera.hpp
+│       │   │   ├── CMeshRenderer.hpp
+│       │   │   ├── CPointLight.hpp
+│       │   │   └── CDirectionalLight.hpp
+│       │   ├── system/       # Rendering systems
+│       │   │   ├── TransformSystem.hpp
+│       │   │   ├── CameraSystem.hpp
+│       │   │   ├── RenderSystem.hpp
+│       │   │   └── LightSystem.hpp
+│       │   └── service/      # Platform services
+│       │       ├── Window.hpp
+│       │       └── Input.hpp
+│       └── src/              # Implementation files
+│
+└── examples/                  # Example projects
+    └── basic_scene/          # Basic 3D scene example
+        ├── main.cpp
+        └── assets/           # Textures and models
 ```
 
-## Run the Example
-- Assets for the example live under [examples/basic_scene/assets](examples/basic_scene/assets).
-- Run the `BasicScene` binary with its working directory set to `examples/basic_scene/` or the project root so relative asset paths resolve.
-- Typical MSVC output path: `build/bin/Release/BasicScene.exe` (Debug builds under `build/bin/Debug/`).
+### Key Concepts
 
-## Example: Basic Scene
-Minimal example extracted from [examples/basic_scene/main.cpp](examples/basic_scene/main.cpp):
+#### **World (ECS Registry)**
+The `World` class manages all entities and components. It provides:
+- `create<Components...>()` - Create entities with components
+- `get<Components...>()` - Query entities by component types
+- `getFrom<Components...>(entity)` - Get components from specific entity
+- `add<Components...>(entity)` - Add components to existing entity
+
+#### **Systems**
+Systems implement game logic and operate on entities with specific component combinations:
+- `start()` - Called once at startup
+- `input()` - Handle input events
+- `update()` - Update game logic
+- `render()` - Perform rendering
+
+#### **Services**
+Services are singletons providing engine-wide functionality (Window, Input, etc.)
+
+#### **Bundles**
+Bundles package related systems, services, and components together:
+```cpp
+class MyBundle : public Bundle {
+    void apply(Engine& engine) const override {
+        engine.addSystems<MySystem1, MySystem2>();
+        engine.addServices<MyService>();
+    }
+};
+```
+
+### Game Loop
+
+The engine's game loop follows a fixed structure:
+```
+1. Poll Events (Input)
+2. Input Phase (Systems process input)
+3. Update Phase (Game logic updates)
+4. Render Phase (Draw scene)
+5. Swap Buffers (Present frame)
+```
+
+Each system receives the `World`, `ServiceRegistry`, and `deltaTime` during each phase.
+
+## Basic Example
+
+Here's a minimal example creating a 3D scene with a camera, lights, and a rotating 3D model:
 
 ```cpp
-#include <engine/Core.hpp>
+#include <DefaultBundle.hpp>
 
-class StartupSystem : public System {
-  public:
-    void start(World& world) override {
-      // Clear color and camera
-      world.Serv<Window>().setClearColor(glm::vec3(0.1f));
-      world.create(CCamera{}, CTransform{.position = glm::vec3(0.0f, 0.0f, 3.0f)});
+// Custom system to rotate a model
+class BackPackSystem : public System
+{
+    Entity backpackEntity;
+    
+    void start(World& world, ServiceRegistry& /*services*/) override
+    {
+        // Create an entity with a 3D model
+        backpackEntity = world.create(
+            CTransform{
+                .position = glm::vec3(0.0f, 0, -6.0f), 
+                .scale = glm::vec3(0.01f)
+            },
+            CModelRenderer{
+                .model = Model("assets/models/backpack.gltf"),
+                .materialOverrides = std::vector<MaterialInstance>{
+                    MaterialInstance::Default({
+                        .albedoMap    = Texture("assets/textures/backpack/albedo.jpeg"),
+                        .metallicMap  = Texture("assets/textures/backpack/metallic.png"),
+                        .roughnessMap = Texture("assets/textures/backpack/roughness.png"),
+                        .normalMap    = Texture("assets/textures/backpack/normal.png"),
+                    })
+                },
+            }
+        );
+    }
 
-      // Lights
-      world.create(CDirectionalLight{.direction = {-0.2f, -1.0f, -0.3f}});
-      world.create(CPointLight{.color = {1.0f, 0.5f, 0.5f}, .intensity = 5.0f},
-                   CTransform{.position = {-2.0f, 2.0f, -2.0f}, .scale = glm::vec3(0.2f)},
-                   CMeshRenderer{ .mesh = Mesh::Cube(), .material = Material::Default() });
-
-      // Model + material override (assets/ relative to working dir)
-      world.create(CTransform{.position = {0.0f, 0.0f, -6.0f}, .scale = glm::vec3(0.01f)},
-                   CModelRenderer{ .model = Model("assets/models/backpack.gltf"),
-                     .materialOverrides = { MaterialInstance::Default({
-                       .albedoMap = Texture("assets/textures/backpack/baseColor.jpeg")
-                     }) } });
+    void update(World& world, ServiceRegistry& /*services*/, double deltaTime) override
+    {
+        // Rotate the model over time
+        if (auto [entity, transform] = world.getFrom<CTransform>(backpackEntity); entity != 0) {
+            transform->rotation.y += 100.0f * static_cast<float>(deltaTime);
+        }
     }
 };
 
-int main() {
-  Engine engine(800, 600, "Game Engine");
-  engine.systems().registerSystem<TransformSystem>();
-  engine.systems().registerSystem<CameraSystem>();
-  engine.systems().registerSystem<RenderSystem>();
-  engine.systems().registerSystem<LightSystem>();
-  engine.systems().registerSystem<StartupSystem>(SystemPhase::Start);
-  engine.run();
+// System to set up the initial scene
+class StartupSystem : public System
+{
+    void start(World& world, ServiceRegistry& services) override
+    {
+        // Set background color
+        services.get<Window>()->setClearColor(glm::vec3(0.1f, 0.1f, 0.1f));
+        
+        // Create camera
+        world.create(
+            CCamera{}, 
+            CTransform{.position = glm::vec3(0.0f, 0.0f, 3.0f)}
+        );
+        
+        // Create directional light (sun)
+        world.create(
+            CDirectionalLight{
+                .direction = glm::vec3(-0.2f, -1.0f, -0.3f),
+                .color     = glm::vec3(1.0f, 1.0f, 1.0f),
+                .ambient   = 0.2f,
+                .intensity = 0.0f
+            }
+        );
+        
+        // Create point light
+        world.create(
+            CPointLight{
+                .color = glm::vec3(1.0f, 1.0f, 1.0f), 
+                .intensity = 500.0f
+            },
+            CTransform{.position = glm::vec3(-2.0f, 2.0f, -2.0f)},
+            CMeshRenderer{
+                .mesh = Mesh::Cube(),
+                .material = MaterialInstance::Default({
+                    .albedo    = glm::vec3(1.0f, 1.0f, 1.0f),
+                    .metallic  = 0.0f,
+                    .roughness = 1.0f,
+                })
+            }
+        );
+        
+        // Create textured wall
+        world.create(
+            CMeshRenderer{
+                .mesh = Mesh::Cube(),
+                .material = MaterialInstance::Default({
+                    .albedoMap    = Texture("assets/textures/wall/diffuse.png"),
+                    .roughnessMap = Texture("assets/textures/wall/roughness.png"),
+                    .normalMap    = Texture("assets/textures/wall/normal.png")
+                })
+            },
+            CTransform{
+                .position = glm::vec3(0.0f, 0.0f, -10.0f), 
+                .scale = glm::vec3(20.0f, 20.0f, 1.0f)
+            }
+        );
+    }
+};
+
+int main()
+{
+    Engine engine;
+    
+    // Add the default rendering bundle
+    engine.addBundle<DefaultBundle>();
+    
+    // Add custom game systems
+    engine.addSystems<StartupSystem, BackPackSystem>();
+    
+    // Run the engine
+    engine.run<Window>(1280, 720, "Basic Scene Example", false);
+    
+    return 0;
 }
 ```
 
-This shows how to:
-- Configure clear color and spawn a `CCamera`
-- Add a directional light and a point light with a cube mesh
-- Load a GLTF model with a texture override
-- Register core systems and run the engine
+### Key Takeaways
 
-## Project Layout
-- `src/` — engine sources (ECS, rendering, utilities)
-- `include/` — public headers (engine API)
-- `examples/basic_scene/` — runnable example with assets
-- `renderdoc/` — capture files for debugging rendering
-- `build/` — out‑of‑source build artifacts (solutions, targets)
+1. **Include the DefaultBundle** to get rendering capabilities
+2. **Create systems** by inheriting from `System` and implementing lifecycle methods
+3. **Use the World** to create entities with components
+4. **Add systems to the engine** before running
+5. **Start the game loop** with `engine.run<WindowType>()`
 
-## Extending
-- Add components to describe state (e.g., `CPlayer`, `CVelocity`).
-- Write systems that iterate over matching components and mutate state or render.
-- Use `SystemPhase::Start` for one‑time scene setup, and default phase for per‑frame updates.
+## Building
 
-## Notes
-- Ensure the working directory points to a folder where asset paths resolve (example uses `assets/...`).
-- If you modify shaders or assets, prefer running from an IDE or setting the working directory accordingly.
+Requirements:
+- CMake 3.20+
+- C++20 compatible compiler
+- OpenGL 3.3+
+
+```bash
+# Configure
+cmake -B build
+
+# Build
+cmake --build build --config Debug
+
+# Run example
+./build/bin/Debug/BasicScene
+```
+
+## Dependencies
+
+All dependencies are automatically fetched via CMake FetchContent:
+- **GLFW** - Window and input handling
+- **GLM** - Mathematics library
+- **Assimp** - 3D model loading
+- **GLAD** - OpenGL function loader
+- **stb_image** - Image loading
+
+## License
+
+MIT License. See LICENSE file for details.

@@ -1,4 +1,4 @@
-#include <engine/Core.hpp>
+#include <DefaultBundle.hpp>
 
 class MovingPointLightSystem : public System
 {
