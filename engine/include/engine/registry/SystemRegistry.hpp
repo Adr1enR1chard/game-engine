@@ -1,12 +1,15 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <typeindex>
 #include <unordered_map>
 #include <vector>
 
 #include <engine/model/System.hpp>
 #include <engine/utils/types.hpp>
+
+#include <engine/utils/Log.hpp>
 
 class World;
 class ServiceRegistry;
@@ -25,6 +28,7 @@ class SystemRegistry
     template <SystemType... T> void add()
     {
         (m_systems.try_emplace(std::type_index(typeid(T)), std::make_unique<T>()), ...);
+        (..., Log::Print("Added system: " + std::string(typeid(T).name()), LogLevel::Info));
     }
 
     /**
@@ -35,6 +39,13 @@ class SystemRegistry
         (m_systems.erase(std::type_index(typeid(T))), ...);
     }
 
+    void init(ServiceRegistry& services)
+    {
+        for (auto& [typeIndex, system] : m_systems) {
+            system->init(services);
+        }
+    }
+
     void start(World& world, ServiceRegistry& services)
     {
         for (auto& [typeIndex, system] : m_systems) {
@@ -42,10 +53,10 @@ class SystemRegistry
         }
     }
 
-    void input(World& world, ServiceRegistry& services, float deltaTime)
+    void preUpdate(World& world, ServiceRegistry& services, float deltaTime)
     {
         for (auto& [typeIndex, system] : m_systems) {
-            system->input(world, services, deltaTime);
+            system->preUpdate(world, services, deltaTime);
         }
     }
 
@@ -56,10 +67,24 @@ class SystemRegistry
         }
     }
 
+    void preRender(World& world, ServiceRegistry& services, float deltaTime)
+    {
+        for (auto& [typeIndex, system] : m_systems) {
+            system->preRender(world, services, deltaTime);
+        }
+    }
+
     void render(World& world, ServiceRegistry& services, float deltaTime)
     {
         for (auto& [typeIndex, system] : m_systems) {
             system->render(world, services, deltaTime);
+        }
+    }
+
+    void present(World& world, ServiceRegistry& services, float deltaTime)
+    {
+        for (auto& [typeIndex, system] : m_systems) {
+            system->present(world, services, deltaTime);
         }
     }
 

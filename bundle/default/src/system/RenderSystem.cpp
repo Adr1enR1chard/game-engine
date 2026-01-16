@@ -9,8 +9,8 @@
 #include <component/CMeshRenderer.hpp>
 #include <component/CTransformCache.hpp>
 
-#include <engine/model/Material.hpp>
-#include <engine/model/Mesh.hpp>
+#include <model/Material.hpp>
+#include <model/Mesh.hpp>
 
 #include <engine/registry/World.hpp>
 

@@ -1,4 +1,4 @@
-#include <engine/model/Texture.hpp>
+#include <model/Texture.hpp>
 
 #include <glad/glad.h>
 #include <iostream>

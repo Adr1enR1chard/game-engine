@@ -1,10 +1,10 @@
-#include <engine/model/MaterialInstance.hpp>
+#include <model/MaterialInstance.hpp>
 
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
-#include <engine/model/Material.hpp>
+#include <model/Material.hpp>
 
 MaterialInstance MaterialInstance::Default(const DefaultMaterialParameters& params)
 {

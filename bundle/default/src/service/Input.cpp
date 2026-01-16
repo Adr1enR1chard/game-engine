@@ -1,5 +1,7 @@
 #include <service/Input.hpp>
 
+#include <chrono>
+
 std::vector<Input*> Input::s_activeInputs;
 
 void Input::KeyCallback(Key key, Key scancode, KeyAction action, int mods)

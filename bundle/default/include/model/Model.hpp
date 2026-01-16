@@ -6,8 +6,8 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-#include <engine/model/Mesh.hpp>
-#include <engine/model/Texture.hpp>
+#include <model/Mesh.hpp>
+#include <model/Texture.hpp>
 
 class Model
 {

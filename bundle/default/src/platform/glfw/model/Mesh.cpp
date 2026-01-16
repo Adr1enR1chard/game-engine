@@ -1,6 +1,6 @@
-#include <engine/model/Mesh.hpp>
+#include <model/Mesh.hpp>
 
-#include <engine/model/MaterialInstance.hpp>
+#include <model/MaterialInstance.hpp>
 
 #include <glad/glad.h>
 #include <iostream>

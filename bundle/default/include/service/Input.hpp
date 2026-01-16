@@ -37,7 +37,7 @@ class Input : public Service
     glm::vec2 getMouseDelta() const;
 
   private:
-    friend class Engine;
+    friend class PlatformSystem;
 
     void clear();
 

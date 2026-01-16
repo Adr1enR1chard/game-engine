@@ -1,4 +1,4 @@
-#include <engine/model/Material.hpp>
+#include <model/Material.hpp>
 
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>

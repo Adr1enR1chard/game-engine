@@ -2,9 +2,9 @@
 
 #include <memory>
 
-#include <engine/model/MaterialInstance.hpp>
-#include <engine/model/Mesh.hpp>
-#include <engine/model/Model.hpp>
+#include <model/MaterialInstance.hpp>
+#include <model/Mesh.hpp>
+#include <model/Model.hpp>
 
 struct CMeshRenderer {
     std::shared_ptr<Mesh> mesh;

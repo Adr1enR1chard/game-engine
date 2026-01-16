@@ -57,8 +57,8 @@ class CameraControlSystem : public System
         float dt = static_cast<float>(deltaTime);
         if (auto [entity, cCam, transform] = world.getAt<CCamera, CTransform>(0); entity != 0) {
             Input* input = services.get<Input>();
-            transform->rotation.y += -input->getMouseDelta().x * 0.1f;
-            transform->rotation.x += -input->getMouseDelta().y * 0.1f;
+            transform->rotation.y += -input->getMouseDelta().x * 0.2f;
+            transform->rotation.x += -input->getMouseDelta().y * 0.2f;
 
             transform->rotation.x = glm::clamp(transform->rotation.x, -89.0f, 89.0f);
 
@@ -84,8 +84,11 @@ class CameraControlSystem : public System
                 direction.y = 1;
             if (input->isKeyDown(Key::S))
                 direction.y = -1;
+            direction = glm::length(direction) != 0 ? glm::normalize(direction) : direction;
 
             float speed = 5.0f * dt;
+            if (input->isKeyDown(Key::LShift))
+                speed *= 2.0f;
 
             transform->position += forward * direction.y * speed;
             transform->position += right * direction.x * speed;
@@ -135,7 +138,7 @@ int main()
     Engine::Init()
         .addBundle<DefaultBundle>()
         .addSystems<MovingPointLightSystem, StartupSystem, BackPackSystem, CameraControlSystem>()
-        .run<Window>(1280, 720, "Basic Scene Example", false);
+        .run();
 
     return 0;
 }

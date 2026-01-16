@@ -1,17 +1,18 @@
 #pragma once
 #include <chrono>
 #include <iostream>
+#include <source_location>
 #include <thread>
 #include <typeindex>
 #include <unordered_map>
 #include <vector>
 
 #include <engine/model/Bundle.hpp>
-#include <engine/model/WindowService.hpp>
 #include <engine/registry/ServiceRegistry.hpp>
 #include <engine/registry/SystemRegistry.hpp>
 #include <engine/registry/World.hpp>
 
+#include <engine/utils/Log.hpp>
 #include <engine/utils/types.hpp>
 
 class Engine
@@ -31,6 +32,7 @@ class Engine
         if (!m_instance)
             return;
 
+        Log::Print("Engine Shutdown", LogLevel::Info);
         m_instance->m_running = false;
     }
 
@@ -46,17 +48,10 @@ class Engine
     /**
      * Run the engine with the specified window service type.
      */
-    template <WindowType T> void run(int width, int height, const char* title, bool fullscreen)
+    void run()
     {
-        WindowService* window = tryWindow<T>();
-        if (!window) {
-            std::cerr
-                << "No window service found in the engine. Please add the window service before running the engine."
-                << std::endl;
-            return;
-        }
+        m_systems.init(m_services);
 
-        window->init(width, height, title, fullscreen);
         m_running = true;
 
         using clock    = std::chrono::steady_clock;
@@ -74,12 +69,11 @@ class Engine
             deltaTime = static_cast<float>(delta.count());
 
             // --- Engine loop ---
-            window->pollEvents();
-            m_systems.input(m_world, m_services, deltaTime);
+            m_systems.preUpdate(m_world, m_services, deltaTime);
             m_systems.update(m_world, m_services, deltaTime);
-            window->clear();
+            m_systems.preRender(m_world, m_services, deltaTime);
             m_systems.render(m_world, m_services, deltaTime);
-            window->swapBuffers();
+            m_systems.present(m_world, m_services, deltaTime);
         }
     }
 
@@ -151,15 +145,9 @@ class Engine
     }
 
   private:
-    template <WindowType T> WindowService* tryWindow()
-    {
-        return m_services.get<T>();
-    }
-
-  private:
+    bool                                 m_running = false;
     World                                m_world;
     SystemRegistry                       m_systems;
     ServiceRegistry                      m_services;
     std::vector<std::unique_ptr<Bundle>> m_bundles;
-    bool                                 m_running = false;
 };

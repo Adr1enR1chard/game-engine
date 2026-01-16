@@ -1,6 +1,7 @@
 #pragma once
 
-#include <engine/model/Texture.hpp>
+#include <model/Texture.hpp>
+
 #include <engine/utils/types.hpp>
 
 #include <glm/glm.hpp>

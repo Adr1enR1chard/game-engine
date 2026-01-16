@@ -1,11 +1,13 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <typeindex>
 #include <unordered_map>
 
 #include <engine/model/Service.hpp>
 
+#include <engine/utils/Log.hpp>
 #include <engine/utils/types.hpp>
 
 class ServiceRegistry
@@ -22,6 +24,7 @@ class ServiceRegistry
     template <ServiceType... T> void add()
     {
         (m_services.try_emplace(std::type_index(typeid(T)), std::make_unique<T>()), ...);
+        (..., Log::Print("Added service: " + std::string(typeid(T).name()), LogLevel::Info));
     }
 
     /**

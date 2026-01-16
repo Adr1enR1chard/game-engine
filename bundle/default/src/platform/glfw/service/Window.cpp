@@ -28,7 +28,7 @@ Window::~Window()
     glfwTerminate();
 }
 
-void Window::init(int width, int height, const char* title, bool fullscreen)
+void Window::create()
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -41,7 +41,8 @@ void Window::init(int width, int height, const char* title, bool fullscreen)
 
     // glfw window creation
     // --------------------
-    GLFWwindow* window = glfwCreateWindow(width, height, title, fullscreen ? glfwGetPrimaryMonitor() : NULL, NULL);
+    GLFWwindow* window =
+        glfwCreateWindow(m_width, m_height, m_title, m_fullscreen ? glfwGetPrimaryMonitor() : NULL, NULL);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -66,6 +67,8 @@ void Window::init(int width, int height, const char* title, bool fullscreen)
     glfwSetWindowCloseCallback(window, [](GLFWwindow* /*wnd*/) { Engine::Shutdown(); });
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    if (glfwRawMouseMotionSupported())
+        glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
     glfwSwapInterval(1); // Enable vsync
     glEnable(GL_DEPTH_TEST);

@@ -26,41 +26,41 @@ add_library(default_bundle
     bundle/default/src/system/TransformSystem.cpp
     bundle/default/src/system/LightSystem.cpp
     bundle/default/src/system/LightSystem.cpp
+    bundle/default/src/system/PlatformSystem.cpp
     bundle/default/src/service/Input.cpp
-    bundle/default/src/service/Window.cpp
+    bundle/default/src/model/Model.cpp
+    bundle/default/src/model/MaterialInstance.cpp
+    bundle/default/src/model/Texture.cpp
 )
 target_include_directories(default_bundle PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/engine/include
     ${CMAKE_CURRENT_SOURCE_DIR}/bundle/default/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/bundle/default/src
+)
+
+# Library: GLFW platform
+add_library(default_bundle_glfw
+    bundle/default/src/platform/glfw/model/Mesh.cpp
+    bundle/default/src/platform/glfw/model/Material.cpp
+    bundle/default/src/platform/glfw/service/Window.cpp
+)
+target_include_directories(default_bundle_glfw PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/engine/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/bundle/default/include
 )
 
 # Library: Rendering
 add_library(engine_core
     engine/src/Engine.cpp
     engine/src/registry/World.cpp
-    engine/src/model/Texture.cpp
-    engine/src/model/MaterialInstance.cpp
-    engine/src/model/Model.cpp
     engine/src/utils/key_mapping.cpp
 )
 target_include_directories(engine_core PUBLIC
      ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/engine/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/engine/src
 )
 target_compile_definitions(engine_core PUBLIC GLFW_INCLUDE_NONE)
-# Library: Model loading
-add_library(glfw_platform
-    engine/src/platform/glfw/Mesh.cpp
-    engine/src/platform/glfw/Material.cpp
-)
-target_include_directories(glfw_platform PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/engine/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/engine/src
-)
 
 # Library: third-party single-file implementations (GLAD, stb_image)
 add_library(engine_vendor
@@ -69,7 +69,6 @@ add_library(engine_vendor
 )
 target_include_directories(engine_vendor PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/engine/src
 )
 
 # Dependencies: GLFW via FetchContent
@@ -100,7 +99,7 @@ set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(assimp)
 
 # Link third-party to engine libraries
-target_link_libraries(glfw_platform PUBLIC
+target_link_libraries(default_bundle_glfw PUBLIC
     glfw
     OpenGL::GL
 )
@@ -108,7 +107,7 @@ target_link_libraries(engine_core PUBLIC
     assimp::assimp
 )
 if (WIN32)
-    target_link_libraries(glfw_platform PUBLIC opengl32)
+    target_link_libraries(default_bundle_glfw PUBLIC opengl32)
 endif()
 
 # Executable: BasicScene sample
@@ -123,7 +122,7 @@ target_link_libraries(BasicScene PRIVATE
     default_bundle
     engine_core
     engine_vendor
-    glfw_platform
+    default_bundle_glfw
 )
 
 ## Note: dependencies are linked to engine_* libraries above
@@ -163,7 +162,7 @@ add_custom_command(TARGET BasicScene POST_BUILD
 
 enable_strict_warnings(engine_core)
 enable_strict_warnings(engine_vendor)
-enable_strict_warnings(glfw_platform)
+enable_strict_warnings(default_bundle_glfw)
 enable_strict_warnings(BasicScene)
 # enable_strict_warnings(RegistryTests)
 # enable_strict_warnings(SystemTests)

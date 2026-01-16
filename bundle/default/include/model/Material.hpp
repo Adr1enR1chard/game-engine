@@ -6,9 +6,9 @@
 #include <variant>
 #include <vector>
 
-#include <engine/model/Mesh.hpp>
-#include <engine/model/Texture.hpp>
 #include <engine/utils/types.hpp>
+#include <model/Mesh.hpp>
+#include <model/Texture.hpp>
 
 class Material
 {

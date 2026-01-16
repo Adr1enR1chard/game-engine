@@ -1,6 +1,6 @@
-#include <engine/model/Model.hpp>
+#include <model/Model.hpp>
 
-#include <engine/model/MaterialInstance.hpp>
+#include <model/MaterialInstance.hpp>
 
 #include <iostream>
 
