@@ -229,17 +229,11 @@ class StartupSystem : public System
 
 int main()
 {
-    Engine engine;
-    
-    // Add the default rendering bundle
-    engine.addBundle<DefaultBundle>();
-    
-    // Add custom game systems
-    engine.addSystems<StartupSystem, BackPackSystem>();
-    
-    // Run the engine
-    engine.run<Window>(1280, 720, "Basic Scene Example", false);
-    
+    Engine::Init()
+        .addBundle<DefaultBundle>() // Add the default rendering bundle
+        .addSystems<StartupSystem, BackPackSystem>() // Add custom game systems
+        .run<Window>(1280, 720, "Basic Scene Example", false); // Run the engine
+
     return 0;
 }
 ```
