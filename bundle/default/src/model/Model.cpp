@@ -1,5 +1,7 @@
 #include <model/Model.hpp>
 
+#include <engine/utils/Log.hpp>
+
 #include <model/MaterialInstance.hpp>
 
 #include <iostream>
@@ -26,10 +28,15 @@ glm::mat4 AiMatrixToGlmMat4(const aiMatrix4x4& from)
     return to;
 }
 
-void Model::Draw(MaterialInstance& materialInstance, glm::mat4 modelMatrix) const
+void Model::draw(glm::mat4 viewMatrix, glm::mat4 projectionMatrix, glm::mat4 modelMatrix) const
 {
+    int meshIndex = 0;
     for (const auto& mesh : meshes) {
-        mesh->Draw(materialInstance, modelMatrix);
+        std::shared_ptr<MaterialInstance> materialInstance = materials[meshMaterialMap.find(meshIndex)->second];
+        materialInstance->setup(viewMatrix, projectionMatrix);
+
+        mesh->Draw(*materialInstance, modelMatrix);
+        meshIndex++;
     }
 }
 
@@ -48,10 +55,10 @@ void Model::loadModel(std::string path)
         import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-        std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
+        Log::Print("Error while loading model: " + std::string(import.GetErrorString()), LogLevel::Error);
         return;
     }
-    directory = path.substr(0, path.find_last_of('/'));
+    modelDirectory = path.substr(0, path.find_last_of('/'));
 
     processNode(scene->mRootNode, scene);
 }
@@ -72,39 +79,41 @@ void Model::processNode(aiNode* node, const aiScene* scene, const glm::mat4& par
     }
 }
 
-std::shared_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* /*scene*/, const glm::mat4& nodeTransform)
+std::shared_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene, const glm::mat4& nodeTransform)
 {
     std::vector<Vertex>       vertices;
     std::vector<unsigned int> indices;
-    std::vector<Texture>      textures;
 
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
         Vertex    vertex;
         glm::vec3 vector;
-        vector.x         = mesh->mVertices[i].x;
-        vector.y         = mesh->mVertices[i].y;
-        vector.z         = mesh->mVertices[i].z;
-        vertex.position  = vector;
-        vector.x         = mesh->mNormals[i].x;
-        vector.y         = mesh->mNormals[i].y;
-        vector.z         = mesh->mNormals[i].z;
-        vertex.normal    = vector;
-        vector.x         = mesh->mTangents[i].x;
-        vector.y         = mesh->mTangents[i].y;
-        vector.z         = mesh->mTangents[i].z;
-        vertex.tangent   = vector;
-        vector.x         = mesh->mBitangents[i].x;
-        vector.y         = mesh->mBitangents[i].y;
-        vector.z         = mesh->mBitangents[i].z;
-        vertex.bitangent = vector;
+        vector.x        = mesh->mVertices[i].x;
+        vector.y        = mesh->mVertices[i].y;
+        vector.z        = mesh->mVertices[i].z;
+        vertex.position = vector;
+        vector.x        = mesh->mNormals[i].x;
+        vector.y        = mesh->mNormals[i].y;
+        vector.z        = mesh->mNormals[i].z;
+        vertex.normal   = vector;
+        if (mesh->mTangents) {
+            vector.x       = mesh->mTangents[i].x;
+            vector.y       = mesh->mTangents[i].y;
+            vector.z       = mesh->mTangents[i].z;
+            vertex.tangent = vector;
+        }
+        if (mesh->mBitangents) {
+            vector.x         = mesh->mBitangents[i].x;
+            vector.y         = mesh->mBitangents[i].y;
+            vector.z         = mesh->mBitangents[i].z;
+            vertex.bitangent = vector;
+        }
         if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
         {
             glm::vec2 vec;
             vec.x            = mesh->mTextureCoords[0][i].x;
             vec.y            = mesh->mTextureCoords[0][i].y;
             vertex.texCoords = vec;
-        } else
-            vertex.texCoords = glm::vec2(0.0f, 0.0f);
+        }
         // process vertex positions, normals and texture coordinates
         vertices.push_back(vertex);
     }
@@ -115,24 +124,44 @@ std::shared_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* /*scene*/,
             indices.push_back(face.mIndices[j]);
     }
     // process material
-    // if (mesh->mMaterialIndex >= 0)
-    // {
-    //     aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-    //     std::vector<Texture> diffuseMaps = loadMaterialTextures(material,
-    //                                                             aiTextureType_DIFFUSE, "texture_diffuse");
-    //     textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-    //     std::vector<Texture> specularMaps = loadMaterialTextures(material,
-    //                                                              aiTextureType_SPECULAR, "texture_specular");
-    //     textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-    // }
+    if (mesh->mMaterialIndex >= 0) {
+        if (assimpMaterialMap.find(mesh->mMaterialIndex) != assimpMaterialMap.end()) {
+            uint16_t materialIndex         = assimpMaterialMap[mesh->mMaterialIndex];
+            meshMaterialMap[meshes.size()] = materialIndex;
+        } else {
+            auto        materialInstance = std::make_shared<MaterialInstance>(MaterialInstance::Default());
+            aiMaterial* material         = scene->mMaterials[mesh->mMaterialIndex];
+            if (auto texture = loadMaterialTextures(material, aiTextureType_DIFFUSE, "albedoMap")) {
+                materialInstance->setTexture("albedoMap", *texture);
+            }
+            if (auto texture = loadMaterialTextures(material, aiTextureType_METALNESS, "metallicMap")) {
+                materialInstance->setTexture("metallicMap", *texture);
+            }
+            if (auto texture = loadMaterialTextures(material, aiTextureType_DIFFUSE_ROUGHNESS, "roughnessMap")) {
+                materialInstance->setTexture("roughnessMap", *texture);
+            }
+            if (auto texture = loadMaterialTextures(material, aiTextureType_AMBIENT_OCCLUSION, "aoMap")) {
+                materialInstance->setTexture("aoMap", *texture);
+            }
+
+            uint16_t materialIndex = materials.size();
+            materials.push_back(materialInstance);
+            meshMaterialMap[meshes.size()]          = materialIndex;
+            assimpMaterialMap[mesh->mMaterialIndex] = materialIndex;
+        }
+    }
 
     return std::make_shared<Mesh>(vertices, indices, nodeTransform);
 }
 
-std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
+std::unique_ptr<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
 {
-    mat;
-    type;
-    typeName;
-    return std::vector<Texture>();
+    if (mat->GetTextureCount(type) > 0) {
+        aiString str;
+        mat->GetTexture(type, 0, &str);
+        std::string filename = std::string(str.C_Str());
+        filename             = modelDirectory + '/' + filename;
+        return std::make_unique<Texture>(filename.c_str());
+    }
+    return nullptr;
 }

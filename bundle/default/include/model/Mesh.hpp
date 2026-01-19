@@ -5,6 +5,8 @@
 #include <glm/glm.hpp>
 #include <string>
 
+class MaterialInstance;
+
 struct Vertex {
     glm::vec3 position;
     glm::vec3 normal;
@@ -24,11 +26,11 @@ class Mesh
 
     Mesh(Mesh&& other) noexcept
     {
-        VAO         = other.VAO;
-        VBO         = other.VBO;
-        EBO         = other.EBO;
-        vertexCount = other.vertexCount;
-        indexCount  = other.indexCount;
+        VAO           = other.VAO;
+        VBO           = other.VBO;
+        EBO           = other.EBO;
+        m_vertexCount = other.m_vertexCount;
+        m_indexCount  = other.m_indexCount;
     }
 
     void Draw(class MaterialInstance& materialInstance, glm::mat4 modelMatrix) const;
@@ -40,18 +42,18 @@ class Mesh
 
     unsigned int getVertexCount() const
     {
-        return vertexCount;
+        return m_vertexCount;
     }
     unsigned int getIndexCount() const
     {
-        return indexCount;
+        return m_indexCount;
     }
 
   private:
     glm::mat4 localModel = glm::mat4(1.0f);
 
-    unsigned int vertexCount;
-    unsigned int indexCount;
+    unsigned int m_vertexCount;
+    unsigned int m_indexCount;
 
   private:
     friend class RenderSystem;

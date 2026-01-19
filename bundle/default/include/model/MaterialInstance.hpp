@@ -20,7 +20,7 @@ struct DefaultMaterialParameters {
     Texture   albedoMap    = Texture::White();
     Texture   metallicMap  = Texture::White();
     Texture   roughnessMap = Texture::White();
-    Texture   aoMap        = Texture::White();
+    Texture   aoMap        = Texture::Black();
     Texture   normalMap    = Texture::DefaultNormalMap();
 };
 

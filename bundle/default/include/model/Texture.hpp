@@ -10,6 +10,7 @@ class Texture
     ~Texture() = default;
 
     static Texture White();
+    static Texture Black();
     static Texture DefaultNormalMap();
 
     void filteringParameters(unsigned int minFilter, unsigned int magFilter) const;

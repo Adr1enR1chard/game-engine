@@ -23,17 +23,18 @@ class BackPackSystem : public System
   public:
     void start(World& world, ServiceRegistry& /*services*/) override
     {
-        backpackEntity = world.create(CTransform{.position = glm::vec3(0.0f, 0, -6.0f), .scale = glm::vec3(0.01f)},
-                                      CModelRenderer{
-                                          .model             = Model("assets/models/backpack.gltf"),
-                                          .materialOverrides = std::vector<MaterialInstance>{MaterialInstance::Default({
-                                              .ao           = 0.0f,
-                                              .albedoMap    = Texture("assets/textures/backpack/albedo.jpeg"),
-                                              .metallicMap  = Texture("assets/textures/backpack/metallic.png"),
-                                              .roughnessMap = Texture("assets/textures/backpack/roughness.png"),
-                                              .normalMap    = Texture("assets/textures/backpack/normal.png"),
-                                          })},
-                                      });
+        backpackEntity =
+            world.create(CTransform{.position = glm::vec3(0.0f, 0, -6.0f), .scale = glm::vec3(0.1f)},
+                         CModelRenderer{
+                             .model = Model("assets/models/car/source/car.fbx"),
+                             //   .materialOverrides = std::vector<MaterialInstance>{MaterialInstance::Default({
+                             //       .ao           = 0.0f,
+                             //       .albedoMap    = Texture("assets/textures/backpack/albedo.jpeg"),
+                             //       .metallicMap  = Texture("assets/textures/backpack/metallic.png"),
+                             //       .roughnessMap = Texture("assets/textures/backpack/roughness.png"),
+                             //       .normalMap    = Texture("assets/textures/backpack/normal.png"),
+                             //   })},
+                         });
     }
 
   public:
@@ -106,7 +107,7 @@ class StartupSystem : public System
         world.create(CDirectionalLight{.direction = glm::vec3(-0.2f, -1.0f, -0.3f),
                                        .color     = glm::vec3(1.0f, 1.0f, 1.0f),
                                        .ambient   = 0.2f,
-                                       .intensity = 0.0f});
+                                       .intensity = 1.0f});
 
         world.create(CPointLight{.color = glm::vec3(1.0f, 1.0f, 1.0f), .intensity = 500.0f},
                      CTransform{.position = glm::vec3(-2.0f, 2.0f, -2.0f), .scale = glm::vec3(0.2f)},

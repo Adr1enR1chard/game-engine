@@ -65,7 +65,7 @@ const std::vector<uint32_t> kCubeIndices = {
     22, 21, 20, 23, 22, 20};
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, const glm::mat4& localModel)
-    : vertexCount(vertices.size()), indexCount(indices.size()), localModel(localModel)
+    : m_vertexCount(vertices.size()), m_indexCount(indices.size()), localModel(localModel)
 {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -104,7 +104,7 @@ void Mesh::Draw(MaterialInstance& materialInstance, glm::mat4 modelMatrix) const
     materialInstance.link(modelMatrix * localModel);
 
     glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, m_indexCount, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
 

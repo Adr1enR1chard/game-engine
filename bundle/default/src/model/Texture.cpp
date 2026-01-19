@@ -1,8 +1,9 @@
 #include <model/Texture.hpp>
 
+#include <engine/utils/Log.hpp>
 #include <glad/glad.h>
-#include <iostream>
 #include <stb_image/stb_image.h>
+#include <string>
 
 Texture::Texture(const char* imagePath)
 {
@@ -35,7 +36,8 @@ Texture::Texture(const char* imagePath)
             format         = GL_RGBA;
             internalFormat = GL_RGBA8;
         } else {
-            std::cout << "Unexpected channel count (" << nrChannels << ") for " << imagePath << "\n";
+            Log::Print("Unexpected channel count (" + std::to_string(nrChannels) + ") for " + std::string(imagePath),
+                       LogLevel::Error);
             stbi_image_free(data);
             return;
         }
@@ -44,7 +46,7 @@ Texture::Texture(const char* imagePath)
         glGenerateMipmap(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);
     } else {
-        std::cout << "TextureHandle: Failed to load texture at path: " << imagePath << std::endl;
+        Log::Print("Failed to load texture at path: " + std::string(imagePath), LogLevel::Error);
     }
     stbi_image_free(data);
 }
@@ -67,6 +69,26 @@ Texture Texture::White()
     glBindTexture(GL_TEXTURE_2D, 0);
 
     return Texture(whiteTextureID);
+}
+
+Texture Texture::Black()
+{
+    unsigned int blackTextureID;
+    glGenTextures(1, &blackTextureID);
+    glBindTexture(GL_TEXTURE_2D, blackTextureID);
+
+    unsigned char blackPixel[4] = {0, 0, 0, 255};
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, blackPixel);
+
+    // default texture wrapping and filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    return Texture(blackTextureID);
 }
 
 Texture Texture::DefaultNormalMap()

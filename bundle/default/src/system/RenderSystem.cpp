@@ -31,15 +31,8 @@ void RenderSystem::render(World& world, ServiceRegistry& /*services*/, double /*
     }
 
     for (const auto& [entity, modelRenderer, transform] : world.get<CModelRenderer, CTransformCache>()) {
-        auto& model            = modelRenderer->model;
-        auto& materialInstance = modelRenderer->materialOverrides;
+        auto& model = modelRenderer->model;
 
-        if (!materialInstance.empty()) {
-            materialInstance[0].setup(cameraTransform->viewMatrix, cameraCache->projectionMatrix);
-
-            model.Draw(
-                materialInstance[0],
-                transform->modelMatrix); // TODO: single material for now, must be handled inside model class late
-        }
+        model.draw(cameraTransform->viewMatrix, cameraCache->projectionMatrix, transform->modelMatrix);
     }
 }
