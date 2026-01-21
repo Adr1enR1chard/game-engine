@@ -8,6 +8,7 @@
 
 // --- Systems ---
 #include <system/CameraSystem.hpp>
+#include <system/EnvironmentSystem.hpp>
 #include <system/LightSystem.hpp>
 #include <system/PlatformSystem.hpp>
 #include <system/RenderSystem.hpp>
@@ -25,7 +26,8 @@ class DefaultBundle : public Bundle
   public:
     void apply(Engine& engine) const override
     {
-        engine.addSystems<TransformSystem, CameraSystem, RenderSystem, LightSystem, PlatformSystem>();
+        engine
+            .addSystems<TransformSystem, CameraSystem, RenderSystem, LightSystem, PlatformSystem, EnvironmentSystem>();
         engine.addServices<Window, Input>();
     }
     void remove(Engine& engine) const override

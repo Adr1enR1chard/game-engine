@@ -27,10 +27,10 @@ add_library(default_bundle
     bundle/default/src/system/LightSystem.cpp
     bundle/default/src/system/LightSystem.cpp
     bundle/default/src/system/PlatformSystem.cpp
+    bundle/default/src/system/EnvironmentSystem.cpp
     bundle/default/src/service/Input.cpp
     bundle/default/src/model/Model.cpp
     bundle/default/src/model/MaterialInstance.cpp
-    bundle/default/src/model/Texture.cpp
 )
 target_include_directories(default_bundle PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -42,6 +42,8 @@ target_include_directories(default_bundle PUBLIC
 add_library(default_bundle_glfw
     bundle/default/src/platform/glfw/model/Mesh.cpp
     bundle/default/src/platform/glfw/model/Material.cpp
+    bundle/default/src/platform/glfw/model/Skybox.cpp
+    bundle/default/src/platform/glfw/model/Texture.cpp
     bundle/default/src/platform/glfw/service/Window.cpp
 )
 target_include_directories(default_bundle_glfw PUBLIC
@@ -131,6 +133,9 @@ add_custom_command(TARGET BasicScene POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:BasicScene>/assets"
   COMMAND ${CMAKE_COMMAND} -E copy_directory
           "${CMAKE_SOURCE_DIR}/examples/basic_scene/assets"
+          "$<TARGET_FILE_DIR:BasicScene>/assets"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+          "${CMAKE_SOURCE_DIR}/bundle/default/assets"
           "$<TARGET_FILE_DIR:BasicScene>/assets")
 
 # # Registry unit tests

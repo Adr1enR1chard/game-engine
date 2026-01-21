@@ -29,6 +29,7 @@ void LightSystem::update(World& world, ServiceRegistry& /*services*/, double /*d
             materialInstance.setUniform("dirLight", UDirectionalLight{
                                                         cDirLight->direction, // direction
                                                         cDirLight->color,     // color
+                                                        cDirLight->ambient,   // ambient
                                                         cDirLight->intensity, // intensity
                                                     });
         }

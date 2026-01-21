@@ -21,6 +21,7 @@ concept BundleType = std::derived_from<T, Bundle>;
 struct UDirectionalLight {
     glm::vec3 direction;
     glm::vec3 color     = glm::vec3(1.0f);
+    float     ambient   = 0.1f;
     float     intensity = 1.0f;
 };
 

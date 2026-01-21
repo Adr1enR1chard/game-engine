@@ -129,7 +129,7 @@ std::shared_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene, con
             uint16_t materialIndex         = assimpMaterialMap[mesh->mMaterialIndex];
             meshMaterialMap[meshes.size()] = materialIndex;
         } else {
-            auto        materialInstance = std::make_shared<MaterialInstance>(MaterialInstance::Default());
+            auto        materialInstance = std::make_shared<MaterialInstance>(MaterialInstance::PBR());
             aiMaterial* material         = scene->mMaterials[mesh->mMaterialIndex];
             if (auto texture = loadMaterialTextures(material, aiTextureType_DIFFUSE, "albedoMap")) {
                 materialInstance->setTexture("albedoMap", *texture);
@@ -160,8 +160,8 @@ std::unique_ptr<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureT
         aiString str;
         mat->GetTexture(type, 0, &str);
         std::string filename = std::string(str.C_Str());
-        filename             = modelDirectory + '/' + filename;
         return std::make_unique<Texture>(filename.c_str());
     }
+    Log::Print("Texture not found for type: " + typeName, LogLevel::Warning);
     return nullptr;
 }

@@ -13,7 +13,9 @@
 class Material
 {
   public:
-    static std::shared_ptr<Material> Default();
+    static std::shared_ptr<Material> PBR();
+    static std::shared_ptr<Material> Phong();
+    static std::shared_ptr<Material> Skybox();
 
   public:
     Material(unsigned int id) : ID(id) {};
@@ -35,7 +37,8 @@ class Material
 
     void checkCompileErrors(unsigned int shader, std::string type);
 
-    static std::shared_ptr<Material> m_defaultMaterial;
+    static std::shared_ptr<Material> m_PBRMaterial;
+    static std::shared_ptr<Material> m_PhongMaterial;
 
   public:
     unsigned int ID;

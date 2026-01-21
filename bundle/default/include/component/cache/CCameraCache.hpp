@@ -2,7 +2,6 @@
 
 #include <glm/glm.hpp>
 
-struct CCameraCache
-{
+struct CCameraCache {
     glm::mat4 projectionMatrix{1.0f};
 };

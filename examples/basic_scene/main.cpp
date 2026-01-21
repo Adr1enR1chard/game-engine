@@ -1,4 +1,5 @@
 #include <DefaultBundle.hpp>
+#include <component/CEnvironment.hpp>
 
 class MovingPointLightSystem : public System
 {
@@ -26,7 +27,7 @@ class BackPackSystem : public System
         backpackEntity =
             world.create(CTransform{.position = glm::vec3(0.0f, 0, -6.0f), .scale = glm::vec3(0.1f)},
                          CModelRenderer{
-                             .model = Model("assets/models/car/source/car.fbx"),
+                             .model = Model("assets/models/crowbar/source/untitled.fbx"),
                              //   .materialOverrides = std::vector<MaterialInstance>{MaterialInstance::Default({
                              //       .ao           = 0.0f,
                              //       .albedoMap    = Texture("assets/textures/backpack/albedo.jpeg"),
@@ -100,35 +101,35 @@ class CameraControlSystem : public System
 class StartupSystem : public System
 {
   public:
-    void start(World& world, ServiceRegistry& services) override
+    void start(World& world, ServiceRegistry& /*services*/) override
     {
-        services.get<Window>()->setClearColor(glm::vec3(0.1f, 0.1f, 0.1f));
         world.create(CCamera{}, CTransform{.position = glm::vec3(0.0f, 0.0f, 3.0f)});
         world.create(CDirectionalLight{.direction = glm::vec3(-0.2f, -1.0f, -0.3f),
                                        .color     = glm::vec3(1.0f, 1.0f, 1.0f),
-                                       .ambient   = 0.2f,
-                                       .intensity = 1.0f});
+                                       .ambient   = 0.0f,
+                                       .intensity = 10.0f});
+        world.create(CEnvironment{
+            .skybox = Skybox({"assets/skybox/right.jpg", "assets/skybox/left.jpg", "assets/skybox/top.jpg",
+                              "assets/skybox/bottom.jpg", "assets/skybox/front.jpg", "assets/skybox/back.jpg"}),
+        });
 
-        world.create(CPointLight{.color = glm::vec3(1.0f, 1.0f, 1.0f), .intensity = 500.0f},
+        world.create(CPointLight{.color = glm::vec3(1.0f, 1.0f, 0.8f), .intensity = 200.0f},
                      CTransform{.position = glm::vec3(-2.0f, 2.0f, -2.0f), .scale = glm::vec3(0.2f)},
                      CMeshRenderer{
                          .mesh     = Mesh::Cube(),
-                         .material = MaterialInstance::Default({
-                             .albedo    = glm::vec3(1.0f, 1.0f, 1.0f),
-                             .metallic  = 0.0f,
-                             .roughness = 1.0f,
-                         }),
+                         .material = MaterialInstance::PBR(),
                      });
 
         world.create(
             CMeshRenderer{
                 .mesh     = Mesh::Cube(),
-                .material = MaterialInstance::Default({.metallic     = 0.0f,
-                                                       .ao           = 0.1f,
-                                                       .albedoMap    = Texture("assets/textures/wall/diffuse.png"),
-                                                       .roughnessMap = Texture("assets/textures/wall/roughness.png"),
-                                                       .aoMap        = Texture("assets/textures/wall/ao.png"),
-                                                       .normalMap    = Texture("assets/textures/wall/normal.png")}),
+                .material = MaterialInstance::PBR({
+                    .metallic     = 0.0f,
+                    .albedoMap    = Texture("assets/textures/wall/color.png"),
+                    .roughnessMap = Texture("assets/textures/wall/roughness.png"),
+                    .aoMap        = Texture("assets/textures/wall/ao.png"),
+                    .normalMap    = Texture("assets/textures/wall/normal.png"),
+                }),
             },
             CTransform{.position = glm::vec3(0.0f, 0.0f, -10.0f), .scale = glm::vec3(20.0f, 20.0f, 1.0f)});
     }

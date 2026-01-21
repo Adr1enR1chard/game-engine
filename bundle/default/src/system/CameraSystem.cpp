@@ -6,7 +6,7 @@
 #include <engine/registry/World.hpp>
 
 #include <component/CCamera.hpp>
-#include <component/CCameraCache.hpp>
+#include <component/cache/CCameraCache.hpp>
 #include <service/Window.hpp>
 
 glm::mat4 getProjectionMatrix(float fov, float aspectRatio, float nearPlane, float farPlane)

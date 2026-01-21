@@ -39,15 +39,10 @@ class Window : public Service
 
   public:
     void getSize(int& width, int& height) const;
-    void setClearColor(const glm::vec3& color)
-    {
-        m_clearColor = color;
-    }
 
   private:
     struct WindowImpl;
     std::unique_ptr<WindowImpl> m_impl;
-    glm::vec3                   m_clearColor = glm::vec3(0.0f, 0.0f, 0.0f);
     int                         m_width      = 800;
     int                         m_height     = 600;
     const char*                 m_title      = "Game Engine";

@@ -6,9 +6,9 @@
 
 #include <model/Material.hpp>
 
-MaterialInstance MaterialInstance::Default(const DefaultMaterialParameters& params)
+MaterialInstance MaterialInstance::PBR(const PBRMaterialParameters& params)
 {
-    MaterialInstance material = MaterialInstance(Material::Default());
+    MaterialInstance material = MaterialInstance(Material::PBR());
 
     material.setUniform("material.albedo", params.albedo);
     material.setUniform("material.metallic", params.metallic);
@@ -19,6 +19,31 @@ MaterialInstance MaterialInstance::Default(const DefaultMaterialParameters& para
     material.setTexture("material.roughnessMap", params.roughnessMap);
     material.setTexture("material.aoMap", params.aoMap);
     material.setTexture("material.normalMap", params.normalMap);
+
+    return material;
+}
+
+MaterialInstance MaterialInstance::Phong(const PhongMaterialParameters& params)
+{
+    MaterialInstance material = MaterialInstance(Material::Phong());
+
+    material.setUniform("material.ambient", params.ambient);
+    material.setUniform("material.diffuse", params.diffuse);
+    material.setUniform("material.specular", params.specular);
+    material.setUniform("material.shininess", params.shininess);
+    material.setTexture("material.diffuseMap", params.diffuseMap);
+    material.setTexture("material.specularMap", params.specularMap);
+    material.setTexture("material.normalMap", params.normalMap);
+
+    return material;
+}
+
+MaterialInstance MaterialInstance::Skybox(const SkyboxMaterialParameters& params)
+{
+    MaterialInstance material = MaterialInstance(Material::Skybox());
+
+    material.setUniform("material.color", params.color);
+    material.setTexture("material.colorMap", params.colorMap);
 
     return material;
 }
