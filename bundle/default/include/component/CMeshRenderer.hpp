@@ -7,8 +7,8 @@
 #include <model/Model.hpp>
 
 struct CMeshRenderer {
-    std::shared_ptr<Mesh> mesh;
-    MaterialInstance      material;
+    MeshRef          meshRef;
+    MaterialInstance material;
 };
 
 struct CModelRenderer {

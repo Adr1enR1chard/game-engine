@@ -51,15 +51,8 @@ class MaterialInstance
     MaterialInstance&       setTexture(std::string name, const Texture& texture);
     MaterialInstance&       setUniform(const std::string& name, const UniformValue& value);
 
-  private:
-    friend class RenderSystem;
-
-    void setup(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
-
-  private:
-    friend class Model;
-    friend class Mesh;
-    void link(glm::mat4 modelMatrix);
+    void setCamera(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
+    void setTransform(glm::mat4 modelMatrix);
 
   private:
     std::unordered_map<std::string, Texture>   m_textures;

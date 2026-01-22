@@ -2,11 +2,8 @@
 
 #include <engine/model/System.hpp>
 
-class World;
-class ServiceRegistry;
-
 class TransformSystem : public System
 {
   public:
-    void update(World& world, ServiceRegistry& services, double deltaTime) override;
+    void update(double deltaTime) override;
 };

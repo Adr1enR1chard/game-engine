@@ -8,6 +8,6 @@ class EnvironmentSystem : public System
     EnvironmentSystem()           = default;
     ~EnvironmentSystem() override = default;
 
-    void start(World& world, ServiceRegistry& services) override;
-    void render(World& world, ServiceRegistry& services, double deltaTime) override;
+    void start() override;
+    void render(double deltaTime) override;
 };

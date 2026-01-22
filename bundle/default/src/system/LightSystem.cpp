@@ -1,27 +1,24 @@
 #include <system/LightSystem.hpp>
 
-#include <engine/registry/ServiceRegistry.hpp>
-#include <engine/registry/World.hpp>
-
 #include <component/CCamera.hpp>
 #include <component/CDirectionalLight.hpp>
 #include <component/CMeshRenderer.hpp>
 #include <component/CPointLight.hpp>
 #include <component/CTransform.hpp>
 
-void LightSystem::update(World& world, ServiceRegistry& /*services*/, double /*deltaTime*/)
+void LightSystem::update(double /*deltaTime*/)
 {
 
-    const auto& [eCamera, cCamera, cCameraTransform] = world.getAt<CCamera, CTransform>(0);
+    const auto& [eCamera, cCamera, cCameraTransform] = world().getAt<CCamera, CTransform>(0);
 
     if (!eCamera)
         return;
 
-    const auto& [eDirLight, cDirLight] = world.getAt<CDirectionalLight>(0);
+    const auto& [eDirLight, cDirLight] = world().getAt<CDirectionalLight>(0);
 
-    const auto& pointLights = world.get<CPointLight, CTransform>();
+    const auto& pointLights = world().get<CPointLight, CTransform>();
 
-    for (const auto& [eMeshRenderer, cMeshRenderer] : world.get<CMeshRenderer>()) {
+    for (const auto& [eMeshRenderer, cMeshRenderer] : world().get<CMeshRenderer>()) {
         auto& materialInstance = cMeshRenderer->material;
         materialInstance.setUniform("viewPos", cCameraTransform->position);
 
@@ -44,6 +41,7 @@ void LightSystem::update(World& world, ServiceRegistry& /*services*/, double /*d
                                                       cPointLight->color,             // color
                                                       cPointLight->intensity,         // intensity
                                                   });
+            ++i;
         }
     }
 }

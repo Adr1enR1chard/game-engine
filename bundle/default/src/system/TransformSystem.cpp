@@ -6,8 +6,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
-#include <engine/registry/World.hpp>
-
 glm::mat4 getModelMatrix(CTransform& transform)
 {
     glm::mat4 model = glm::mat4(1.0f);
@@ -29,14 +27,14 @@ glm::mat4 getViewMatrix(const glm::vec3& position, const glm::vec3& rotation)
     return view;
 }
 
-void TransformSystem::update(World& world, ServiceRegistry& /*services*/, double /*deltaTime*/)
+void TransformSystem::update(double /*deltaTime*/)
 {
-    for (const auto& [entity, transform] : world.get<CTransform>()) {
-        if (!world.has<CTransformCache>(entity)) {
-            world.add(entity, CTransformCache{});
+    for (const auto& [entity, transform] : world().get<CTransform>()) {
+        if (!world().has<CTransformCache>(entity)) {
+            world().add(entity, CTransformCache{});
         }
 
-        const auto& [_, transformCache] = world.getFrom<CTransformCache>(entity);
+        const auto& [_, transformCache] = world().getFrom<CTransformCache>(entity);
         transformCache->modelMatrix     = getModelMatrix(*transform);
         transformCache->viewMatrix      = getViewMatrix(transform->position, transform->rotation);
     }

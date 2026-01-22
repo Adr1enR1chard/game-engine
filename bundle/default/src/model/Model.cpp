@@ -33,7 +33,7 @@ void Model::draw(glm::mat4 viewMatrix, glm::mat4 projectionMatrix, glm::mat4 mod
     int meshIndex = 0;
     for (const auto& mesh : meshes) {
         std::shared_ptr<MaterialInstance> materialInstance = materials[meshMaterialMap.find(meshIndex)->second];
-        materialInstance->setup(viewMatrix, projectionMatrix);
+        materialInstance->setCamera(viewMatrix, projectionMatrix);
 
         mesh->Draw(*materialInstance, modelMatrix);
         meshIndex++;

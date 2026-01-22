@@ -4,22 +4,16 @@
 
 #include <glm/glm.hpp>
 #include <string>
+#include <utils/RenderTypes.hpp>
 
 class MaterialInstance;
 
-struct Vertex {
-    glm::vec3 position;
-    glm::vec3 normal;
-    glm::vec2 texCoords;
-    glm::vec3 tangent;
-    glm::vec3 bitangent;
-};
+using MeshRef = uint32_t;
 
 class Mesh
 {
   public:
-    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices,
-         const glm::mat4& localModel = glm::mat4(1.0f));
+    Mesh(std::vector<Vertex> vertices, std::vector<Index> indices, const glm::mat4& localModel = glm::mat4(1.0f));
 
     Mesh(const Mesh&)            = delete;
     Mesh& operator=(const Mesh&) = delete;

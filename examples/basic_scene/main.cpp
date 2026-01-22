@@ -4,9 +4,9 @@
 class MovingPointLightSystem : public System
 {
   public:
-    void update(World& world, ServiceRegistry& /*services*/, double deltaTime) override
+    void update(double deltaTime) override
     {
-        for (const auto& [entity, transform, pointLight] : world.get<CTransform, CPointLight>()) {
+        for (const auto& [entity, transform, pointLight] : world().get<CTransform, CPointLight>()) {
             glm::vec3 pos       = transform->position;
             pos.x               = 5.0f * std::sin(static_cast<float>(timeAccumulator));
             pos.z               = 5.0f * std::cos(static_cast<float>(timeAccumulator));
@@ -22,27 +22,27 @@ class MovingPointLightSystem : public System
 class BackPackSystem : public System
 {
   public:
-    void start(World& world, ServiceRegistry& /*services*/) override
+    void start() override
     {
         backpackEntity =
-            world.create(CTransform{.position = glm::vec3(0.0f, 0, -6.0f), .scale = glm::vec3(0.1f)},
-                         CModelRenderer{
-                             .model = Model("assets/models/crowbar/source/untitled.fbx"),
-                             //   .materialOverrides = std::vector<MaterialInstance>{MaterialInstance::Default({
-                             //       .ao           = 0.0f,
-                             //       .albedoMap    = Texture("assets/textures/backpack/albedo.jpeg"),
-                             //       .metallicMap  = Texture("assets/textures/backpack/metallic.png"),
-                             //       .roughnessMap = Texture("assets/textures/backpack/roughness.png"),
-                             //       .normalMap    = Texture("assets/textures/backpack/normal.png"),
-                             //   })},
-                         });
+            world().create(CTransform{.position = glm::vec3(0.0f, 0, -6.0f), .scale = glm::vec3(0.1f)},
+                           CModelRenderer{
+                               .model = Model("assets/models/crowbar/source/untitled.fbx"),
+                               //   .materialOverrides = std::vector<MaterialInstance>{MaterialInstance::Default({
+                               //       .ao           = 0.0f,
+                               //       .albedoMap    = Texture("assets/textures/backpack/albedo.jpeg"),
+                               //       .metallicMap  = Texture("assets/textures/backpack/metallic.png"),
+                               //       .roughnessMap = Texture("assets/textures/backpack/roughness.png"),
+                               //       .normalMap    = Texture("assets/textures/backpack/normal.png"),
+                               //   })},
+                           });
     }
 
   public:
-    void update(World& world, ServiceRegistry& /*services*/, double deltaTime) override
+    void update(double deltaTime) override
     {
         float dt = static_cast<float>(deltaTime);
-        if (auto [entity, transform] = world.getFrom<CTransform>(backpackEntity); entity != 0) {
+        if (auto [entity, transform] = world().getFrom<CTransform>(backpackEntity); entity != 0) {
             transform->rotation.y += 100.0f * dt;
         }
     }
@@ -54,11 +54,11 @@ class BackPackSystem : public System
 class CameraControlSystem : public System
 {
   public:
-    void update(World& world, ServiceRegistry& services, double deltaTime) override
+    void update(double deltaTime) override
     {
         float dt = static_cast<float>(deltaTime);
-        if (auto [entity, cCam, transform] = world.getAt<CCamera, CTransform>(0); entity != 0) {
-            Input* input = services.get<Input>();
+        if (auto [entity, cCam, transform] = world().getAt<CCamera, CTransform>(0); entity != 0) {
+            Input* input = services().get<Input>();
             transform->rotation.y += -input->getMouseDelta().x * 0.2f;
             transform->rotation.x += -input->getMouseDelta().y * 0.2f;
 
@@ -101,28 +101,28 @@ class CameraControlSystem : public System
 class StartupSystem : public System
 {
   public:
-    void start(World& world, ServiceRegistry& /*services*/) override
+    void start() override
     {
-        world.create(CCamera{}, CTransform{.position = glm::vec3(0.0f, 0.0f, 3.0f)});
-        world.create(CDirectionalLight{.direction = glm::vec3(-0.2f, -1.0f, -0.3f),
-                                       .color     = glm::vec3(1.0f, 1.0f, 1.0f),
-                                       .ambient   = 0.0f,
-                                       .intensity = 10.0f});
-        world.create(CEnvironment{
+        world().create(CCamera{}, CTransform{.position = glm::vec3(0.0f, 0.0f, 3.0f)});
+        world().create(CDirectionalLight{.direction = glm::vec3(-0.2f, -1.0f, -0.3f),
+                                         .color     = glm::vec3(1.0f, 1.0f, 1.0f),
+                                         .ambient   = 0.0f,
+                                         .intensity = 10.0f});
+        world().create(CEnvironment{
             .skybox = Skybox({"assets/skybox/right.jpg", "assets/skybox/left.jpg", "assets/skybox/top.jpg",
                               "assets/skybox/bottom.jpg", "assets/skybox/front.jpg", "assets/skybox/back.jpg"}),
         });
 
-        world.create(CPointLight{.color = glm::vec3(1.0f, 1.0f, 0.8f), .intensity = 200.0f},
-                     CTransform{.position = glm::vec3(-2.0f, 2.0f, -2.0f), .scale = glm::vec3(0.2f)},
-                     CMeshRenderer{
-                         .mesh     = Mesh::Cube(),
-                         .material = MaterialInstance::PBR(),
-                     });
+        world().create(CPointLight{.color = glm::vec3(1.0f, 1.0f, 0.8f), .intensity = 200.0f},
+                       CTransform{.position = glm::vec3(-2.0f, 2.0f, -2.0f), .scale = glm::vec3(0.2f)},
+                       CMeshRenderer{
+                           .meshRef  = services().get<MeshResource>()->createCube(),
+                           .material = MaterialInstance::PBR(),
+                       });
 
-        world.create(
+        world().create(
             CMeshRenderer{
-                .mesh     = Mesh::Cube(),
+                .meshRef  = services().get<MeshResource>()->createCube(),
                 .material = MaterialInstance::PBR({
                     .metallic     = 0.0f,
                     .albedoMap    = Texture("assets/textures/wall/color.png"),

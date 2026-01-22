@@ -1,5 +1,6 @@
 #pragma once
 
+#include <concepts>
 #include <typeindex>
 #include <vector>
 
@@ -15,3 +16,6 @@ class Bundle
   private:
     std::vector<std::type_index> m_systems;
 };
+
+template <typename T>
+concept BundleType = std::derived_from<T, Bundle>;

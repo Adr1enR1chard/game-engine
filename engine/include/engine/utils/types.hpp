@@ -1,22 +1,8 @@
 #pragma once
 
-#include <concepts>
 #include <variant>
 
 #include <glm/glm.hpp>
-
-#include <engine/model/Bundle.hpp>
-#include <engine/model/Service.hpp>
-#include <engine/model/System.hpp>
-
-template <typename T>
-concept SystemType = std::derived_from<T, System>;
-
-template <typename T>
-concept ServiceType = std::derived_from<T, Service>;
-
-template <typename T>
-concept BundleType = std::derived_from<T, Bundle>;
 
 struct UDirectionalLight {
     glm::vec3 direction;

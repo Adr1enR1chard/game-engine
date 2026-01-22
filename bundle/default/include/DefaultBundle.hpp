@@ -4,6 +4,7 @@
 
 // --- Services ---
 #include <service/Input.hpp>
+#include <service/MeshResource.hpp>
 #include <service/Window.hpp>
 
 // --- Systems ---
@@ -28,11 +29,11 @@ class DefaultBundle : public Bundle
     {
         engine
             .addSystems<TransformSystem, CameraSystem, RenderSystem, LightSystem, PlatformSystem, EnvironmentSystem>();
-        engine.addServices<Window, Input>();
+        engine.addServices<Window, Input, MeshResource>();
     }
     void remove(Engine& engine) const override
     {
         engine.removeSystems<TransformSystem, CameraSystem, RenderSystem, LightSystem, PlatformSystem>();
-        engine.removeServices<Window, Input>();
+        engine.removeServices<Window, Input, MeshResource>();
     }
 };

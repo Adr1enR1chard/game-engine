@@ -7,8 +7,8 @@ class PlatformSystem : public System
   public:
     PlatformSystem()           = default;
     ~PlatformSystem() override = default;
-    void init(ServiceRegistry& services) override;
-    void preUpdate(World& world, ServiceRegistry& services, double deltaTime) override;
-    void preRender(World& world, ServiceRegistry& services, double deltaTime) override;
-    void present(World& world, ServiceRegistry& services, double deltaTime) override;
+    void init() override;
+    void preUpdate(double deltaTime) override;
+    void preRender(double deltaTime) override;
+    void present(double deltaTime) override;
 };

@@ -45,6 +45,8 @@ add_library(default_bundle_glfw
     bundle/default/src/platform/glfw/model/Skybox.cpp
     bundle/default/src/platform/glfw/model/Texture.cpp
     bundle/default/src/platform/glfw/service/Window.cpp
+    bundle/default/src/platform/glfw/service/MeshResource.cpp
+    bundle/default/src/platform/glfw/service/ShaderResource.cpp
 )
 target_include_directories(default_bundle_glfw PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -57,6 +59,7 @@ add_library(engine_core
     engine/src/Engine.cpp
     engine/src/registry/World.cpp
     engine/src/utils/key_mapping.cpp
+    engine/src/model/Service.cpp
 )
 target_include_directories(engine_core PUBLIC
      ${CMAKE_CURRENT_SOURCE_DIR}/include

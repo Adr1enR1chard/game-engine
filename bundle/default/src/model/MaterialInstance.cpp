@@ -84,12 +84,12 @@ MaterialInstance& MaterialInstance::setUniform(const std::string& name, const Un
     return *this;
 }
 
-void MaterialInstance::setup(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
+void MaterialInstance::setCamera(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
 {
     m_material->use(&m_uniforms, &m_textures, viewMatrix, projectionMatrix);
 }
 
-void MaterialInstance::link(glm::mat4 modelMatrix)
+void MaterialInstance::setTransform(glm::mat4 modelMatrix)
 {
     m_material->setMat4("model", modelMatrix);
 }

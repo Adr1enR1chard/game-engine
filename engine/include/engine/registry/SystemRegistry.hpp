@@ -7,7 +7,6 @@
 #include <vector>
 
 #include <engine/model/System.hpp>
-#include <engine/utils/types.hpp>
 
 #include <engine/utils/Log.hpp>
 
@@ -39,52 +38,59 @@ class SystemRegistry
         (m_systems.erase(std::type_index(typeid(T))), ...);
     }
 
-    void init(ServiceRegistry& services)
+    void setContext(World& world, ServiceRegistry& services)
     {
         for (auto& [typeIndex, system] : m_systems) {
-            system->init(services);
+            system->setContext(world, services);
         }
     }
 
-    void start(World& world, ServiceRegistry& services)
+    void init()
     {
         for (auto& [typeIndex, system] : m_systems) {
-            system->start(world, services);
+            system->init();
         }
     }
 
-    void preUpdate(World& world, ServiceRegistry& services, float deltaTime)
+    void start()
     {
         for (auto& [typeIndex, system] : m_systems) {
-            system->preUpdate(world, services, deltaTime);
+            system->start();
         }
     }
 
-    void update(World& world, ServiceRegistry& services, float deltaTime)
+    void preUpdate(float deltaTime)
     {
         for (auto& [typeIndex, system] : m_systems) {
-            system->update(world, services, deltaTime);
+            system->preUpdate(deltaTime);
         }
     }
 
-    void preRender(World& world, ServiceRegistry& services, float deltaTime)
+    void update(float deltaTime)
     {
         for (auto& [typeIndex, system] : m_systems) {
-            system->preRender(world, services, deltaTime);
+            system->update(deltaTime);
         }
     }
 
-    void render(World& world, ServiceRegistry& services, float deltaTime)
+    void preRender(float deltaTime)
     {
         for (auto& [typeIndex, system] : m_systems) {
-            system->render(world, services, deltaTime);
+            system->preRender(deltaTime);
         }
     }
 
-    void present(World& world, ServiceRegistry& services, float deltaTime)
+    void render(float deltaTime)
     {
         for (auto& [typeIndex, system] : m_systems) {
-            system->present(world, services, deltaTime);
+            system->render(deltaTime);
+        }
+    }
+
+    void present(float deltaTime)
+    {
+        for (auto& [typeIndex, system] : m_systems) {
+            system->present(deltaTime);
         }
     }
 

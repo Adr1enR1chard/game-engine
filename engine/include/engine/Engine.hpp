@@ -50,14 +50,15 @@ class Engine
      */
     void run()
     {
-        m_systems.init(m_services);
+        m_systems.setContext(m_world, m_services);
+        m_systems.init();
 
         m_running = true;
 
         using clock    = std::chrono::steady_clock;
         auto lastFrame = clock::now();
 
-        m_systems.start(m_world, m_services);
+        m_systems.start();
 
         float deltaTime = 0.0f;
 
@@ -69,11 +70,11 @@ class Engine
             deltaTime = static_cast<float>(delta.count());
 
             // --- Engine loop ---
-            m_systems.preUpdate(m_world, m_services, deltaTime);
-            m_systems.update(m_world, m_services, deltaTime);
-            m_systems.preRender(m_world, m_services, deltaTime);
-            m_systems.render(m_world, m_services, deltaTime);
-            m_systems.present(m_world, m_services, deltaTime);
+            m_systems.preUpdate(deltaTime);
+            m_systems.update(deltaTime);
+            m_systems.preRender(deltaTime);
+            m_systems.render(deltaTime);
+            m_systems.present(deltaTime);
         }
     }
 
