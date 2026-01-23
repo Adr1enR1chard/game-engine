@@ -2,25 +2,8 @@
 
 #include <variant>
 
-#include <glm/glm.hpp>
-
-struct UDirectionalLight {
-    glm::vec3 direction;
-    glm::vec3 color     = glm::vec3(1.0f);
-    float     ambient   = 0.1f;
-    float     intensity = 1.0f;
-};
-
-struct UPointLight {
-    glm::vec3 position;
-    glm::vec3 color     = glm::vec3(1.0f);
-    float     intensity = 1.0f;
-};
-
-using UniformValue =
-    std::variant<int, float, glm::vec2, glm::vec3, glm::vec4, glm::mat4, UDirectionalLight, UPointLight>;
-
 #include <cstdint>
+#include <glm/glm.hpp>
 
 enum class KeyAction {
     Pressed  = 1,

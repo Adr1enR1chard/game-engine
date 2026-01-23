@@ -14,7 +14,10 @@
 #include <model/Material.hpp>
 #include <model/Mesh.hpp>
 
-#include <service/MeshResource.hpp>
+#include <service/resource/MaterialResource.hpp>
+#include <service/resource/MeshResource.hpp>
+#include <service/resource/ShaderResource.hpp>
+#include <service/resource/TextureResource.hpp>
 
 void RenderSystem::render(double /*deltaTime*/)
 {
@@ -23,14 +26,16 @@ void RenderSystem::render(double /*deltaTime*/)
     if (!cameraEntity)
         return;
 
+    glm::mat4 viewMatrix = cameraTransform->viewMatrix;
+    glm::mat4 projMatrix = cameraCache->projectionMatrix;
+
     /// ------- Render Environment -------
     if (const auto& [envEntity, environment] = world().getAt<CEnvironment>(0); envEntity) {
         if (auto [_, skyboxCache] = world().getFrom<CSkyboxCache>(envEntity); skyboxCache != nullptr) {
             glDepthMask(GL_FALSE);
             glDisable(GL_CULL_FACE);
 
-            skyboxCache->skyboxMaterial.setCamera(glm::mat4(glm::mat3(cameraTransform->viewMatrix)),
-                                                  cameraCache->projectionMatrix);
+            skyboxCache->skyboxMaterial.setCamera(glm::mat4(glm::mat3(viewMatrix)), projMatrix);
 
             skyboxCache->skyboxMesh->Draw(skyboxCache->skyboxMaterial, glm::mat4(1.0f));
 
@@ -44,13 +49,19 @@ void RenderSystem::render(double /*deltaTime*/)
     }
 
     /// ------- Render Meshes -------
-    MeshResource* meshResource = services().get<MeshResource>();
+    MeshResource*     meshResource     = services().get<MeshResource>();
+    MaterialResource* materialResource = services().get<MaterialResource>();
+    ShaderResource*   shaderResource   = services().get<ShaderResource>();
+    TextureResource*  textureResource  = services().get<TextureResource>();
     for (const auto& [entity, meshRenderer, transform] : world().get<CMeshRenderer, CTransformCache>()) {
-        auto  meshRef          = meshRenderer->meshRef;
-        auto& materialInstance = meshRenderer->material;
+        auto meshRef     = meshRenderer->meshRef;
+        auto materialRef = meshRenderer->materialRef;
 
-        materialInstance.setCamera(cameraTransform->viewMatrix, cameraCache->projectionMatrix);
-        materialInstance.setTransform(transform->modelMatrix * meshResource->getLocalModel(meshRef));
+        auto* uniforms = materialResource->getUniforms(materialRef);
+
+        auto shaderRef = materialResource->getShaderRef(materialRef);
+        shaderResource->bind(shaderRef, uniforms, viewMatrix, projMatrix, transform->modelMatrix, *textureResource);
+
         meshResource->draw(meshRef);
     }
 
@@ -58,6 +69,6 @@ void RenderSystem::render(double /*deltaTime*/)
     for (const auto& [entity, modelRenderer, transform] : world().get<CModelRenderer, CTransformCache>()) {
         auto& model = modelRenderer->model;
 
-        model.draw(cameraTransform->viewMatrix, cameraCache->projectionMatrix, transform->modelMatrix);
+        model.draw(viewMatrix, projMatrix, transform->modelMatrix);
     }
 }

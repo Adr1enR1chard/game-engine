@@ -64,11 +64,11 @@ MaterialInstance& MaterialInstance::setUniform(const std::string& name, const Un
         [&](auto const& v) {
             using T = std::decay_t<decltype(v)>;
 
-            if constexpr (std::is_same_v<T, UDirectionalLight>) {
+            if constexpr (std::is_same_v<T, Uniform::DirectionalLight>) {
                 setUniform(name + ".direction", v.direction);
                 setUniform(name + ".color", v.color);
                 setUniform(name + ".intensity", v.intensity);
-            } else if constexpr (std::is_same_v<T, UPointLight>) {
+            } else if constexpr (std::is_same_v<T, Uniform::PointLight>) {
                 setUniform(name + ".position", v.position);
                 setUniform(name + ".color", v.color);
                 setUniform(name + ".intensity", v.intensity);

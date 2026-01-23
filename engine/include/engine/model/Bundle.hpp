@@ -9,12 +9,9 @@ class SystemScheduler;
 class Bundle
 {
   public:
-    virtual ~Bundle()                               = default;
-    virtual void apply(class Engine& engine) const  = 0;
-    virtual void remove(class Engine& engine) const = 0;
-
-  private:
-    std::vector<std::type_index> m_systems;
+    virtual ~Bundle()                                                                            = default;
+    virtual void install(class SystemRegistry& systems, class ServiceRegistry& services) const   = 0;
+    virtual void uninstall(class SystemRegistry& systems, class ServiceRegistry& services) const = 0;
 };
 
 template <typename T>

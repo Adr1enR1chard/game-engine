@@ -2,7 +2,7 @@
 /// @brief Implementation of the MeshResource service using OpenGL.
 
 #include <glad/glad.h>
-#include <service/MeshResource.hpp>
+#include <service/resource/MeshResource.hpp>
 #include <utils/PrimitiveMeshes.hpp>
 
 struct MeshResource::MeshData {
@@ -23,14 +23,11 @@ void MeshResource::MeshDataDeleter::operator()(MeshData* meshData)
     }
 }
 
-MeshResource::~MeshResource()
-{
-    clear();
-}
+MeshResource::~MeshResource() = default;
 
 MeshRef MeshResource::create(std::vector<Vertex> vertices, std::vector<Index> indices)
 {
-    MeshRef newMeshRef = alloc();
+    MeshRef newMeshRef = m_idManager.alloc();
     auto    meshData   = std::unique_ptr<MeshData, MeshDataDeleter>(new MeshData());
 
     meshData->indicesCount = static_cast<unsigned int>(indices.size());
@@ -82,7 +79,7 @@ void MeshResource::remove(MeshRef meshRef)
     auto it = m_meshes.find(meshRef);
     if (it != m_meshes.end()) {
         m_meshes.erase(it);
-        m_freeMeshIds.push(meshRef);
+        m_idManager.free(meshRef);
         // Note : The MeshDataDeleter will be called automatically to free OpenGL resources.
     }
 }
@@ -104,25 +101,4 @@ glm::mat4 MeshResource::getLocalModel(MeshRef meshRef) const
         return it->second->localModel;
     }
     return glm::mat4(1.0f);
-}
-
-MeshRef MeshResource::alloc()
-{
-    MeshRef meshRef;
-    if (!m_freeMeshIds.empty()) {
-        meshRef = m_freeMeshIds.front();
-        m_freeMeshIds.pop();
-    } else {
-        meshRef = m_nextMeshId++;
-    }
-    return meshRef;
-}
-
-void MeshResource::clear()
-{
-    m_meshes.clear();
-    while (!m_freeMeshIds.empty()) {
-        m_freeMeshIds.pop();
-    }
-    m_nextMeshId = 1;
 }

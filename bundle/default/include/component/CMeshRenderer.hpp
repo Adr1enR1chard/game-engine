@@ -7,8 +7,8 @@
 #include <model/Model.hpp>
 
 struct CMeshRenderer {
-    MeshRef          meshRef;
-    MaterialInstance material;
+    MeshRef     meshRef;
+    MaterialRef materialRef;
 };
 
 struct CModelRenderer {

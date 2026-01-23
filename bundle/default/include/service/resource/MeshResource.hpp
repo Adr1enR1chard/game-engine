@@ -4,6 +4,7 @@
 #include <memory>
 #include <queue>
 #include <unordered_map>
+#include <utils/IdManager.hpp>
 #include <utils/RenderTypes.hpp>
 #include <vector>
 
@@ -34,10 +35,7 @@ class MeshResource : public Service
         void operator()(MeshData* meshData);
     };
 
-    MeshRef alloc();
-    void    clear();
-
-    MeshRef                                                                 m_nextMeshId = 1;
-    std::queue<MeshRef>                                                     m_freeMeshIds;
+  private:
+    IdManager                                                               m_idManager;
     std::unordered_map<MeshRef, std::unique_ptr<MeshData, MeshDataDeleter>> m_meshes;
 };

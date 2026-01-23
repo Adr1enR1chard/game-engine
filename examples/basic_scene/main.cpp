@@ -116,19 +116,31 @@ class StartupSystem : public System
         world().create(CPointLight{.color = glm::vec3(1.0f, 1.0f, 0.8f), .intensity = 200.0f},
                        CTransform{.position = glm::vec3(-2.0f, 2.0f, -2.0f), .scale = glm::vec3(0.2f)},
                        CMeshRenderer{
-                           .meshRef  = services().get<MeshResource>()->createCube(),
-                           .material = MaterialInstance::PBR(),
+                           .meshRef     = services().get<MeshResource>()->createCube(),
+                           .materialRef = services().get<MaterialFactory>()->PBR({
+                               .baseColor    = glm::vec3(1.0f, 1.0f, 1.0f),
+                               .metallic     = 0.0f,
+                               .roughness    = 1.0f,
+                               .ao           = 0.0f,
+                               .baseColorMap = "assets/textures/metal/albedo.png",
+                               .normalMap    = "assets/textures/metal/normal.png",
+                               .metallicMap  = "assets/textures/metal/metallic.png",
+                               .roughnessMap = "assets/textures/metal/roughness.png",
+                           }),
                        });
 
         world().create(
             CMeshRenderer{
-                .meshRef  = services().get<MeshResource>()->createCube(),
-                .material = MaterialInstance::PBR({
+                .meshRef     = services().get<MeshResource>()->createCube(),
+                .materialRef = services().get<MaterialFactory>()->PBR({
+                    .baseColor    = glm::vec3(1.0f, 1.0f, 1.0f),
                     .metallic     = 0.0f,
-                    .albedoMap    = Texture("assets/textures/wall/color.png"),
-                    .roughnessMap = Texture("assets/textures/wall/roughness.png"),
-                    .aoMap        = Texture("assets/textures/wall/ao.png"),
-                    .normalMap    = Texture("assets/textures/wall/normal.png"),
+                    .roughness    = 0.5f,
+                    .ao           = 1.0f,
+                    .baseColorMap = "assets/textures/metal/albedo.png",
+                    .normalMap    = "assets/textures/metal/normal.png",
+                    .metallicMap  = "assets/textures/metal/metallic.png",
+                    .roughnessMap = "assets/textures/metal/roughness.png",
                 }),
             },
             CTransform{.position = glm::vec3(0.0f, 0.0f, -10.0f), .scale = glm::vec3(20.0f, 20.0f, 1.0f)});

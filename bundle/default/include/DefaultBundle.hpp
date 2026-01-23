@@ -4,8 +4,11 @@
 
 // --- Services ---
 #include <service/Input.hpp>
-#include <service/MeshResource.hpp>
 #include <service/Window.hpp>
+#include <service/factory/MaterialFactory.hpp>
+#include <service/resource/MaterialResource.hpp>
+#include <service/resource/MeshResource.hpp>
+#include <service/resource/ShaderResource.hpp>
 
 // --- Systems ---
 #include <system/CameraSystem.hpp>
@@ -25,15 +28,16 @@
 class DefaultBundle : public Bundle
 {
   public:
-    void apply(Engine& engine) const override
+    void install(SystemRegistry& systems, ServiceRegistry& services) const override
     {
-        engine
-            .addSystems<TransformSystem, CameraSystem, RenderSystem, LightSystem, PlatformSystem, EnvironmentSystem>();
-        engine.addServices<Window, Input, MeshResource>();
+        systems.add<TransformSystem, CameraSystem, RenderSystem, LightSystem, PlatformSystem, EnvironmentSystem>();
+        services.add<Window, Input, MeshResource, MaterialResource, ShaderResource>();
+        services.add<MaterialFactory>(*(services.get<MaterialResource>()), *(services.get<ShaderResource>()));
     }
-    void remove(Engine& engine) const override
+
+    void uninstall(SystemRegistry& systems, ServiceRegistry& services) const override
     {
-        engine.removeSystems<TransformSystem, CameraSystem, RenderSystem, LightSystem, PlatformSystem>();
-        engine.removeServices<Window, Input, MeshResource>();
+        systems.remove<TransformSystem, CameraSystem, RenderSystem, LightSystem, PlatformSystem>();
+        services.remove<Window, Input, MeshResource, MaterialResource, ShaderResource>();
     }
 };

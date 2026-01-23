@@ -14,11 +14,11 @@ struct PointLight {
 };
 
 struct Material {
-    vec3 albedo;
+    vec3 baseColor;
     float metallic;
     float roughness;
     float ao;
-    sampler2D albedoMap;
+    sampler2D baseColorMap;
     sampler2D metallicMap;
     sampler2D roughnessMap;
     sampler2D aoMap;
@@ -84,14 +84,14 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
     return ggx1 * ggx2;
 }
 
-vec3 CalcDirLight(DirLight light, vec3 N, vec3 V, vec3 albedo, float metallic, float roughness, float ao) {
+vec3 CalcDirLight(DirLight light, vec3 N, vec3 V, vec3 baseColor, float metallic, float roughness, float ao) {
     vec3 L = normalize(-light.direction);
     vec3 H = normalize(V + L);
 
     vec3 radiance = light.color * light.intensity;
 
     vec3 F0 = vec3(0.04);
-    F0 = mix(F0, albedo, metallic);
+    F0 = mix(F0, baseColor, metallic);
     vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
 
     float NDF = DistributionGGX(N, H, roughness);
@@ -105,10 +105,10 @@ vec3 CalcDirLight(DirLight light, vec3 N, vec3 V, vec3 albedo, float metallic, f
     kD *= 1.0 - metallic;
 
     float NdotL = max(dot(N, L), 0.0);
-    return (kD * albedo / PI + specular) * radiance * NdotL;
+    return (kD * baseColor / PI + specular) * radiance * NdotL;
 }
 
-vec3 CalcPointLight(PointLight light, vec3 N, vec3 worldPos, vec3 V, vec3 albedo, float metallic, float roughness, float ao) {
+vec3 CalcPointLight(PointLight light, vec3 N, vec3 worldPos, vec3 V, vec3 baseColor, float metallic, float roughness, float ao) {
     vec3 L = normalize(light.position - worldPos);
     vec3 H = normalize(V + L);
 
@@ -117,7 +117,7 @@ vec3 CalcPointLight(PointLight light, vec3 N, vec3 worldPos, vec3 V, vec3 albedo
     vec3 radiance = light.color * light.intensity * attenuation;
 
     vec3 F0 = vec3(0.04);
-    F0 = mix(F0, albedo, metallic);
+    F0 = mix(F0, baseColor, metallic);
     vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
 
     float NDF = DistributionGGX(N, H, roughness);
@@ -131,7 +131,7 @@ vec3 CalcPointLight(PointLight light, vec3 N, vec3 worldPos, vec3 V, vec3 albedo
     kD *= 1.0 - metallic;
 
     float NdotL = max(dot(N, L), 0.0);
-    return (kD * albedo / PI + specular) * radiance * NdotL;
+    return (kD * baseColor / PI + specular) * radiance * NdotL;
 }
 
 void main() {
@@ -139,17 +139,18 @@ void main() {
     N = normalize(vTBN * (N * 2.0 - 1.0));
     vec3 V = normalize(viewPos - vWorldPos);
 
-    vec3 albedo = pow(texture(material.albedoMap, vUV).rgb * material.albedo, vec3(2.2));
+    // TODO: Handle default textures when not provided
+    vec3 baseColor = pow(texture(material.baseColorMap, vUV).rgb * material.baseColor, vec3(2.2));
     float metallic = texture(material.metallicMap, vUV).r * material.metallic;
     float roughness = texture(material.roughnessMap, vUV).r * material.roughness;
     float ao = texture(material.aoMap, vUV).r * material.ao;
 
-    vec3 Lo = CalcDirLight(dirLight, N, V, albedo, metallic, roughness, ao);
+    vec3 Lo = CalcDirLight(dirLight, N, V, baseColor, metallic, roughness, ao);
     for(int i = 0; i < pointLightCount; ++i) {
-        Lo += CalcPointLight(pointLights[i], N, vWorldPos, V, albedo, metallic, roughness, ao);
+        Lo += CalcPointLight(pointLights[i], N, vWorldPos, V, baseColor, metallic, roughness, ao);
     }
 
-    vec3 ambient = vec3(0.03) * material.albedo * material.ao * dirLight.ambient;
+    vec3 ambient = vec3(0.03) * baseColor * ao * dirLight.ambient;
     vec3 color = ambient + Lo;
 
     color = color / (color + vec3(1.0));

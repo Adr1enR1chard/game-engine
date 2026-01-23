@@ -84,7 +84,7 @@ class Engine
     template <BundleType B> Engine& addBundle()
     {
         std::unique_ptr<Bundle> bundle = std::make_unique<B>();
-        bundle->apply(*this);
+        bundle->install(m_systems, m_services);
 
         m_bundles.push_back(std::move(bundle));
 
@@ -100,7 +100,7 @@ class Engine
             std::find_if(m_bundles.begin(), m_bundles.end(), [](Bundle* b) { return dynamic_cast<B*>(b) != nullptr; });
 
         if (it != m_bundles.end()) {
-            (*it)->remove(*this);
+            (*it)->uninstall(m_systems, m_services);
             m_bundles.erase(it);
         }
 

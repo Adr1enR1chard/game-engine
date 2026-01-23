@@ -30,6 +30,12 @@ class SystemRegistry
         (..., Log::Print("Added system: " + std::string(typeid(T).name()), LogLevel::Info));
     }
 
+    template <SystemType T, typename... Args> void add(Args&&... args)
+    {
+        m_systems.try_emplace(std::type_index(typeid(T)), std::make_unique<T>(std::forward<Args>(args)...));
+        Log::Print("Added system: " + std::string(typeid(T).name()), LogLevel::Info);
+    }
+
     /**
      * Remove systems from the registry.
      */

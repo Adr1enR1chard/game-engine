@@ -27,6 +27,12 @@ class ServiceRegistry
         (..., Log::Print("Added service: " + std::string(typeid(T).name()), LogLevel::Info));
     }
 
+    template <ServiceType T, typename... Args> void add(Args&&... args)
+    {
+        m_services.try_emplace(std::type_index(typeid(T)), std::make_unique<T>(std::forward<Args>(args)...));
+        Log::Print("Added service: " + std::string(typeid(T).name()), LogLevel::Info);
+    }
+
     /**
      * Remove services from the registry.
      */

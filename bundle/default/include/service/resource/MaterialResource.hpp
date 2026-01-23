@@ -1,0 +1,26 @@
+#pragma once
+
+#include <engine/model/Service.hpp>
+#include <string>
+#include <unordered_map>
+#include <utils/IdManager.hpp>
+#include <utils/RenderTypes.hpp>
+
+class MaterialResource : public Service
+{
+  public:
+    MaterialResource()           = default;
+    ~MaterialResource() override = default;
+
+    MaterialRef create(ShaderRef shaderRef);
+    void        remove(MaterialRef materialRef);
+
+    void                     setUniform(MaterialRef materialRef, const char* uniformName, const UniformValue& value);
+    const UniformCollection* getUniforms(MaterialRef materialRef) const;
+    ShaderRef                getShaderRef(MaterialRef materialRef) const;
+
+  private:
+    IdManager                                          m_idManager;
+    std::unordered_map<MaterialRef, ShaderRef>         m_materials;
+    std::unordered_map<MaterialRef, UniformCollection> m_materialUniforms;
+};

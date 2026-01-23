@@ -3,6 +3,7 @@
 #include <model/Texture.hpp>
 
 #include <engine/utils/types.hpp>
+#include <utils/RenderTypes.hpp>
 
 #include <glm/glm.hpp>
 #include <memory>
