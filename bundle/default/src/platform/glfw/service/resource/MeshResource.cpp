@@ -69,11 +69,6 @@ MeshRef MeshResource::create(std::vector<Vertex> vertices, std::vector<Index> in
     return newMeshRef;
 }
 
-MeshRef MeshResource::createCube()
-{
-    return create(kCubeVertices, kCubeIndices);
-}
-
 void MeshResource::remove(MeshRef meshRef)
 {
     auto it = m_meshes.find(meshRef);

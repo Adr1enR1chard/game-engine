@@ -26,21 +26,21 @@ void RenderSystem::render(double /*deltaTime*/)
     if (!cameraEntity)
         return;
 
+    MeshResource*     meshResource     = services().get<MeshResource>();
+    MaterialResource* materialResource = services().get<MaterialResource>();
+    ShaderResource*   shaderResource   = services().get<ShaderResource>();
+
     glm::mat4 viewMatrix = cameraTransform->viewMatrix;
     glm::mat4 projMatrix = cameraCache->projectionMatrix;
 
     /// ------- Render Environment -------
     if (const auto& [envEntity, environment] = world().getAt<CEnvironment>(0); envEntity) {
         if (auto [_, skyboxCache] = world().getFrom<CSkyboxCache>(envEntity); skyboxCache != nullptr) {
-            glDepthMask(GL_FALSE);
-            glDisable(GL_CULL_FACE);
+            auto shaderRef = materialResource->getShaderRef(environment->skyboxMaterial);
+            shaderResource->bind(shaderRef, materialResource->getUniforms(environment->skyboxMaterial),
+                                 glm::mat4(glm::mat3(viewMatrix)), projMatrix, glm::mat4(1.0f));
 
-            skyboxCache->skyboxMaterial.setCamera(glm::mat4(glm::mat3(viewMatrix)), projMatrix);
-
-            skyboxCache->skyboxMesh->Draw(skyboxCache->skyboxMaterial, glm::mat4(1.0f));
-
-            glEnable(GL_CULL_FACE);
-            glDepthMask(GL_TRUE);
+            meshResource->draw(skyboxCache->meshRef);
         } else {
             // Clear to background color if no skybox is set
             glClearColor(environment->backgroundColor.r, environment->backgroundColor.g, environment->backgroundColor.b,
@@ -49,9 +49,6 @@ void RenderSystem::render(double /*deltaTime*/)
     }
 
     /// ------- Render Meshes -------
-    MeshResource*     meshResource     = services().get<MeshResource>();
-    MaterialResource* materialResource = services().get<MaterialResource>();
-    ShaderResource*   shaderResource   = services().get<ShaderResource>();
     for (const auto& [entity, meshRenderer, transform] : world().get<CMeshRenderer, CTransformCache>()) {
         auto meshRef     = meshRenderer->meshRef;
         auto materialRef = meshRenderer->materialRef;

@@ -6,7 +6,7 @@
 
 #include <model/Material.hpp>
 
-MaterialInstance MaterialInstance::PBR(const PBRMaterialParameters& params)
+MaterialInstance MaterialInstance::PBR(const PBRMaterialParameters_& params)
 {
     MaterialInstance material = MaterialInstance(Material::PBR());
 
@@ -38,7 +38,7 @@ MaterialInstance MaterialInstance::Phong(const PhongMaterialParameters& params)
     return material;
 }
 
-MaterialInstance MaterialInstance::Skybox(const SkyboxMaterialParameters& params)
+MaterialInstance MaterialInstance::Skybox(const SkyboxMaterialParameters_& params)
 {
     MaterialInstance material = MaterialInstance(Material::Skybox());
 

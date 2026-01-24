@@ -50,6 +50,7 @@ add_library(default_bundle_glfw
     bundle/default/src/platform/glfw/service/resource/MaterialResource.cpp
     bundle/default/src/platform/glfw/service/resource/TextureResource.cpp
     bundle/default/src/platform/glfw/service/factory/MaterialFactory.cpp
+    bundle/default/src/DefaultBundle.cpp
 )
 target_include_directories(default_bundle_glfw PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include

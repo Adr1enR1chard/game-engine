@@ -3,7 +3,7 @@
 #include <service/resource/MaterialResource.hpp>
 #include <service/resource/ShaderResource.hpp>
 
-struct PBRMaterialOptions {
+struct PBRMaterialParameters {
     glm::vec3  baseColor    = glm::vec3(1.0f);
     float      metallic     = 0.0f;
     float      roughness    = 1.0f;
@@ -15,6 +15,10 @@ struct PBRMaterialOptions {
     TextureRef aoMap        = 0;
 };
 
+struct SkyboxMaterialParameters {
+    TextureRef colorMap = 0;
+};
+
 class MaterialFactory : public Service
 {
   public:
@@ -23,7 +27,8 @@ class MaterialFactory : public Service
     {
     }
 
-    MaterialRef PBR(const PBRMaterialOptions& options);
+    MaterialRef PBR(const PBRMaterialParameters& options);
+    MaterialRef Skybox(const SkyboxMaterialParameters& options);
 
   private:
     MaterialResource& m_materialResource;

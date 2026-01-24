@@ -108,15 +108,17 @@ class StartupSystem : public System
                                          .color     = glm::vec3(1.0f, 1.0f, 1.0f),
                                          .ambient   = 0.0f,
                                          .intensity = 10.0f});
-        world().create(CEnvironment{
-            .skybox = Skybox({"assets/skybox/right.jpg", "assets/skybox/left.jpg", "assets/skybox/top.jpg",
-                              "assets/skybox/bottom.jpg", "assets/skybox/front.jpg", "assets/skybox/back.jpg"}),
-        });
+        world().create(
+            CEnvironment{.skyboxMaterial = services().get<MaterialFactory>()->Skybox({
+                             .colorMap = services().get<TextureFactory>()->CubeMap(
+                                 {"assets/skybox/right.jpg", "assets/skybox/left.jpg", "assets/skybox/top.jpg",
+                                  "assets/skybox/bottom.jpg", "assets/skybox/front.jpg", "assets/skybox/back.jpg"}),
+                         })});
 
         world().create(CPointLight{.color = glm::vec3(1.0f, 1.0f, 0.8f), .intensity = 200.0f},
                        CTransform{.position = glm::vec3(-2.0f, 2.0f, -2.0f), .scale = glm::vec3(0.2f)},
                        CMeshRenderer{
-                           .meshRef     = services().get<MeshResource>()->createCube(),
+                           .meshRef     = services().get<MeshFactory>()->Cube(),
                            .materialRef = services().get<MaterialFactory>()->PBR({
                                .baseColor = glm::vec3(1.0f, 1.0f, 1.0f),
                                .metallic  = 0.0f,
@@ -127,16 +129,16 @@ class StartupSystem : public System
 
         world().create(
             CMeshRenderer{
-                .meshRef     = services().get<MeshResource>()->createCube(),
+                .meshRef     = services().get<MeshFactory>()->Cube(),
                 .materialRef = services().get<MaterialFactory>()->PBR({
                     .baseColor    = glm::vec3(1.0f, 1.0f, 1.0f),
                     .metallic     = 0.0f,
                     .roughness    = 1.0f,
                     .ao           = 0.0f,
-                    .baseColorMap = services().get<TextureResource>()->create("assets/textures/wall/color.png"),
-                    .normalMap    = services().get<TextureResource>()->create("assets/textures/wall/normal.png"),
-                    .roughnessMap = services().get<TextureResource>()->create("assets/textures/wall/roughness.png"),
-                    .aoMap        = services().get<TextureResource>()->create("assets/textures/wall/ao.png"),
+                    .baseColorMap = services().get<TextureFactory>()->Texture2D("assets/textures/wall/color.png"),
+                    .normalMap    = services().get<TextureFactory>()->Texture2D("assets/textures/wall/normal.png"),
+                    .roughnessMap = services().get<TextureFactory>()->Texture2D("assets/textures/wall/roughness.png"),
+                    .aoMap        = services().get<TextureFactory>()->Texture2D("assets/textures/wall/ao.png"),
                 }),
             },
             CTransform{.position = glm::vec3(0.0f, 0.0f, -10.0f), .scale = glm::vec3(20.0f, 20.0f, 1.0f)});

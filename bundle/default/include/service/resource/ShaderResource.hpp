@@ -10,6 +10,17 @@
 #include <utils/IdManager.hpp>
 #include <utils/RenderTypes.hpp>
 
+struct ShaderParameters {
+    bool cullFaceEnabled   = true;
+    bool depthTestEnabled  = true;
+    bool depthWriteEnabled = true;
+    bool backfaceCulling   = true;
+    bool blendEnabled      = false;
+    bool wireframeEnabled  = false;
+    bool scissorEnabled    = false;
+    bool stencilEnabled    = false;
+};
+
 class ShaderResource : public Service
 {
   public:
@@ -23,21 +34,27 @@ class ShaderResource : public Service
     /// @param vertexShaderPath
     /// @param fragmentShaderPath
     /// @return
-    ShaderRef create(const char* name, const char* vertexShaderPath, const char* fragmentShaderPath);
+    ShaderRef create(const char* name, const char* vertexShaderPath, const char* fragmentShaderPath,
+                     const ShaderParameters& params = {});
     ShaderRef get(const char* name) const;
 
     void bind(ShaderRef shaderRef, const UniformCollection* uniforms, glm::mat4 viewMatrix, glm::mat4 projectionMatrix,
               glm::mat4 modelMatrix) const;
 
   private:
-    struct ShaderData;
-
-    struct ShaderDataDeleter {
-        void operator()(ShaderData* shaderData);
+    /// @brief Implementation details for Shader, based on the rendering backend
+    struct ShaderImpl;
+    struct ShaderImplDeleter {
+        void operator()(ShaderImpl* shaderImpl);
     };
 
-    IdManager                                                                     m_idManager;
-    std::unordered_map<std::string, ShaderRef>                                    m_nameToShaderRef;
-    std::unordered_map<ShaderRef, std::unique_ptr<ShaderData, ShaderDataDeleter>> m_loadedShaders;
-    TextureResource&                                                              m_textureResource;
+    struct ShaderData {
+        std::unique_ptr<ShaderImpl, ShaderImplDeleter> impl;
+        ShaderParameters                               parameters = {};
+    };
+
+    IdManager                                                  m_idManager;
+    std::unordered_map<std::string, ShaderRef>                 m_nameToShaderRef;
+    std::unordered_map<ShaderRef, std::unique_ptr<ShaderData>> m_loadedShaders;
+    TextureResource&                                           m_textureResource;
 };

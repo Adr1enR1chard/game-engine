@@ -13,7 +13,7 @@
 
 class Material;
 
-struct PBRMaterialParameters {
+struct PBRMaterialParameters_ {
     glm::vec3 albedo       = glm::vec3(1.0f);
     float     metallic     = 1.0f;
     float     roughness    = 1.0f;
@@ -35,7 +35,7 @@ struct PhongMaterialParameters {
     Texture   normalMap   = Texture::DefaultNormalMap();
 };
 
-struct SkyboxMaterialParameters {
+struct SkyboxMaterialParameters_ {
     glm::vec3 color    = glm::vec3(1.0f);
     Texture   colorMap = Texture::White();
 };
@@ -46,9 +46,9 @@ class MaterialInstance
     MaterialInstance(std::shared_ptr<Material> baseMaterial) : m_material(baseMaterial) {}
     ~MaterialInstance() = default;
 
-    static MaterialInstance PBR(const PBRMaterialParameters& params = {});
+    static MaterialInstance PBR(const PBRMaterialParameters_& params = {});
     static MaterialInstance Phong(const PhongMaterialParameters& params = {});
-    static MaterialInstance Skybox(const SkyboxMaterialParameters& params = {});
+    static MaterialInstance Skybox(const SkyboxMaterialParameters_& params = {});
     MaterialInstance&       setTexture(std::string name, const Texture& texture);
     MaterialInstance&       setUniform(const std::string& name, const UniformValue& value);
 

@@ -17,7 +17,6 @@ class MeshResource : public Service
 
   public:
     MeshRef create(std::vector<Vertex> vertices, std::vector<Index> indices);
-    MeshRef createCube();
 
     void remove(MeshRef meshRef);
 

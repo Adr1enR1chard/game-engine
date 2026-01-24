@@ -12,7 +12,8 @@ class TextureResource : public Service
     TextureResource()           = default;
     ~TextureResource() override = default;
 
-    TextureRef create(const char* imagePath);
+    TextureRef texture2D(const char* imagePath);
+    TextureRef cubeMap(const std::vector<std::string>& faces);
     void       remove(TextureRef textureRef);
 
     void bind(TextureRef textureRef) const;

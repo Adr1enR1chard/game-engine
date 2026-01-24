@@ -2,16 +2,13 @@
 
 #include <engine/utils/Log.hpp>
 
-MaterialRef MaterialFactory::PBR(const PBRMaterialOptions& options)
+MaterialRef MaterialFactory::PBR(const PBRMaterialParameters& options)
 {
-    // Get or create the PBR shader
     ShaderRef pbrShaderRef =
         m_shaderResource.create("PBRShader", "assets/shaders/Default.vert", "assets/shaders/PBR.frag");
 
-    // Create a new material with the PBR shader
     MaterialRef materialRef = m_materialResource.create(pbrShaderRef);
 
-    // Set the PBR uniforms
     m_materialResource.setUniform(materialRef, "material.baseColor", options.baseColor);
     m_materialResource.setUniform(materialRef, "material.metallic", options.metallic);
     m_materialResource.setUniform(materialRef, "material.roughness", options.roughness);
@@ -19,33 +16,44 @@ MaterialRef MaterialFactory::PBR(const PBRMaterialOptions& options)
 
     m_materialResource.setUniform(materialRef, "material.useBaseColorMap", options.baseColorMap != 0);
     if (options.baseColorMap != 0) {
-        m_materialResource.setUniform(materialRef, "material.baseColorMap",
-                                      Uniform::Texture{options.baseColorMap, TextureType::Texture2D});
+        m_materialResource.setUniform(materialRef, "material.baseColorMap", options.baseColorMap);
     }
 
     m_materialResource.setUniform(materialRef, "material.useNormalMap", options.normalMap != 0);
     if (options.normalMap != 0) {
-        m_materialResource.setUniform(materialRef, "material.normalMap",
-                                      Uniform::Texture{options.normalMap, TextureType::Texture2D});
+        m_materialResource.setUniform(materialRef, "material.normalMap", options.normalMap);
     }
 
     m_materialResource.setUniform(materialRef, "material.useMetallicMap", options.metallicMap != 0);
     if (options.metallicMap != 0) {
-        m_materialResource.setUniform(materialRef, "material.metallicMap",
-                                      Uniform::Texture{options.metallicMap, TextureType::Texture2D});
+        m_materialResource.setUniform(materialRef, "material.metallicMap", options.metallicMap);
     }
 
     m_materialResource.setUniform(materialRef, "material.useRoughnessMap", options.roughnessMap != 0);
     if (options.roughnessMap != 0) {
-        m_materialResource.setUniform(materialRef, "material.roughnessMap",
-                                      Uniform::Texture{options.roughnessMap, TextureType::Texture2D});
+        m_materialResource.setUniform(materialRef, "material.roughnessMap", options.roughnessMap);
     }
 
     m_materialResource.setUniform(materialRef, "material.useAOMap", options.aoMap != 0);
     if (options.aoMap != 0) {
-        m_materialResource.setUniform(materialRef, "material.aoMap",
-                                      Uniform::Texture{options.aoMap, TextureType::Texture2D});
+        m_materialResource.setUniform(materialRef, "material.aoMap", options.aoMap);
     }
 
     return materialRef;
 };
+
+MaterialRef MaterialFactory::Skybox(const SkyboxMaterialParameters& options)
+{
+    ShaderRef skyboxShaderRef =
+        m_shaderResource.create("SkyboxShader", "assets/shaders/Skybox.vert", "assets/shaders/Skybox.frag",
+                                {
+                                    .cullFaceEnabled   = false,
+                                    .depthTestEnabled  = false,
+                                    .depthWriteEnabled = false,
+                                });
+    MaterialRef materialRef = m_materialResource.create(skyboxShaderRef);
+
+    m_materialResource.setUniform(materialRef, "material.colorMap", options.colorMap);
+
+    return materialRef;
+}

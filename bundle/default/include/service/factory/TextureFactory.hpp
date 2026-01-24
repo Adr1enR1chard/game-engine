@@ -11,7 +11,12 @@ class TextureFactory : public Service
 
     TextureRef Texture2D(const char* imagePath)
     {
-        return m_texture2DResource.create(imagePath);
+        return m_texture2DResource.texture2D(imagePath);
+    }
+
+    TextureRef CubeMap(const std::vector<std::string>& faces)
+    {
+        return m_texture2DResource.cubeMap(faces);
     }
 
   private:

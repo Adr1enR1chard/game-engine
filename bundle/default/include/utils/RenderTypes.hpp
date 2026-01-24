@@ -24,6 +24,7 @@ using MaterialRef = unsigned int;
 
 enum TextureType {
     Texture2D,
+    CubeMap,
 };
 
 class Uniform
@@ -41,14 +42,9 @@ class Uniform
         glm::vec3 color     = glm::vec3(1.0f);
         float     intensity = 1.0f;
     };
-
-    struct Texture {
-        TextureRef  textureRef;
-        TextureType type;
-    };
 };
 
 using UniformValue = std::variant<int, float, glm::vec2, glm::vec3, glm::vec4, glm::mat4, Uniform::DirectionalLight,
-                                  Uniform::PointLight, Uniform::Texture>;
+                                  Uniform::PointLight, TextureRef>;
 
 using UniformCollection = std::unordered_map<std::string, UniformValue>;
