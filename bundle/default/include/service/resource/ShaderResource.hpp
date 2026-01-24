@@ -1,18 +1,19 @@
 #pragma once
 
-#include <engine/model/Service.hpp>
-#include <utils/RenderTypes.hpp>
-
 #include <glm/glm.hpp>
 #include <memory>
 #include <string>
 #include <unordered_map>
+
+#include <engine/model/Service.hpp>
+#include <service/resource/TextureResource.hpp>
 #include <utils/IdManager.hpp>
+#include <utils/RenderTypes.hpp>
 
 class ShaderResource : public Service
 {
   public:
-    ShaderResource()           = default;
+    ShaderResource(TextureResource& textureResource) : m_textureResource(textureResource) {};
     ~ShaderResource() override = default;
 
   public:
@@ -26,7 +27,7 @@ class ShaderResource : public Service
     ShaderRef get(const char* name) const;
 
     void bind(ShaderRef shaderRef, const UniformCollection* uniforms, glm::mat4 viewMatrix, glm::mat4 projectionMatrix,
-              glm::mat4 modelMatrix, class TextureResource& textureResource) const;
+              glm::mat4 modelMatrix) const;
 
   private:
     struct ShaderData;
@@ -38,4 +39,5 @@ class ShaderResource : public Service
     IdManager                                                                     m_idManager;
     std::unordered_map<std::string, ShaderRef>                                    m_nameToShaderRef;
     std::unordered_map<ShaderRef, std::unique_ptr<ShaderData, ShaderDataDeleter>> m_loadedShaders;
+    TextureResource&                                                              m_textureResource;
 };

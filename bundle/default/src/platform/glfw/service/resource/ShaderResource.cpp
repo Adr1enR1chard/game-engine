@@ -132,13 +132,13 @@ inline void parseUniforms(unsigned int shaderProgram, const UniformCollection* u
         return;
     }
 
+    unsigned int textureUnit = 0;
     for (const auto& [name, value] : *uniforms) {
         uint32_t location = glGetUniformLocation(shaderProgram, name.c_str());
         if (location == static_cast<uint32_t>(-1)) {
             continue;
         }
 
-        unsigned int textureUnit = 0;
         std::visit(
             [&](auto const& v) {
                 using T = std::decay_t<decltype(v)>;
@@ -167,7 +167,7 @@ inline void parseUniforms(unsigned int shaderProgram, const UniformCollection* u
 }
 
 void ShaderResource::bind(ShaderRef shaderRef, const UniformCollection* uniforms, glm::mat4 viewMatrix,
-                          glm::mat4 projectionMatrix, glm::mat4 modelMatrix, TextureResource& textureResource) const
+                          glm::mat4 projectionMatrix, glm::mat4 modelMatrix) const
 {
     auto it = m_loadedShaders.find(shaderRef);
     if (it == m_loadedShaders.end()) {
@@ -179,7 +179,7 @@ void ShaderResource::bind(ShaderRef shaderRef, const UniformCollection* uniforms
     glUseProgram(shaderProgram); // Note: Not sure OpenGL handles redundant calls to glUseProgram
 
     if (uniforms != nullptr) {
-        parseUniforms(shaderProgram, uniforms, textureResource);
+        parseUniforms(shaderProgram, uniforms, m_textureResource);
     }
 
     uint32_t viewLoc  = glGetUniformLocation(shaderProgram, "view");

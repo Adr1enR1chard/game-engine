@@ -52,7 +52,6 @@ void RenderSystem::render(double /*deltaTime*/)
     MeshResource*     meshResource     = services().get<MeshResource>();
     MaterialResource* materialResource = services().get<MaterialResource>();
     ShaderResource*   shaderResource   = services().get<ShaderResource>();
-    TextureResource*  textureResource  = services().get<TextureResource>();
     for (const auto& [entity, meshRenderer, transform] : world().get<CMeshRenderer, CTransformCache>()) {
         auto meshRef     = meshRenderer->meshRef;
         auto materialRef = meshRenderer->materialRef;
@@ -60,7 +59,7 @@ void RenderSystem::render(double /*deltaTime*/)
         auto* uniforms = materialResource->getUniforms(materialRef);
 
         auto shaderRef = materialResource->getShaderRef(materialRef);
-        shaderResource->bind(shaderRef, uniforms, viewMatrix, projMatrix, transform->modelMatrix, *textureResource);
+        shaderResource->bind(shaderRef, uniforms, viewMatrix, projMatrix, transform->modelMatrix);
 
         meshResource->draw(meshRef);
     }

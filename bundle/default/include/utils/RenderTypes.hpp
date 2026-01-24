@@ -22,6 +22,10 @@ using TextureRef = unsigned int;
 
 using MaterialRef = unsigned int;
 
+enum TextureType {
+    Texture2D,
+};
+
 class Uniform
 {
   public:
@@ -40,7 +44,7 @@ class Uniform
 
     struct Texture {
         TextureRef  textureRef;
-        const char* textureName;
+        TextureType type;
     };
 };
 

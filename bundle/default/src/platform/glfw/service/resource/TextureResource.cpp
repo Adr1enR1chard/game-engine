@@ -22,7 +22,6 @@ TextureRef TextureResource::create(const char* imagePath)
     TextureRef newTextureRef = m_idManager.alloc();
     auto       textureData   = std::unique_ptr<TextureData, TextureDataDeleter>(new TextureData());
 
-    // Load image using stb_image or any other image loading library
     int            width, height, nrChannels;
     unsigned char* data = stbi_load(imagePath, &width, &height, &nrChannels, 0);
     if (data) {
@@ -41,28 +40,29 @@ TextureRef TextureResource::create(const char* imagePath)
         } else if (nrChannels == 4) {
             format         = GL_RGBA;
             internalFormat = GL_RGBA8;
-
-            glGenTextures(1, &textureData->textureID);
-            glBindTexture(GL_TEXTURE_2D, textureData->textureID);
-            glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-            glGenerateMipmap(GL_TEXTURE_2D);
-
-            // Set texture parameters
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-            stbi_image_free(data);
         } else {
-            Log::Print("Failed to load texture: " + std::string(imagePath), LogLevel::Critical);
             stbi_image_free(data);
+            m_idManager.free(newTextureRef);
+            return 0;
         }
+
+        glGenTextures(1, &textureData->textureID);
+        glBindTexture(GL_TEXTURE_2D, textureData->textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
 
         m_textures[newTextureRef] = std::move(textureData);
         return newTextureRef;
     }
     Log::Print("Failed to load texture: " + std::string(imagePath), LogLevel::Critical);
+    m_idManager.free(newTextureRef);
     return 0;
 }
 
