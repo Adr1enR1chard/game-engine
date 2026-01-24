@@ -29,8 +29,6 @@ add_library(default_bundle
     bundle/default/src/system/PlatformSystem.cpp
     bundle/default/src/system/EnvironmentSystem.cpp
     bundle/default/src/service/Input.cpp
-    bundle/default/src/model/Model.cpp
-    bundle/default/src/model/MaterialInstance.cpp
 )
 target_include_directories(default_bundle PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -40,15 +38,12 @@ target_include_directories(default_bundle PUBLIC
 
 # Library: GLFW platform
 add_library(default_bundle_glfw
-    bundle/default/src/platform/glfw/model/Mesh.cpp
-    bundle/default/src/platform/glfw/model/Material.cpp
-    bundle/default/src/platform/glfw/model/Skybox.cpp
-    bundle/default/src/platform/glfw/model/Texture.cpp
     bundle/default/src/platform/glfw/service/Window.cpp
     bundle/default/src/platform/glfw/service/resource/MeshResource.cpp
     bundle/default/src/platform/glfw/service/resource/ShaderResource.cpp
     bundle/default/src/platform/glfw/service/resource/MaterialResource.cpp
     bundle/default/src/platform/glfw/service/resource/TextureResource.cpp
+    bundle/default/src/platform/glfw/service/resource/ModelResource.cpp
     bundle/default/src/platform/glfw/service/factory/MaterialFactory.cpp
     bundle/default/src/DefaultBundle.cpp
 )

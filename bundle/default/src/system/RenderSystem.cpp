@@ -11,11 +11,10 @@
 #include <component/cache/CSkyboxCache.hpp>
 #include <component/cache/CTransformCache.hpp>
 
-#include <model/Material.hpp>
-#include <model/Mesh.hpp>
-
+#include <service/Window.hpp>
 #include <service/resource/MaterialResource.hpp>
 #include <service/resource/MeshResource.hpp>
+#include <service/resource/ModelResource.hpp>
 #include <service/resource/ShaderResource.hpp>
 #include <service/resource/TextureResource.hpp>
 
@@ -29,6 +28,7 @@ void RenderSystem::render(double /*deltaTime*/)
     MeshResource*     meshResource     = services().get<MeshResource>();
     MaterialResource* materialResource = services().get<MaterialResource>();
     ShaderResource*   shaderResource   = services().get<ShaderResource>();
+    ModelResource*    modelResource    = services().get<ModelResource>();
 
     glm::mat4 viewMatrix = cameraTransform->viewMatrix;
     glm::mat4 projMatrix = cameraCache->projectionMatrix;
@@ -42,9 +42,7 @@ void RenderSystem::render(double /*deltaTime*/)
 
             meshResource->draw(skyboxCache->meshRef);
         } else {
-            // Clear to background color if no skybox is set
-            glClearColor(environment->backgroundColor.r, environment->backgroundColor.g, environment->backgroundColor.b,
-                         1.0f);
+            services().get<Window>()->clearColor(environment->backgroundColor);
         }
     }
 
@@ -56,15 +54,27 @@ void RenderSystem::render(double /*deltaTime*/)
         auto* uniforms = materialResource->getUniforms(materialRef);
 
         auto shaderRef = materialResource->getShaderRef(materialRef);
-        shaderResource->bind(shaderRef, uniforms, viewMatrix, projMatrix, transform->modelMatrix);
+        shaderResource->bind(shaderRef, uniforms, viewMatrix, projMatrix,
+                             transform->modelMatrix * meshResource->getLocalModel(meshRef));
 
         meshResource->draw(meshRef);
     }
 
     /// ------- Render Models -------
     for (const auto& [entity, modelRenderer, transform] : world().get<CModelRenderer, CTransformCache>()) {
-        auto& model = modelRenderer->model;
+        auto& modelRef = modelRenderer->modelRef;
 
-        model.draw(viewMatrix, projMatrix, transform->modelMatrix);
+        // Test with a single PBR shader for now
+        modelResource->forEach(modelRef, [&](MeshRef meshRef) {
+            auto* uniforms = materialResource->getUniforms(
+                modelRenderer->materialOverrides.empty() ? 0 : modelRenderer->materialOverrides[0]);
+
+            auto shaderRef = materialResource->getShaderRef(
+                modelRenderer->materialOverrides.empty() ? 0 : modelRenderer->materialOverrides[0]);
+            shaderResource->bind(shaderRef, uniforms, viewMatrix, projMatrix,
+                                 transform->modelMatrix * meshResource->getLocalModel(meshRef));
+
+            meshResource->draw(meshRef);
+        });
     }
 }

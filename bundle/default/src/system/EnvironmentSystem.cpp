@@ -3,8 +3,6 @@
 #include <component/CEnvironment.hpp>
 #include <component/cache/CSkyboxCache.hpp>
 #include <engine/utils/Log.hpp>
-#include <model/MaterialInstance.hpp>
-#include <model/Mesh.hpp>
 #include <service/factory/MeshFactory.hpp>
 
 void EnvironmentSystem::start()

@@ -22,6 +22,8 @@ using TextureRef = unsigned int;
 
 using MaterialRef = unsigned int;
 
+using ModelRef = unsigned int;
+
 enum TextureType {
     Texture2D,
     CubeMap,

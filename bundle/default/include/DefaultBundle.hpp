@@ -8,7 +8,9 @@
 #include <service/factory/MaterialFactory.hpp>
 #include <service/factory/MeshFactory.hpp>
 #include <service/factory/TextureFactory.hpp>
+#include <service/resource/MaterialResource.hpp>
 #include <service/resource/MeshResource.hpp>
+#include <service/resource/ModelResource.hpp>
 #include <service/resource/ShaderResource.hpp>
 #include <service/resource/TextureResource.hpp>
 

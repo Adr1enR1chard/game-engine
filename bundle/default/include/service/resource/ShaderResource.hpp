@@ -28,12 +28,6 @@ class ShaderResource : public Service
     ~ShaderResource() override = default;
 
   public:
-    /// @brief Creates a new shader resource, if a shader with the same name
-    /// already exists, it returns the existing one.
-    /// @param name
-    /// @param vertexShaderPath
-    /// @param fragmentShaderPath
-    /// @return
     ShaderRef create(const char* name, const char* vertexShaderPath, const char* fragmentShaderPath,
                      const ShaderParameters& params = {});
     ShaderRef get(const char* name) const;

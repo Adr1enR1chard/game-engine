@@ -8,6 +8,7 @@ void DefaultBundle::install(SystemRegistry& systems, ServiceRegistry& services) 
     services.add<MaterialFactory>(*(services.get<MaterialResource>()), *(services.get<ShaderResource>()));
     services.add<TextureFactory>(*(services.get<TextureResource>()));
     services.add<MeshFactory>(*(services.get<MeshResource>()));
+    services.add<ModelResource>(*(services.get<MeshResource>()));
 }
 void DefaultBundle::uninstall(SystemRegistry& systems, ServiceRegistry& services) const
 {

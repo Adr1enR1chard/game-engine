@@ -2,9 +2,7 @@
 
 #include <memory>
 
-#include <model/MaterialInstance.hpp>
-#include <model/Mesh.hpp>
-#include <model/Model.hpp>
+#include <utils/RenderTypes.hpp>
 
 struct CMeshRenderer {
     MeshRef     meshRef;
@@ -12,6 +10,6 @@ struct CMeshRenderer {
 };
 
 struct CModelRenderer {
-    Model                         model;
-    std::vector<MaterialInstance> materialOverrides;
+    ModelRef                 modelRef;
+    std::vector<MaterialRef> materialOverrides;
 };

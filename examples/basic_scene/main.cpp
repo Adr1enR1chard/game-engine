@@ -24,18 +24,26 @@ class BackPackSystem : public System
   public:
     void start() override
     {
-        // backpackEntity =
-        //     world().create(CTransform{.position = glm::vec3(0.0f, 0, -6.0f), .scale = glm::vec3(0.1f)},
-        //                    CModelRenderer{
-        //                        .model = Model("assets/models/crowbar/source/untitled.fbx"),
-        //                        //   .materialOverrides = std::vector<MaterialInstance>{MaterialInstance::Default({
-        //                        //       .ao           = 0.0f,
-        //                        //       .albedoMap    = Texture("assets/textures/backpack/albedo.jpeg"),
-        //                        //       .metallicMap  = Texture("assets/textures/backpack/metallic.png"),
-        //                        //       .roughnessMap = Texture("assets/textures/backpack/roughness.png"),
-        //                        //       .normalMap    = Texture("assets/textures/backpack/normal.png"),
-        //                        //   })},
-        //                    });
+        backpackEntity =
+            world().create(CTransform{.position = glm::vec3(0.0f, -10.0f, -10.0f), .scale = glm::vec3(0.05f)},
+                           CModelRenderer{
+                               .modelRef = services().get<ModelResource>()->create("assets/models/car/source/car.fbx"),
+                               .materialOverrides =
+                                   std::vector<MaterialRef>{
+                                       services().get<MaterialFactory>()->PBR({
+                                           .baseColor    = glm::vec3(1.0f, 1.0f, 1.0f),
+                                           .metallic     = 0.0f,
+                                           .roughness    = 1.0f,
+                                           .ao           = 1.0f,
+                                           .baseColorMap = services().get<TextureFactory>()->Texture2D(
+                                               "assets/models/car/textures/body_Base_Color.png"),
+                                           .metallicMap = services().get<TextureFactory>()->Texture2D(
+                                               "assets/models/car/textures/body_Metallic.png"),
+                                           .roughnessMap = services().get<TextureFactory>()->Texture2D(
+                                               "assets/models/car/textures/body_Roughness.png"),
+                                       }),
+                                   },
+                           });
     }
 
   public:
@@ -43,7 +51,7 @@ class BackPackSystem : public System
     {
         float dt = static_cast<float>(deltaTime);
         if (auto [entity, transform] = world().getFrom<CTransform>(backpackEntity); entity != 0) {
-            transform->rotation.y += 100.0f * dt;
+            transform->rotation.y += 50.0f * dt;
         }
     }
 
@@ -126,22 +134,6 @@ class StartupSystem : public System
                                .ao        = 0.0f,
                            }),
                        });
-
-        world().create(
-            CMeshRenderer{
-                .meshRef     = services().get<MeshFactory>()->Cube(),
-                .materialRef = services().get<MaterialFactory>()->PBR({
-                    .baseColor    = glm::vec3(1.0f, 1.0f, 1.0f),
-                    .metallic     = 0.0f,
-                    .roughness    = 1.0f,
-                    .ao           = 0.0f,
-                    .baseColorMap = services().get<TextureFactory>()->Texture2D("assets/textures/wall/color.png"),
-                    .normalMap    = services().get<TextureFactory>()->Texture2D("assets/textures/wall/normal.png"),
-                    .roughnessMap = services().get<TextureFactory>()->Texture2D("assets/textures/wall/roughness.png"),
-                    .aoMap        = services().get<TextureFactory>()->Texture2D("assets/textures/wall/ao.png"),
-                }),
-            },
-            CTransform{.position = glm::vec3(0.0f, 0.0f, -10.0f), .scale = glm::vec3(20.0f, 20.0f, 1.0f)});
     }
 };
 

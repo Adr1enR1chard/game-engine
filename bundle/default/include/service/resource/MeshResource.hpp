@@ -16,14 +16,11 @@ class MeshResource : public Service
     ~MeshResource();
 
   public:
-    MeshRef create(std::vector<Vertex> vertices, std::vector<Index> indices);
+    MeshRef create(std::vector<Vertex> vertices, std::vector<Index> indices, glm::mat4 localModel = glm::mat4(1.0f));
 
     void remove(MeshRef meshRef);
+    void draw(MeshRef meshRef) const;
 
-  private:
-    friend class RenderSystem;
-
-    void      draw(MeshRef meshRef) const;
     glm::mat4 getLocalModel(MeshRef meshRef) const;
 
   private:

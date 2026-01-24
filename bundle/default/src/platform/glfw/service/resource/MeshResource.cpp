@@ -25,12 +25,13 @@ void MeshResource::MeshDataDeleter::operator()(MeshData* meshData)
 
 MeshResource::~MeshResource() = default;
 
-MeshRef MeshResource::create(std::vector<Vertex> vertices, std::vector<Index> indices)
+MeshRef MeshResource::create(std::vector<Vertex> vertices, std::vector<Index> indices, glm::mat4 localModel)
 {
     MeshRef newMeshRef = m_idManager.alloc();
     auto    meshData   = std::unique_ptr<MeshData, MeshDataDeleter>(new MeshData());
 
     meshData->indicesCount = static_cast<unsigned int>(indices.size());
+    meshData->localModel   = localModel;
 
     // Generate OpenGL buffers
     glGenVertexArrays(1, &meshData->VAO);

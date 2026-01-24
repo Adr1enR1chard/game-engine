@@ -14,8 +14,8 @@ class TextureResource : public Service
 
     TextureRef texture2D(const char* imagePath);
     TextureRef cubeMap(const std::vector<std::string>& faces);
-    void       remove(TextureRef textureRef);
 
+    void remove(TextureRef textureRef);
     void bind(TextureRef textureRef) const;
 
   private:

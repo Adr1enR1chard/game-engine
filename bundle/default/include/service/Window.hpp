@@ -27,6 +27,11 @@ class Window : public Service
         m_fullscreen = fullscreen;
     }
 
+    void clearColor(const glm::vec3& color)
+    {
+        m_clearColor = color;
+    }
+
   private:
     friend class PlatformSystem;
 
@@ -47,4 +52,5 @@ class Window : public Service
     int                         m_height     = 600;
     const char*                 m_title      = "Game Engine";
     bool                        m_fullscreen = false;
+    glm::vec3                   m_clearColor = glm::vec3(0.1f, 0.1f, 0.1f);
 };
