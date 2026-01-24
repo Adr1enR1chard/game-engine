@@ -1,5 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <string>
 #include <unordered_map>
 #include <variant>
 
@@ -46,4 +47,4 @@ class Uniform
 using UniformValue = std::variant<int, float, glm::vec2, glm::vec3, glm::vec4, glm::mat4, Uniform::DirectionalLight,
                                   Uniform::PointLight, Uniform::Texture>;
 
-using UniformCollection = std::unordered_map<const char*, UniformValue>;
+using UniformCollection = std::unordered_map<std::string, UniformValue>;

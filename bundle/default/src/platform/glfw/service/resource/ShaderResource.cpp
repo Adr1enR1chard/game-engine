@@ -133,7 +133,7 @@ inline void parseUniforms(unsigned int shaderProgram, const UniformCollection* u
     }
 
     for (const auto& [name, value] : *uniforms) {
-        uint32_t location = glGetUniformLocation(shaderProgram, name);
+        uint32_t location = glGetUniformLocation(shaderProgram, name.c_str());
         if (location == static_cast<uint32_t>(-1)) {
             continue;
         }
@@ -155,17 +155,6 @@ inline void parseUniforms(unsigned int shaderProgram, const UniformCollection* u
                     glUniform4fv(location, 1, glm::value_ptr(v));
                 } else if constexpr (std::is_same_v<T, glm::mat4>) {
                     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(v));
-                } else if constexpr (std::is_same_v<T, Uniform::DirectionalLight>) {
-                    glUniform3fv(glGetUniformLocation(shaderProgram, "dirLight.direction"), 1,
-                                 glm::value_ptr(v.direction));
-                    glUniform3fv(glGetUniformLocation(shaderProgram, "dirLight.color"), 1, glm::value_ptr(v.color));
-                    glUniform1f(glGetUniformLocation(shaderProgram, "dirLight.ambient"), v.ambient);
-                    glUniform1f(glGetUniformLocation(shaderProgram, "dirLight.intensity"), v.intensity);
-                } else if constexpr (std::is_same_v<T, Uniform::PointLight>) {
-                    glUniform3fv(glGetUniformLocation(shaderProgram, "pointLight.position"), 1,
-                                 glm::value_ptr(v.position));
-                    glUniform3fv(glGetUniformLocation(shaderProgram, "pointLight.color"), 1, glm::value_ptr(v.color));
-                    glUniform1f(glGetUniformLocation(shaderProgram, "pointLight.intensity"), v.intensity);
                 } else if constexpr (std::is_same_v<T, Uniform::Texture>) {
                     glActiveTexture(GL_TEXTURE0 + textureUnit);
                     textureResource.bind(v.textureRef);

@@ -118,14 +118,10 @@ class StartupSystem : public System
                        CMeshRenderer{
                            .meshRef     = services().get<MeshResource>()->createCube(),
                            .materialRef = services().get<MaterialFactory>()->PBR({
-                               .baseColor    = glm::vec3(1.0f, 1.0f, 1.0f),
-                               .metallic     = 0.0f,
-                               .roughness    = 1.0f,
-                               .ao           = 0.0f,
-                               .baseColorMap = "assets/textures/metal/albedo.png",
-                               .normalMap    = "assets/textures/metal/normal.png",
-                               .metallicMap  = "assets/textures/metal/metallic.png",
-                               .roughnessMap = "assets/textures/metal/roughness.png",
+                               .baseColor = glm::vec3(1.0f, 1.0f, 1.0f),
+                               .metallic  = 0.0f,
+                               .roughness = 1.0f,
+                               .ao        = 0.0f,
                            }),
                        });
 
@@ -133,14 +129,10 @@ class StartupSystem : public System
             CMeshRenderer{
                 .meshRef     = services().get<MeshResource>()->createCube(),
                 .materialRef = services().get<MaterialFactory>()->PBR({
-                    .baseColor    = glm::vec3(1.0f, 1.0f, 1.0f),
-                    .metallic     = 0.0f,
-                    .roughness    = 0.5f,
-                    .ao           = 1.0f,
-                    .baseColorMap = "assets/textures/metal/albedo.png",
-                    .normalMap    = "assets/textures/metal/normal.png",
-                    .metallicMap  = "assets/textures/metal/metallic.png",
-                    .roughnessMap = "assets/textures/metal/roughness.png",
+                    .baseColor = glm::vec3(1.0f, 1.0f, 1.0f),
+                    .metallic  = 1.0f,
+                    .roughness = 0.5f,
+                    .ao        = 1.0f,
                 }),
             },
             CTransform{.position = glm::vec3(0.0f, 0.0f, -10.0f), .scale = glm::vec3(20.0f, 20.0f, 1.0f)});

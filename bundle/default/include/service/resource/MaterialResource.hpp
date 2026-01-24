@@ -15,7 +15,7 @@ class MaterialResource : public Service
     MaterialRef create(ShaderRef shaderRef);
     void        remove(MaterialRef materialRef);
 
-    void                     setUniform(MaterialRef materialRef, const char* uniformName, const UniformValue& value);
+    void setUniform(MaterialRef materialRef, const std::string& uniformName, const UniformValue& value);
     const UniformCollection* getUniforms(MaterialRef materialRef) const;
     ShaderRef                getShaderRef(MaterialRef materialRef) const;
 

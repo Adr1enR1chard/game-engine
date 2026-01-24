@@ -16,7 +16,7 @@ void MaterialResource::remove(MaterialRef materialRef)
     m_materialUniforms.erase(materialRef);
 }
 
-void MaterialResource::setUniform(MaterialRef materialRef, const char* uniformName, const UniformValue& value)
+void MaterialResource::setUniform(MaterialRef materialRef, const std::string& uniformName, const UniformValue& value)
 {
     auto it = m_materials.find(materialRef);
     if (it == m_materials.end()) {
@@ -24,7 +24,23 @@ void MaterialResource::setUniform(MaterialRef materialRef, const char* uniformNa
         return;
     }
 
-    m_materialUniforms[materialRef][uniformName] = value;
+    std::visit(
+        [&](auto const& v) {
+            using T = std::decay_t<decltype(v)>;
+
+            if constexpr (std::is_same_v<T, Uniform::DirectionalLight>) {
+                setUniform(materialRef, uniformName + ".direction", v.direction);
+                setUniform(materialRef, uniformName + ".color", v.color);
+                setUniform(materialRef, uniformName + ".intensity", v.intensity);
+            } else if constexpr (std::is_same_v<T, Uniform::PointLight>) {
+                setUniform(materialRef, uniformName + ".position", v.position);
+                setUniform(materialRef, uniformName + ".color", v.color);
+                setUniform(materialRef, uniformName + ".intensity", v.intensity);
+            } else {
+                m_materialUniforms[materialRef][uniformName] = value;
+            }
+        },
+        value);
 }
 
 const UniformCollection* MaterialResource::getUniforms(MaterialRef materialRef) const
