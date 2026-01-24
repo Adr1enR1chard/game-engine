@@ -31,17 +31,18 @@ class BackPackSystem : public System
                                .materialOverrides =
                                    std::vector<MaterialRef>{
                                        services().get<MaterialFactory>()->PBR({
-                                           .baseColor    = glm::vec3(1.0f, 1.0f, 1.0f),
-                                           .metallic     = 0.0f,
-                                           .roughness    = 1.0f,
-                                           .ao           = 1.0f,
-                                           .baseColorMap = services().get<TextureFactory>()->Texture2D(
-                                               "assets/models/car/textures/body_Base_Color.png"),
-                                           .metallicMap = services().get<TextureFactory>()->Texture2D(
-                                               "assets/models/car/textures/body_Metallic.png"),
-                                           .roughnessMap = services().get<TextureFactory>()->Texture2D(
-                                               "assets/models/car/textures/body_Roughness.png"),
+                                           .baseColor = glm::vec3(0.0f, 1.0f, 1.0f),
+                                           .metallic  = 0.0f,
+                                           .roughness = 1.0f,
+                                           .ao        = 1.0f,
+                                           //    .baseColorMap = services().get<TextureFactory>()->Texture2D(
+                                           //        "assets/models/car/textures/body_Base_Color.png"),
+                                           //    .metallicMap = services().get<TextureFactory>()->Texture2D(
+                                           //        "assets/models/car/textures/body_Metallic.png"),
+                                           //    .roughnessMap = services().get<TextureFactory>()->Texture2D(
+                                           //        "assets/models/car/textures/body_Roughness.png"),
                                        }),
+
                                    },
                            });
     }

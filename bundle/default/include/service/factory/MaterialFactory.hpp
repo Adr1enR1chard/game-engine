@@ -1,5 +1,6 @@
 #pragma once
 
+#include <service/factory/TextureFactory.hpp>
 #include <service/resource/MaterialResource.hpp>
 #include <service/resource/ShaderResource.hpp>
 
@@ -22,8 +23,8 @@ struct SkyboxMaterialParameters {
 class MaterialFactory : public Service
 {
   public:
-    MaterialFactory(MaterialResource& materialResource, ShaderResource& shaderResource)
-        : m_materialResource(materialResource), m_shaderResource(shaderResource)
+    MaterialFactory(MaterialResource& materialResource, ShaderResource& shaderResource, TextureFactory& textureFactory)
+        : m_materialResource(materialResource), m_shaderResource(shaderResource), m_textureFactory(textureFactory)
     {
     }
 
@@ -33,4 +34,5 @@ class MaterialFactory : public Service
   private:
     MaterialResource& m_materialResource;
     ShaderResource&   m_shaderResource;
+    TextureFactory&   m_textureFactory;
 };

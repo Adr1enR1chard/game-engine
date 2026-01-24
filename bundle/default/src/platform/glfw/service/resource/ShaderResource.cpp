@@ -129,10 +129,6 @@ ShaderRef ShaderResource::get(const char* name) const
 inline void parseUniforms(unsigned int shaderProgram, const UniformCollection* uniforms,
                           TextureResource& textureResource)
 {
-    if (uniforms == nullptr) {
-        return;
-    }
-
     unsigned int textureUnit = 0;
     for (const auto& [name, value] : *uniforms) {
         uint32_t location = glGetUniformLocation(shaderProgram, name.c_str());

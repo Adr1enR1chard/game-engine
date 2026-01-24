@@ -18,15 +18,10 @@ struct Material {
     float metallic;
     float roughness;
     float ao;
-    bool useBaseColorMap;
     sampler2D baseColorMap;
-    bool useMetallicMap;
     sampler2D metallicMap;
-    bool useRoughnessMap;
     sampler2D roughnessMap;
-    bool useAOMap;
     sampler2D aoMap;
-    bool useNormalMap;
     sampler2D normalMap;
 };
 
@@ -141,27 +136,17 @@ vec3 CalcPointLight(PointLight light, vec3 N, vec3 worldPos, vec3 V, vec3 baseCo
 
 void main() {
     vec3 N = vWorldNormal;
-    if(material.useNormalMap) {
-        N = texture(material.normalMap, vUV).rgb;
-        N = normalize(vTBN * (N * 2.0 - 1.0));
-    }
+    N = texture(material.normalMap, vUV).rgb;
+    N = normalize(vTBN * (N * 2.0 - 1.0));
     vec3 V = normalize(viewPos - vWorldPos);
 
-    vec3 baseColor = material.baseColor;
-    if(material.useBaseColorMap)
-        baseColor = pow(texture(material.baseColorMap, vUV).rgb * baseColor, vec3(2.2));
+    vec3 baseColor = pow(texture(material.baseColorMap, vUV).rgb * material.baseColor, vec3(2.2));
 
-    float metallic = material.metallic;
-    if(material.useMetallicMap)
-        metallic *= texture(material.metallicMap, vUV).r;
+    float metallic = material.metallic * texture(material.metallicMap, vUV).r;
 
-    float roughness = material.roughness;
-    if(material.useRoughnessMap)
-        roughness *= texture(material.roughnessMap, vUV).r;
+    float roughness = material.roughness * texture(material.roughnessMap, vUV).r;
 
-    float ao = material.ao;
-    if(material.useAOMap)
-        ao *= texture(material.aoMap, vUV).r;
+    float ao = material.ao * texture(material.aoMap, vUV).r;
 
     vec3 Lo = CalcDirLight(dirLight, N, V, baseColor, metallic, roughness, ao);
     for(int i = 0; i < pointLightCount; ++i) {

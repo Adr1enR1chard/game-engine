@@ -6,6 +6,10 @@
 
 #include <engine/utils/Log.hpp>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <optional>
+
 glm::mat4 AiMatrixToGlmMat4(const aiMatrix4x4& from)
 {
     glm::mat4 to;
@@ -28,8 +32,43 @@ glm::mat4 AiMatrixToGlmMat4(const aiMatrix4x4& from)
     return to;
 }
 
-inline MeshRef processMesh(aiMesh* mesh, const aiScene* /*scene*/, const glm::mat4& nodeTransform,
-                           MeshResource& meshResource)
+std::optional<TextureRef> ModelResource::loadMaterialTextures(aiMaterial* mat, aiTextureType type)
+{
+    if (mat->GetTextureCount(type) > 0) {
+        aiString str;
+        mat->GetTexture(type, 0, &str);
+        std::string filename = std::string(str.C_Str());
+        return m_textureResource.texture2D(filename.c_str());
+    }
+    return std::nullopt;
+}
+
+MaterialRef ModelResource::processMaterial(aiMesh* mesh, const aiScene* scene)
+{
+    // TODO: Here, we only create a PBR material without any default uniforms => leaks from other materials.
+    // We should move this code to the higher level (ModelFactory) to use MaterialFactory in our case.
+    auto materialRef = m_materialResource.create(
+        m_shaderResource.create("PBRShader", "assets/shaders/Default.vert", "assets/shaders/PBR.frag"));
+    if (mesh->mMaterialIndex >= 0) {
+        // TODO: Cache materials to avoid duplicates
+        aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+        if (auto texture = loadMaterialTextures(material, aiTextureType_BASE_COLOR)) {
+            m_materialResource.setUniform(materialRef, "baseColorMap", *texture);
+        }
+        if (auto texture = loadMaterialTextures(material, aiTextureType_METALNESS)) {
+            m_materialResource.setUniform(materialRef, "metallicMap", *texture);
+        }
+        if (auto texture = loadMaterialTextures(material, aiTextureType_DIFFUSE_ROUGHNESS)) {
+            m_materialResource.setUniform(materialRef, "roughnessMap", *texture);
+        }
+        if (auto texture = loadMaterialTextures(material, aiTextureType_AMBIENT_OCCLUSION)) {
+            m_materialResource.setUniform(materialRef, "aoMap", *texture);
+        }
+    }
+    return materialRef;
+}
+
+MeshRef ModelResource::processMesh(aiMesh* mesh, const glm::mat4& nodeTransform)
 {
     std::vector<Vertex>       vertices;
     std::vector<unsigned int> indices;
@@ -73,92 +112,48 @@ inline MeshRef processMesh(aiMesh* mesh, const aiScene* /*scene*/, const glm::ma
         for (unsigned int j = 0; j < face.mNumIndices; j++)
             indices.push_back(face.mIndices[j]);
     }
-    // process material
-    // if (mesh->mMaterialIndex >= 0) {
-    //     if (assimpMaterialMap.find(mesh->mMaterialIndex) != assimpMaterialMap.end()) {
-    //         uint16_t materialIndex         = assimpMaterialMap[mesh->mMaterialIndex];
-    //         meshMaterialMap[meshes.size()] = materialIndex;
-    //     } else {
-    //         auto        materialInstance = std::make_shared<MaterialInstance>(MaterialInstance::PBR());
-    //         aiMaterial* material         = scene->mMaterials[mesh->mMaterialIndex];
-    //         if (auto texture = loadMaterialTextures(material, aiTextureType_DIFFUSE, "albedoMap")) {
-    //             materialInstance->setTexture("albedoMap", *texture);
-    //         }
-    //         if (auto texture = loadMaterialTextures(material, aiTextureType_METALNESS, "metallicMap")) {
-    //             materialInstance->setTexture("metallicMap", *texture);
-    //         }
-    //         if (auto texture = loadMaterialTextures(material, aiTextureType_DIFFUSE_ROUGHNESS, "roughnessMap")) {
-    //             materialInstance->setTexture("roughnessMap", *texture);
-    //         }
-    //         if (auto texture = loadMaterialTextures(material, aiTextureType_AMBIENT_OCCLUSION, "aoMap")) {
-    //             materialInstance->setTexture("aoMap", *texture);
-    //         }
 
-    //         uint16_t materialIndex = materials.size();
-    //         materials.push_back(materialInstance);
-    //         meshMaterialMap[meshes.size()]          = materialIndex;
-    //         assimpMaterialMap[mesh->mMaterialIndex] = materialIndex;
-    //     }
-    // }
-
-    return meshResource.create(vertices, indices, nodeTransform);
+    return m_meshResource.create(vertices, indices, nodeTransform);
 }
 
-inline std::vector<MeshRef> processNode(aiNode* node, const aiScene* scene, const glm::mat4& parentTransform,
-                                        MeshResource& meshResource)
+std::vector<ModelResource::MeshMaterialBinding> ModelResource::processNode(aiNode* node, const aiScene* scene,
+                                                                           const glm::mat4& parentTransform)
 {
     glm::mat4 nodeTransform = parentTransform * AiMatrixToGlmMat4(node->mTransformation);
 
-    std::vector<MeshRef> meshes;
+    std::vector<MeshMaterialBinding> meshes;
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
-        aiMesh* mesh          = scene->mMeshes[node->mMeshes[i]];
-        auto    processedMesh = processMesh(mesh, scene, nodeTransform, meshResource);
-        meshes.push_back(processedMesh);
+        aiMesh* mesh              = scene->mMeshes[node->mMeshes[i]];
+        auto    processedMesh     = processMesh(mesh, nodeTransform);
+        auto    processedMaterial = processMaterial(mesh, scene);
+        meshes.push_back({processedMesh, processedMaterial});
     }
 
     for (unsigned int i = 0; i < node->mNumChildren; i++) {
-        auto childMeshes = processNode(node->mChildren[i], scene, nodeTransform, meshResource);
+        auto childMeshes = processNode(node->mChildren[i], scene, nodeTransform);
         meshes.insert(meshes.end(), childMeshes.begin(), childMeshes.end());
     }
     return meshes;
 }
 
-inline std::vector<MeshRef> loadModel(std::string path, MeshResource& meshResource)
+ModelRef ModelResource::create(const char* modelPath)
 {
+    ModelRef         newModelRef = m_idManager.alloc();
     Assimp::Importer import;
     const aiScene*   scene =
-        import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+        import.ReadFile(modelPath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         Log::Print("Error while loading model: " + std::string(import.GetErrorString()), LogLevel::Error);
         return {};
     }
 
-    return processNode(scene->mRootNode, scene, glm::mat4(1.0f), meshResource);
-}
-
-// std::unique_ptr<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
-// {
-//     if (mat->GetTextureCount(type) > 0) {
-//         aiString str;
-//         mat->GetTexture(type, 0, &str);
-//         std::string filename = std::string(str.C_Str());
-//         return std::make_unique<Texture>(filename.c_str());
-//     }
-//     Log::Print("Texture not found for type: " + typeName, LogLevel::Warning);
-//     return nullptr;
-// }
-
-ModelRef ModelResource::create(const char* modelPath)
-{
-    ModelRef newModelRef = m_idManager.alloc();
-
-    m_modelMeshes[newModelRef] = loadModel(modelPath, m_meshResource);
+    m_modelMeshes[newModelRef] = processNode(scene->mRootNode, scene, glm::mat4(1.0f));
 
     return newModelRef;
 }
 
-void ModelResource::forEach(ModelRef modelRef, const std::function<void(MeshRef)>& func) const
+void ModelResource::forEach(ModelRef modelRef, const std::function<void(MeshRef, MaterialRef, size_t)>& func) const
 {
     auto it = m_modelMeshes.find(modelRef);
     if (it == m_modelMeshes.end()) {
@@ -166,7 +161,8 @@ void ModelResource::forEach(ModelRef modelRef, const std::function<void(MeshRef)
         return;
     }
 
-    for (const auto& meshRef : it->second) {
-        func(meshRef);
+    for (size_t i = 0; i < it->second.size(); ++i) {
+        const auto& meshMaterialBinding = it->second[i];
+        func(meshMaterialBinding.meshRef, meshMaterialBinding.materialRef, i);
     }
 }

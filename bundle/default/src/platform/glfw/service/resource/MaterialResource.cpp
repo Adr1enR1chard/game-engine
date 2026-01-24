@@ -5,7 +5,7 @@
 MaterialRef MaterialResource::create(ShaderRef shaderRef)
 {
     MaterialRef newMaterialRef  = m_idManager.alloc();
-    m_materials[newMaterialRef] = shaderRef;
+    m_materials[newMaterialRef] = {shaderRef, {}};
     return newMaterialRef;
 }
 
@@ -13,7 +13,6 @@ void MaterialResource::remove(MaterialRef materialRef)
 {
     m_idManager.free(materialRef);
     m_materials.erase(materialRef);
-    m_materialUniforms.erase(materialRef);
 }
 
 void MaterialResource::setUniform(MaterialRef materialRef, const std::string& uniformName, const UniformValue& value)
@@ -37,7 +36,7 @@ void MaterialResource::setUniform(MaterialRef materialRef, const std::string& un
                 setUniform(materialRef, uniformName + ".color", v.color);
                 setUniform(materialRef, uniformName + ".intensity", v.intensity);
             } else {
-                m_materialUniforms[materialRef][uniformName] = value;
+                it->second.uniforms[uniformName] = value;
             }
         },
         value);
@@ -45,12 +44,14 @@ void MaterialResource::setUniform(MaterialRef materialRef, const std::string& un
 
 const UniformCollection* MaterialResource::getUniforms(MaterialRef materialRef) const
 {
-    auto it = m_materialUniforms.find(materialRef);
-    if (it == m_materialUniforms.end()) {
-        Log::Print("Material uniforms not found", LogLevel::Warning, true);
+    auto it = m_materials.find(materialRef);
+    if (it == m_materials.end()) {
+        Log::Print("Material not found for materialRef " + std::to_string(materialRef) + " out of " +
+                       std::to_string(m_materials.size()),
+                   LogLevel::Warning);
         return nullptr;
     }
-    return &(it->second);
+    return &(it->second.uniforms);
 }
 
 ShaderRef MaterialResource::getShaderRef(MaterialRef materialRef) const
@@ -60,5 +61,5 @@ ShaderRef MaterialResource::getShaderRef(MaterialRef materialRef) const
         Log::Print("Material not found", LogLevel::Warning, true);
         return 0;
     }
-    return it->second;
+    return it->second.shaderRef;
 }

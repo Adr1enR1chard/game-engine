@@ -14,30 +14,20 @@ MaterialRef MaterialFactory::PBR(const PBRMaterialParameters& options)
     m_materialResource.setUniform(materialRef, "material.roughness", options.roughness);
     m_materialResource.setUniform(materialRef, "material.ao", options.ao);
 
-    m_materialResource.setUniform(materialRef, "material.useBaseColorMap", options.baseColorMap != 0);
-    if (options.baseColorMap != 0) {
-        m_materialResource.setUniform(materialRef, "material.baseColorMap", options.baseColorMap);
-    }
+    m_materialResource.setUniform(materialRef, "material.baseColorMap",
+                                  options.baseColorMap != 0 ? options.baseColorMap : m_textureFactory.WhiteTexture2D());
 
-    m_materialResource.setUniform(materialRef, "material.useNormalMap", options.normalMap != 0);
-    if (options.normalMap != 0) {
-        m_materialResource.setUniform(materialRef, "material.normalMap", options.normalMap);
-    }
+    m_materialResource.setUniform(materialRef, "material.normalMap",
+                                  options.normalMap != 0 ? options.normalMap : m_textureFactory.NormalTexture2D());
 
-    m_materialResource.setUniform(materialRef, "material.useMetallicMap", options.metallicMap != 0);
-    if (options.metallicMap != 0) {
-        m_materialResource.setUniform(materialRef, "material.metallicMap", options.metallicMap);
-    }
+    m_materialResource.setUniform(materialRef, "material.metallicMap",
+                                  options.metallicMap != 0 ? options.metallicMap : m_textureFactory.BlackTexture2D());
 
-    m_materialResource.setUniform(materialRef, "material.useRoughnessMap", options.roughnessMap != 0);
-    if (options.roughnessMap != 0) {
-        m_materialResource.setUniform(materialRef, "material.roughnessMap", options.roughnessMap);
-    }
+    m_materialResource.setUniform(materialRef, "material.roughnessMap",
+                                  options.roughnessMap != 0 ? options.roughnessMap : m_textureFactory.WhiteTexture2D());
 
-    m_materialResource.setUniform(materialRef, "material.useAOMap", options.aoMap != 0);
-    if (options.aoMap != 0) {
-        m_materialResource.setUniform(materialRef, "material.aoMap", options.aoMap);
-    }
+    m_materialResource.setUniform(materialRef, "material.aoMap",
+                                  options.aoMap != 0 ? options.aoMap : m_textureFactory.WhiteTexture2D());
 
     return materialRef;
 };

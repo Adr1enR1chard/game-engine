@@ -64,13 +64,13 @@ void RenderSystem::render(double /*deltaTime*/)
     for (const auto& [entity, modelRenderer, transform] : world().get<CModelRenderer, CTransformCache>()) {
         auto& modelRef = modelRenderer->modelRef;
 
-        // Test with a single PBR shader for now
-        modelResource->forEach(modelRef, [&](MeshRef meshRef) {
-            auto* uniforms = materialResource->getUniforms(
-                modelRenderer->materialOverrides.empty() ? 0 : modelRenderer->materialOverrides[0]);
+        modelResource->forEach(modelRef, [&](MeshRef meshRef, MaterialRef materialRef, size_t index) {
+            if (modelRenderer->materialOverrides.size() > index) {
+                materialRef = modelRenderer->materialOverrides[index];
+            }
+            auto* uniforms = materialResource->getUniforms(materialRef);
 
-            auto shaderRef = materialResource->getShaderRef(
-                modelRenderer->materialOverrides.empty() ? 0 : modelRenderer->materialOverrides[0]);
+            auto shaderRef = materialResource->getShaderRef(materialRef);
             shaderResource->bind(shaderRef, uniforms, viewMatrix, projMatrix,
                                  transform->modelMatrix * meshResource->getLocalModel(meshRef));
 

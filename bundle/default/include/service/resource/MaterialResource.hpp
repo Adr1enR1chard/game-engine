@@ -20,7 +20,11 @@ class MaterialResource : public Service
     ShaderRef                getShaderRef(MaterialRef materialRef) const;
 
   private:
-    IdManager                                          m_idManager;
-    std::unordered_map<MaterialRef, ShaderRef>         m_materials;
-    std::unordered_map<MaterialRef, UniformCollection> m_materialUniforms;
+    struct MaterialData {
+        ShaderRef         shaderRef;
+        UniformCollection uniforms;
+    };
+
+    IdManager                                     m_idManager;
+    std::unordered_map<MaterialRef, MaterialData> m_materials;
 };

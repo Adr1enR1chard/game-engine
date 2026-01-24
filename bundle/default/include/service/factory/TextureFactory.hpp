@@ -14,6 +14,21 @@ class TextureFactory : public Service
         return m_texture2DResource.texture2D(imagePath);
     }
 
+    TextureRef WhiteTexture2D()
+    {
+        return m_texture2DResource.texture2D("assets/textures/white1x1.png");
+    }
+
+    TextureRef BlackTexture2D()
+    {
+        return m_texture2DResource.texture2D("assets/textures/black1x1.png");
+    }
+
+    TextureRef NormalTexture2D()
+    {
+        return m_texture2DResource.texture2D("assets/textures/normal1x1.png");
+    }
+
     TextureRef CubeMap(const std::vector<std::string>& faces)
     {
         return m_texture2DResource.cubeMap(faces);
