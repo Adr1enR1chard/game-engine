@@ -31,6 +31,7 @@ void MaterialResource::setUniform(MaterialRef materialRef, const std::string& un
                 setUniform(materialRef, uniformName + ".direction", v.direction);
                 setUniform(materialRef, uniformName + ".color", v.color);
                 setUniform(materialRef, uniformName + ".intensity", v.intensity);
+                setUniform(materialRef, uniformName + ".ambient", v.ambient);
             } else if constexpr (std::is_same_v<T, Uniform::PointLight>) {
                 setUniform(materialRef, uniformName + ".position", v.position);
                 setUniform(materialRef, uniformName + ".color", v.color);

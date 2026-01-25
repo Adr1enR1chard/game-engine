@@ -7,6 +7,8 @@
 #include <service/Window.hpp>
 #include <service/factory/MaterialFactory.hpp>
 #include <service/factory/MeshFactory.hpp>
+#include <service/factory/ModelFactory.hpp>
+#include <service/factory/ShaderFactory.hpp>
 #include <service/factory/TextureFactory.hpp>
 #include <service/resource/MaterialResource.hpp>
 #include <service/resource/MeshResource.hpp>
@@ -25,6 +27,7 @@
 // --- Components ---
 #include <component/CCamera.hpp>
 #include <component/CDirectionalLight.hpp>
+#include <component/CEnvironment.hpp>
 #include <component/CMeshRenderer.hpp>
 #include <component/CPointLight.hpp>
 #include <component/CTransform.hpp>

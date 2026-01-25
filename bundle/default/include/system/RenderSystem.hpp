@@ -8,4 +8,7 @@ class RenderSystem : public System
 {
   public:
     void render(double deltaTime) override;
+
+  private:
+    bool m_cameraNotFoundLogged = false;
 };

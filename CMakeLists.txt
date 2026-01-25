@@ -45,6 +45,9 @@ add_library(default_bundle_glfw
     bundle/default/src/platform/glfw/service/resource/TextureResource.cpp
     bundle/default/src/platform/glfw/service/resource/ModelResource.cpp
     bundle/default/src/platform/glfw/service/factory/MaterialFactory.cpp
+    bundle/default/src/platform/glfw/service/factory/ShaderFactory.cpp
+    bundle/default/src/platform/glfw/service/factory/ModelFactory.cpp
+    bundle/default/src/platform/glfw/service/factory/MeshFactory.cpp
     bundle/default/src/DefaultBundle.cpp
 )
 target_include_directories(default_bundle_glfw PUBLIC
@@ -121,6 +124,7 @@ add_executable(BasicScene
 target_include_directories(BasicScene PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/basic_scene
 )
 target_link_libraries(BasicScene PRIVATE
     default_bundle

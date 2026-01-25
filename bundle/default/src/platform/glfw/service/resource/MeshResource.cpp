@@ -3,7 +3,6 @@
 
 #include <glad/glad.h>
 #include <service/resource/MeshResource.hpp>
-#include <utils/PrimitiveMeshes.hpp>
 
 struct MeshResource::MeshData {
     unsigned int VAO;

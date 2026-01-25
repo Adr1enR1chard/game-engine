@@ -4,8 +4,7 @@
 
 MaterialRef MaterialFactory::PBR(const PBRMaterialParameters& options)
 {
-    ShaderRef pbrShaderRef =
-        m_shaderResource.create("PBRShader", "assets/shaders/Default.vert", "assets/shaders/PBR.frag");
+    ShaderRef pbrShaderRef = m_shaderFactory.PBR("__PBRShader");
 
     MaterialRef materialRef = m_materialResource.create(pbrShaderRef);
 
@@ -14,36 +13,48 @@ MaterialRef MaterialFactory::PBR(const PBRMaterialParameters& options)
     m_materialResource.setUniform(materialRef, "material.roughness", options.roughness);
     m_materialResource.setUniform(materialRef, "material.ao", options.ao);
 
-    m_materialResource.setUniform(materialRef, "material.baseColorMap",
-                                  options.baseColorMap != 0 ? options.baseColorMap : m_textureFactory.WhiteTexture2D());
-
-    m_materialResource.setUniform(materialRef, "material.normalMap",
-                                  options.normalMap != 0 ? options.normalMap : m_textureFactory.NormalTexture2D());
-
-    m_materialResource.setUniform(materialRef, "material.metallicMap",
-                                  options.metallicMap != 0 ? options.metallicMap : m_textureFactory.BlackTexture2D());
-
-    m_materialResource.setUniform(materialRef, "material.roughnessMap",
-                                  options.roughnessMap != 0 ? options.roughnessMap : m_textureFactory.WhiteTexture2D());
-
-    m_materialResource.setUniform(materialRef, "material.aoMap",
-                                  options.aoMap != 0 ? options.aoMap : m_textureFactory.WhiteTexture2D());
+    if (options.baseColorMap != 0)
+        m_materialResource.setUniform(materialRef, "material.baseColorMap", options.baseColorMap);
+    if (options.normalMap != 0)
+        m_materialResource.setUniform(materialRef, "material.normalMap", options.normalMap);
+    if (options.metallicMap != 0)
+        m_materialResource.setUniform(materialRef, "material.metallicMap", options.metallicMap);
+    if (options.roughnessMap != 0)
+        m_materialResource.setUniform(materialRef, "material.roughnessMap", options.roughnessMap);
+    if (options.aoMap != 0)
+        m_materialResource.setUniform(materialRef, "material.aoMap", options.aoMap);
 
     return materialRef;
 };
 
+MaterialRef MaterialFactory::Phong(const PhongMaterialParameters& options)
+{
+    ShaderRef phongShaderRef = m_shaderFactory.Phong("__PhongShader");
+
+    MaterialRef materialRef = m_materialResource.create(phongShaderRef);
+
+    m_materialResource.setUniform(materialRef, "material.ambient", options.ambient);
+    m_materialResource.setUniform(materialRef, "material.diffuse", options.diffuse);
+    m_materialResource.setUniform(materialRef, "material.specular", options.specular);
+    m_materialResource.setUniform(materialRef, "material.shininess", options.shininess);
+
+    if (options.diffuseMap != 0)
+        m_materialResource.setUniform(materialRef, "material.diffuseMap", options.diffuseMap);
+    if (options.specularMap != 0)
+        m_materialResource.setUniform(materialRef, "material.specularMap", options.specularMap);
+    if (options.normalMap != 0)
+        m_materialResource.setUniform(materialRef, "material.normalMap", options.normalMap);
+
+    return materialRef;
+}
+
 MaterialRef MaterialFactory::Skybox(const SkyboxMaterialParameters& options)
 {
-    ShaderRef skyboxShaderRef =
-        m_shaderResource.create("SkyboxShader", "assets/shaders/Skybox.vert", "assets/shaders/Skybox.frag",
-                                {
-                                    .cullFaceEnabled   = false,
-                                    .depthTestEnabled  = false,
-                                    .depthWriteEnabled = false,
-                                });
-    MaterialRef materialRef = m_materialResource.create(skyboxShaderRef);
+    ShaderRef   skyboxShaderRef = m_shaderFactory.Skybox("__SkyboxShader");
+    MaterialRef materialRef     = m_materialResource.create(skyboxShaderRef);
 
-    m_materialResource.setUniform(materialRef, "material.colorMap", options.colorMap);
+    if (options.colorMap != 0)
+        m_materialResource.setUniform(materialRef, "material.colorMap", options.colorMap);
 
     return materialRef;
 }

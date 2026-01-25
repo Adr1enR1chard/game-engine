@@ -141,11 +141,8 @@ void main() {
     vec3 V = normalize(viewPos - vWorldPos);
 
     vec3 baseColor = pow(texture(material.baseColorMap, vUV).rgb * material.baseColor, vec3(2.2));
-
     float metallic = material.metallic * texture(material.metallicMap, vUV).r;
-
     float roughness = material.roughness * texture(material.roughnessMap, vUV).r;
-
     float ao = material.ao * texture(material.aoMap, vUV).r;
 
     vec3 Lo = CalcDirLight(dirLight, N, V, baseColor, metallic, roughness, ao);

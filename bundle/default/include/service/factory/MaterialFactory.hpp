@@ -1,12 +1,12 @@
 #pragma once
 
+#include <service/factory/ShaderFactory.hpp>
 #include <service/factory/TextureFactory.hpp>
 #include <service/resource/MaterialResource.hpp>
-#include <service/resource/ShaderResource.hpp>
 
 struct PBRMaterialParameters {
     glm::vec3  baseColor    = glm::vec3(1.0f);
-    float      metallic     = 0.0f;
+    float      metallic     = 1.0f;
     float      roughness    = 1.0f;
     float      ao           = 1.0f;
     TextureRef baseColorMap = 0;
@@ -16,6 +16,16 @@ struct PBRMaterialParameters {
     TextureRef aoMap        = 0;
 };
 
+struct PhongMaterialParameters {
+    glm::vec3  ambient     = glm::vec3(0.1f);
+    glm::vec3  diffuse     = glm::vec3(1.0f);
+    glm::vec3  specular    = glm::vec3(1.0f);
+    float      shininess   = 32.0f;
+    TextureRef diffuseMap  = 0;
+    TextureRef specularMap = 0;
+    TextureRef normalMap   = 0;
+};
+
 struct SkyboxMaterialParameters {
     TextureRef colorMap = 0;
 };
@@ -23,16 +33,16 @@ struct SkyboxMaterialParameters {
 class MaterialFactory : public Service
 {
   public:
-    MaterialFactory(MaterialResource& materialResource, ShaderResource& shaderResource, TextureFactory& textureFactory)
-        : m_materialResource(materialResource), m_shaderResource(shaderResource), m_textureFactory(textureFactory)
+    MaterialFactory(MaterialResource& materialResource, ShaderFactory& shaderFactory)
+        : m_materialResource(materialResource), m_shaderFactory(shaderFactory)
     {
     }
 
-    MaterialRef PBR(const PBRMaterialParameters& options);
-    MaterialRef Skybox(const SkyboxMaterialParameters& options);
+    MaterialRef PBR(const PBRMaterialParameters& options = {});
+    MaterialRef Phong(const PhongMaterialParameters& options = {});
+    MaterialRef Skybox(const SkyboxMaterialParameters& options = {});
 
   private:
     MaterialResource& m_materialResource;
-    ShaderResource&   m_shaderResource;
-    TextureFactory&   m_textureFactory;
+    ShaderFactory&    m_shaderFactory;
 };

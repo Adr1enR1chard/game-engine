@@ -22,13 +22,19 @@ void RenderSystem::render(double /*deltaTime*/)
 {
     const auto& [cameraEntity, cameraCache, cameraTransform] = world().getAt<CCameraCache, CTransformCache>(0);
 
-    if (!cameraEntity)
+    if (!cameraEntity) {
+        if (!m_cameraNotFoundLogged) {
+            Log::Print("No camera found for rendering", LogLevel::Warning);
+            m_cameraNotFoundLogged = true;
+        }
         return;
+    }
 
     MeshResource*     meshResource     = services().get<MeshResource>();
     MaterialResource* materialResource = services().get<MaterialResource>();
     ShaderResource*   shaderResource   = services().get<ShaderResource>();
     ModelResource*    modelResource    = services().get<ModelResource>();
+    TextureResource*  textureResource  = services().get<TextureResource>();
 
     glm::mat4 viewMatrix = cameraTransform->viewMatrix;
     glm::mat4 projMatrix = cameraCache->projectionMatrix;
@@ -36,9 +42,11 @@ void RenderSystem::render(double /*deltaTime*/)
     /// ------- Render Environment -------
     if (const auto& [envEntity, environment] = world().getAt<CEnvironment>(0); envEntity) {
         if (auto [_, skyboxCache] = world().getFrom<CSkyboxCache>(envEntity); skyboxCache != nullptr) {
-            auto shaderRef = materialResource->getShaderRef(environment->skyboxMaterial);
-            shaderResource->bind(shaderRef, materialResource->getUniforms(environment->skyboxMaterial),
-                                 glm::mat4(glm::mat3(viewMatrix)), projMatrix, glm::mat4(1.0f));
+            auto  shaderRef = materialResource->getShaderRef(environment->skyboxMaterial);
+            auto* uniforms  = materialResource->getUniforms(environment->skyboxMaterial);
+
+            shaderResource->bind(shaderRef, glm::mat4(glm::mat3(viewMatrix)), projMatrix, glm::mat4(1.0f));
+            shaderResource->applyUniforms(shaderRef, uniforms, *textureResource);
 
             meshResource->draw(skyboxCache->meshRef);
         } else {
@@ -51,11 +59,12 @@ void RenderSystem::render(double /*deltaTime*/)
         auto meshRef     = meshRenderer->meshRef;
         auto materialRef = meshRenderer->materialRef;
 
-        auto* uniforms = materialResource->getUniforms(materialRef);
+        auto* uniforms  = materialResource->getUniforms(materialRef);
+        auto  shaderRef = materialResource->getShaderRef(materialRef);
 
-        auto shaderRef = materialResource->getShaderRef(materialRef);
-        shaderResource->bind(shaderRef, uniforms, viewMatrix, projMatrix,
+        shaderResource->bind(shaderRef, viewMatrix, projMatrix,
                              transform->modelMatrix * meshResource->getLocalModel(meshRef));
+        shaderResource->applyUniforms(shaderRef, uniforms, *textureResource);
 
         meshResource->draw(meshRef);
     }
@@ -68,11 +77,12 @@ void RenderSystem::render(double /*deltaTime*/)
             if (modelRenderer->materialOverrides.size() > index) {
                 materialRef = modelRenderer->materialOverrides[index];
             }
-            auto* uniforms = materialResource->getUniforms(materialRef);
+            auto* uniforms  = materialResource->getUniforms(materialRef);
+            auto  shaderRef = materialResource->getShaderRef(materialRef);
 
-            auto shaderRef = materialResource->getShaderRef(materialRef);
-            shaderResource->bind(shaderRef, uniforms, viewMatrix, projMatrix,
+            shaderResource->bind(shaderRef, viewMatrix, projMatrix,
                                  transform->modelMatrix * meshResource->getLocalModel(meshRef));
+            shaderResource->applyUniforms(shaderRef, uniforms, *textureResource);
 
             meshResource->draw(meshRef);
         });

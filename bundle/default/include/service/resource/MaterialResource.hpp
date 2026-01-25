@@ -1,6 +1,7 @@
 #pragma once
 
 #include <engine/model/Service.hpp>
+#include <service/resource/ShaderResource.hpp>
 #include <string>
 #include <unordered_map>
 #include <utils/IdManager.hpp>

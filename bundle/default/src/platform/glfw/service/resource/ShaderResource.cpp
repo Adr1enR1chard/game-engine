@@ -98,7 +98,7 @@ inline unsigned int compileShader(const char* vertexSource, const char* fragment
 }
 
 ShaderRef ShaderResource::create(const char* name, const char* vertexShaderPath, const char* fragmentShaderPath,
-                                 const ShaderParameters& params)
+                                 const UniformCollection& defaultUniforms, const ShaderParameters& params)
 {
     if (m_nameToShaderRef.find(name) != m_nameToShaderRef.end()) {
         return m_nameToShaderRef[name];
@@ -112,8 +112,8 @@ ShaderRef ShaderResource::create(const char* name, const char* vertexShaderPath,
     unsigned int shaderProgram    = compileShader(vertexSource, fragmentSource);
     ShaderRef    newShaderRef     = m_idManager.alloc();
     m_nameToShaderRef[name]       = newShaderRef;
-    m_loadedShaders[newShaderRef] = std::unique_ptr<ShaderData>(
-        new ShaderData({std::unique_ptr<ShaderImpl, ShaderImplDeleter>(new ShaderImpl{shaderProgram}), params}));
+    m_loadedShaders[newShaderRef] = std::unique_ptr<ShaderData>(new ShaderData(
+        {std::unique_ptr<ShaderImpl, ShaderImplDeleter>(new ShaderImpl{shaderProgram}), defaultUniforms, params}));
     return newShaderRef;
 }
 
@@ -126,16 +126,27 @@ ShaderRef ShaderResource::get(const char* name) const
     return 0;
 }
 
-inline void parseUniforms(unsigned int shaderProgram, const UniformCollection* uniforms,
-                          TextureResource& textureResource)
+void ShaderResource::applyUniforms(ShaderRef shaderRef, const UniformCollection* uniforms,
+                                   const TextureResource& textureResource) const
 {
-    unsigned int textureUnit = 0;
-    for (const auto& [name, value] : *uniforms) {
-        uint32_t location = glGetUniformLocation(shaderProgram, name.c_str());
+    auto it = m_loadedShaders.find(shaderRef);
+    if (it == m_loadedShaders.end()) {
+        Log::Print("Shader not found", LogLevel::Warning, true);
+        return;
+    }
+
+    unsigned int      textureUnit      = 0;
+    UniformCollection combinedUniforms = it->second->defaultUniforms;
+    if (uniforms) {
+        for (const auto& [name, value] : *uniforms) {
+            combinedUniforms[name] = value;
+        }
+    }
+    for (const auto& [name, value] : combinedUniforms) {
+        uint32_t location = glGetUniformLocation(it->second->impl->programID, name.c_str());
         if (location == static_cast<uint32_t>(-1)) {
             continue;
         }
-
         std::visit(
             [&](auto const& v) {
                 using T = std::decay_t<decltype(v)>;
@@ -163,8 +174,8 @@ inline void parseUniforms(unsigned int shaderProgram, const UniformCollection* u
     }
 }
 
-void ShaderResource::bind(ShaderRef shaderRef, const UniformCollection* uniforms, glm::mat4 viewMatrix,
-                          glm::mat4 projectionMatrix, glm::mat4 modelMatrix) const
+void ShaderResource::bind(ShaderRef shaderRef, glm::mat4 viewMatrix, glm::mat4 projectionMatrix,
+                          glm::mat4 modelMatrix) const
 {
     auto it = m_loadedShaders.find(shaderRef);
     if (it == m_loadedShaders.end()) {
@@ -174,10 +185,6 @@ void ShaderResource::bind(ShaderRef shaderRef, const UniformCollection* uniforms
 
     unsigned int shaderProgram = it->second->impl->programID;
     glUseProgram(shaderProgram); // Note: Not sure OpenGL handles redundant calls to glUseProgram
-
-    if (uniforms != nullptr) {
-        parseUniforms(shaderProgram, uniforms, m_textureResource);
-    }
 
     uint32_t viewLoc  = glGetUniformLocation(shaderProgram, "view");
     uint32_t projLoc  = glGetUniformLocation(shaderProgram, "projection");

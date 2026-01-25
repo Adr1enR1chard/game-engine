@@ -10,4 +10,8 @@ class EnvironmentSystem : public System
 
     void start() override;
     void render(double deltaTime) override;
+
+  private:
+    bool m_clearColorUpdated = false;
+    bool m_skyboxUpdated     = false;
 };
