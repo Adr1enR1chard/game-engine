@@ -141,8 +141,8 @@ add_custom_command(TARGET BasicScene POST_BUILD
           "${CMAKE_SOURCE_DIR}/examples/basic_scene/assets"
           "$<TARGET_FILE_DIR:BasicScene>/assets"
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-          "${CMAKE_SOURCE_DIR}/bundle/default/assets"
-          "$<TARGET_FILE_DIR:BasicScene>/assets")
+          "${CMAKE_SOURCE_DIR}/bundle/default/default-bundle-assets"
+          "$<TARGET_FILE_DIR:BasicScene>/default-bundle-assets")
 
 # # Registry unit tests
 # add_executable(RegistryTests

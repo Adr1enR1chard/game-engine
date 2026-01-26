@@ -3,11 +3,19 @@
 #include <iostream>
 #include <source_location>
 
-enum class LogLevel { Debug, Info, Warning, Error, Critical };
-
-inline const char* LogLevelToString(LogLevel level)
+enum class LogLevel
 {
-    switch (level) {
+    Debug,
+    Info,
+    Warning,
+    Error,
+    Critical
+};
+
+inline const char *LogLevelToString(LogLevel level)
+{
+    switch (level)
+    {
     case LogLevel::Debug:
         return "DEBUG";
     case LogLevel::Info:
@@ -23,9 +31,10 @@ inline const char* LogLevelToString(LogLevel level)
     }
 }
 
-inline const char* LogLevelToColorCode(LogLevel level)
+inline const char *LogLevelToColorCode(LogLevel level)
 {
-    switch (level) {
+    switch (level)
+    {
     case LogLevel::Debug:
         return "\033[36m"; // Cyan
     case LogLevel::Info:
@@ -41,19 +50,20 @@ inline const char* LogLevelToColorCode(LogLevel level)
     }
 }
 
-constexpr const char* RESET_COLOR        = "\033[0m";
-constexpr const char* LOG_LOCATION_COLOR = "\033[37m";
-constexpr const char* BOLD_TEXT          = "\033[1m";
-constexpr const char* ITALIC_TEXT        = "\033[3m";
+constexpr const char *RESET_COLOR = "\033[0m";
+constexpr const char *LOG_LOCATION_COLOR = "\033[37m";
+constexpr const char *BOLD_TEXT = "\033[1m";
+constexpr const char *ITALIC_TEXT = "\033[3m";
 
 class Log
 {
-  public:
-    static void Print(const std::string& message, LogLevel level, bool logLocation = false,
-                      const std::source_location& location = std::source_location::current())
+public:
+    static void Print(const std::string &message, LogLevel level, bool logLocation = false,
+                      const std::source_location &location = std::source_location::current())
     {
         std::cout << "[" << BOLD_TEXT << LogLevelToColorCode(level) << LogLevelToString(level) << RESET_COLOR << "] ";
-        if (logLocation) {
+        if (logLocation)
+        {
             std::cout << ITALIC_TEXT << LOG_LOCATION_COLOR << location.function_name() << " (l." << location.line()
                       << "): " << RESET_COLOR;
         }

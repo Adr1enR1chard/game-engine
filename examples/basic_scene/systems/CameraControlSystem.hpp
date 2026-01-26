@@ -3,18 +3,24 @@
 
 class CameraControlSystem : public System
 {
-  public:
+public:
+    void start() override
+    {
+        input = services().get<Input>();
+        window = services().get<Window>();
+    }
+
     void update(double deltaTime) override
     {
         float dt = static_cast<float>(deltaTime);
-        if (auto [entity, cCam, transform] = world().getAt<CCamera, CTransform>(0); entity != 0) {
-            Input* input = services().get<Input>();
+        if (auto [entity, cCam, transform] = world().getAt<CCamera, CTransform>(0); entity != 0 && mouseCaptured)
+        {
             transform->rotation.y += -input->getMouseDelta().x * 0.2f;
             transform->rotation.x += -input->getMouseDelta().y * 0.2f;
 
             transform->rotation.x = glm::clamp(transform->rotation.x, -89.0f, 89.0f);
 
-            float yaw   = glm::radians(transform->rotation.y);
+            float yaw = glm::radians(transform->rotation.y);
             float pitch = glm::radians(transform->rotation.x);
 
             glm::vec3 forward;
@@ -45,5 +51,21 @@ class CameraControlSystem : public System
             transform->position += forward * direction.y * speed;
             transform->position += right * direction.x * speed;
         }
+
+        if (input->isKeyPressed(Key::Escape))
+        {
+            window->captureMouse(false);
+            mouseCaptured = false;
+        }
+        if (input->isKeyPressed(Key::LAlt))
+        {
+            window->captureMouse(true);
+            mouseCaptured = true;
+        }
     }
+
+private:
+    Input *input = nullptr;
+    Window *window = nullptr;
+    bool mouseCaptured = true;
 };

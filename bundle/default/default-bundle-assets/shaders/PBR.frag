@@ -18,6 +18,7 @@ struct Material {
     float metallic;
     float roughness;
     float ao;
+    bool useMetallicRoughnessMap;
     sampler2D baseColorMap;
     sampler2D metallicMap;
     sampler2D roughnessMap;
@@ -142,7 +143,12 @@ void main() {
 
     vec3 baseColor = pow(texture(material.baseColorMap, vUV).rgb * material.baseColor, vec3(2.2));
     float metallic = material.metallic * texture(material.metallicMap, vUV).r;
-    float roughness = material.roughness * texture(material.roughnessMap, vUV).r;
+    float roughness = material.roughness;
+    if(!material.useMetallicRoughnessMap) {
+        roughness *= texture(material.roughnessMap, vUV).r;
+    } else {
+        roughness *= texture(material.metallicMap, vUV).g;
+    }
     float ao = material.ao * texture(material.aoMap, vUV).r;
 
     vec3 Lo = CalcDirLight(dirLight, N, V, baseColor, metallic, roughness, ao);

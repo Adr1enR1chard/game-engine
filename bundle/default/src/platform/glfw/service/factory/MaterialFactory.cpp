@@ -2,7 +2,7 @@
 
 #include <engine/utils/Log.hpp>
 
-MaterialRef MaterialFactory::PBR(const PBRMaterialParameters& options)
+MaterialRef MaterialFactory::PBR(const PBRMaterialParameters &options)
 {
     ShaderRef pbrShaderRef = m_shaderFactory.PBR("__PBRShader");
 
@@ -12,6 +12,7 @@ MaterialRef MaterialFactory::PBR(const PBRMaterialParameters& options)
     m_materialResource.setUniform(materialRef, "material.metallic", options.metallic);
     m_materialResource.setUniform(materialRef, "material.roughness", options.roughness);
     m_materialResource.setUniform(materialRef, "material.ao", options.ao);
+    m_materialResource.setUniform(materialRef, "material.useMetallicRoughnessMap", options.useMetallicRoughnessMap);
 
     if (options.baseColorMap != 0)
         m_materialResource.setUniform(materialRef, "material.baseColorMap", options.baseColorMap);
@@ -27,7 +28,7 @@ MaterialRef MaterialFactory::PBR(const PBRMaterialParameters& options)
     return materialRef;
 };
 
-MaterialRef MaterialFactory::Phong(const PhongMaterialParameters& options)
+MaterialRef MaterialFactory::Phong(const PhongMaterialParameters &options)
 {
     ShaderRef phongShaderRef = m_shaderFactory.Phong("__PhongShader");
 
@@ -48,10 +49,10 @@ MaterialRef MaterialFactory::Phong(const PhongMaterialParameters& options)
     return materialRef;
 }
 
-MaterialRef MaterialFactory::Skybox(const SkyboxMaterialParameters& options)
+MaterialRef MaterialFactory::Skybox(const SkyboxMaterialParameters &options)
 {
-    ShaderRef   skyboxShaderRef = m_shaderFactory.Skybox("__SkyboxShader");
-    MaterialRef materialRef     = m_materialResource.create(skyboxShaderRef);
+    ShaderRef skyboxShaderRef = m_shaderFactory.Skybox("__SkyboxShader");
+    MaterialRef materialRef = m_materialResource.create(skyboxShaderRef);
 
     if (options.colorMap != 0)
         m_materialResource.setUniform(materialRef, "material.colorMap", options.colorMap);

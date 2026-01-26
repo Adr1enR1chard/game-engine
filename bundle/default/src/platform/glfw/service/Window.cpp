@@ -9,10 +9,11 @@
 #include <engine/Engine.hpp>
 #include <engine/utils/key_mapping.hpp>
 
-struct Window::WindowImpl {
-    struct GLFWwindow* m_window;
+struct Window::WindowImpl
+{
+    struct GLFWwindow *m_window;
 
-    static void framebuffer_size_callback(GLFWwindow* /*window*/, int width, int height)
+    static void framebuffer_size_callback(GLFWwindow * /*window*/, int width, int height)
     {
         if (width == 0 || height == 0)
             return;
@@ -41,39 +42,61 @@ void Window::create()
 
     // glfw window creation
     // --------------------
-    GLFWwindow* window =
+    GLFWwindow *window =
         glfwCreateWindow(m_width, m_height, m_title, m_fullscreen ? glfwGetPrimaryMonitor() : NULL, NULL);
-    if (window == NULL) {
+    if (window == NULL)
+    {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return;
     }
+    m_impl->m_window = window;
+
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, Window::WindowImpl::framebuffer_size_callback);
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return;
     }
 
-    glfwSetKeyCallback(window, [](GLFWwindow* /*wnd*/, int key, int scancode, int action, int mods) {
-        Input::KeyCallback(GLFWKeyToEngineKey(key), GLFWKeyToEngineKey(scancode), GLFWActionToEngineAction(action),
-                           mods);
-    });
+    glfwSetKeyCallback(window, [](GLFWwindow * /*wnd*/, int key, int scancode, int action, int mods)
+                       { Input::KeyCallback(GLFWKeyToEngineKey(key), GLFWKeyToEngineKey(scancode), GLFWActionToEngineAction(action),
+                                            mods); });
     glfwSetCursorPosCallback(
-        window, [](GLFWwindow* /*wnd*/, double xpos, double ypos) { Input::MousePositionCallback(xpos, ypos); });
-    glfwSetWindowCloseCallback(window, [](GLFWwindow* /*wnd*/) { Engine::Shutdown(); });
+        window, [](GLFWwindow * /*wnd*/, double xpos, double ypos)
+        { Input::MousePositionCallback(xpos, ypos); });
+    glfwSetWindowCloseCallback(window, [](GLFWwindow * /*wnd*/)
+                               { Engine::Shutdown(); });
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    captureMouse(true);
     if (glfwRawMouseMotionSupported())
         glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
     glfwSwapInterval(1); // Enable vsync
     glEnable(GL_DEPTH_TEST);
+}
 
-    m_impl->m_window = window;
+void Window::setSize(int width, int height)
+{
+    m_width = width;
+    m_height = height;
+    glfwSetWindowSize(m_impl->m_window, width, height);
+}
+
+void Window::captureMouse(bool capture)
+{
+    if (capture)
+    {
+        glfwSetInputMode(m_impl->m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+    else
+    {
+        glfwSetInputMode(m_impl->m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
 }
 
 bool Window::shouldClose() const
@@ -102,7 +125,7 @@ void Window::clear()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Window::getSize(int& width, int& height) const
+void Window::getSize(int &width, int &height) const
 {
     glfwGetFramebufferSize(m_impl->m_window, &width, &height);
 }

@@ -13,23 +13,20 @@ glm::mat4 getProjectionMatrix(float fov, float aspectRatio, float nearPlane, flo
 
 void CameraSystem::update(double /*deltaTime*/)
 {
-    if (auto [entity, cameraComponent] = world().getAt<CCamera>(0); entity) {
-        if (!cameraComponent->dirty) {
-            return;
-        }
-
-        if (!world().has<CCameraCache>(entity)) {
+    if (auto [entity, cameraComponent] = world().getAt<CCamera>(0); entity)
+    {
+        if (!world().has<CCameraCache>(entity))
+        {
             world().add(entity, CCameraCache{});
         }
 
+        // TODO: Use events to only update when necessary
         int width, height;
         services().get<Window>()->getSize(width, height);
 
-        const auto& [_, cameraCache] = world().getFrom<CCameraCache>(entity);
+        const auto &[_, cameraCache] = world().getFrom<CCameraCache>(entity);
         cameraCache->projectionMatrix =
             getProjectionMatrix(cameraComponent->fov, static_cast<float>(width) / static_cast<float>(height),
                                 cameraComponent->nearPlane, cameraComponent->farPlane);
-
-        cameraComponent->dirty = false;
     }
 }
