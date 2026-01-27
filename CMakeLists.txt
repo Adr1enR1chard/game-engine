@@ -135,15 +135,23 @@ target_link_libraries(BasicScene PRIVATE
     default_bundle_glfw
 )
 
-## Note: dependencies are linked to engine_* libraries above
+set(ASSET_COMPILER_EXE "${CMAKE_SOURCE_DIR}/tools/asset_compiler/bin/Debug/AssetCompiler.exe")
+set(ASSETS_SRC "${CMAKE_SOURCE_DIR}/examples/basic_scene/assets")
+set(DEFAULT_BUNDLE_ASSETS_SRC "${CMAKE_SOURCE_DIR}/bundle/default/default-bundle-assets")
+
+add_custom_command(TARGET BasicScene POST_BUILD
+    COMMAND ${ASSET_COMPILER_EXE} "${ASSETS_SRC}" "$<TARGET_FILE_DIR:BasicScene>/assets"
+    COMMAND ${ASSET_COMPILER_EXE} "${DEFAULT_BUNDLE_ASSETS_SRC}" "$<TARGET_FILE_DIR:BasicScene>/default-bundle-assets"
+    COMMENT "Running AssetCompiler to process assets for BasicScene..."
+)
 
 add_custom_command(TARGET BasicScene POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:BasicScene>/assets"
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-          "${CMAKE_SOURCE_DIR}/examples/basic_scene/assets"
+          "${ASSETS_SRC}"
           "$<TARGET_FILE_DIR:BasicScene>/assets"
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-          "${CMAKE_SOURCE_DIR}/bundle/default/default-bundle-assets"
+          "${DEFAULT_BUNDLE_ASSETS_SRC}"
           "$<TARGET_FILE_DIR:BasicScene>/default-bundle-assets")
 
 # # Registry unit tests
