@@ -6,17 +6,21 @@
 
 class ShaderFactory : public Service
 {
-  public:
-    ShaderFactory(ShaderResource& shaderResource, TextureFactory& textureFactory)
-        : m_shaderResource(shaderResource), m_textureFactory(textureFactory) {};
-    ~ShaderFactory() override = default;
+public:
+  ShaderFactory(ShaderResource &shaderResource, TextureFactory &textureFactory)
+      : m_shaderResource(shaderResource), m_textureFactory(textureFactory) {};
+  ~ShaderFactory() override = default;
 
-  public:
-    ShaderRef PBR(const char* name);
-    ShaderRef Phong(const char* name);
-    ShaderRef Skybox(const char* name);
+public:
+  ShaderRef CustomShader(const char *name, const char *vertexShaderPath, const char *fragmentShaderPath,
+                         const UniformCollection &defaultUniforms, const ShaderParameters &params = {});
+  ShaderRef PBRShader(const char *name);
+  ShaderRef PhongShader(const char *name);
+  ShaderRef SkyboxShader(const char *name);
 
-  private:
-    ShaderResource& m_shaderResource;
-    TextureFactory& m_textureFactory;
+private:
+  void loadShaderFromFile(const char *filePath, std::string &outShaderCode);
+
+  ShaderResource &m_shaderResource;
+  TextureFactory &m_textureFactory;
 };

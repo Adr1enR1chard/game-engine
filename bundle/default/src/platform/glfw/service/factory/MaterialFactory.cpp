@@ -2,9 +2,9 @@
 
 #include <engine/utils/Log.hpp>
 
-MaterialRef MaterialFactory::PBR(const PBRMaterialParameters &options)
+MaterialRef MaterialFactory::PBRMaterial(const PBRMaterialParameters &options)
 {
-    ShaderRef pbrShaderRef = m_shaderFactory.PBR("__PBRShader");
+    ShaderRef pbrShaderRef = m_shaderFactory.PBRShader("__PBRShader");
 
     MaterialRef materialRef = m_materialResource.create(pbrShaderRef);
 
@@ -28,9 +28,9 @@ MaterialRef MaterialFactory::PBR(const PBRMaterialParameters &options)
     return materialRef;
 };
 
-MaterialRef MaterialFactory::Phong(const PhongMaterialParameters &options)
+MaterialRef MaterialFactory::PhongMaterial(const PhongMaterialParameters &options)
 {
-    ShaderRef phongShaderRef = m_shaderFactory.Phong("__PhongShader");
+    ShaderRef phongShaderRef = m_shaderFactory.PhongShader("__PhongShader");
 
     MaterialRef materialRef = m_materialResource.create(phongShaderRef);
 
@@ -49,9 +49,9 @@ MaterialRef MaterialFactory::Phong(const PhongMaterialParameters &options)
     return materialRef;
 }
 
-MaterialRef MaterialFactory::Skybox(const SkyboxMaterialParameters &options)
+MaterialRef MaterialFactory::SkyboxMaterial(const SkyboxMaterialParameters &options)
 {
-    ShaderRef skyboxShaderRef = m_shaderFactory.Skybox("__SkyboxShader");
+    ShaderRef skyboxShaderRef = m_shaderFactory.SkyboxShader("__SkyboxShader");
     MaterialRef materialRef = m_materialResource.create(skyboxShaderRef);
 
     if (options.colorMap != 0)

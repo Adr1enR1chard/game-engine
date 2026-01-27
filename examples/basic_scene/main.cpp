@@ -9,12 +9,12 @@ public:
         services().get<Window>()->setSize(1280, 720);
         world().createEntity(CCamera{}, CTransform{glm::vec3(0.0f, 0.0f, 3.0f)});
         world().createEntity(CDirectionalLight{glm::vec3(-3.0f, -1.0f, -1.0f), glm::vec3(1.0f), 10.0f, 10.0f});
-        world().createEntity(CEnvironment{.skyboxMaterial = services().get<MaterialFactory>()->Skybox({})});
+        world().createEntity(CEnvironment{.skyboxMaterial = services().get<MaterialFactory>()->SkyboxMaterial({})});
 
         m_metalSphere = world().createEntity(
             CMeshRenderer{
                 .meshRef = services().get<MeshFactory>()->Sphere(),
-                .materialRef = services().get<MaterialFactory>()->PBR({
+                .materialRef = services().get<MaterialFactory>()->PBRMaterial({
                     .ao = 0.1f,
                     .baseColorMap =
                         services().get<TextureFactory>()->Texture2D("assets/textures/metal/Metal055A_1K-JPG_Color.jpg"),
@@ -31,7 +31,7 @@ public:
         m_groundSphere = world().createEntity(
             CMeshRenderer{
                 .meshRef = services().get<MeshFactory>()->Sphere(),
-                .materialRef = services().get<MaterialFactory>()->PBR({
+                .materialRef = services().get<MaterialFactory>()->PBRMaterial({
                     .metallic = 0.0f,
                     .baseColorMap = services().get<TextureFactory>()->Texture2D(
                         "assets/textures/ground/Ground104_1K-JPG_Color.jpg"),

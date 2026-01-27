@@ -122,7 +122,7 @@ MaterialRef ModelFactory::processMaterial(aiMesh *mesh, const aiScene *scene, co
             Log::Print("Loaded normal map for model: " + std::string(modelPath), LogLevel::Debug);
         }
     }
-    auto materialRef = m_materialFactory.PBR(options);
+    auto materialRef = m_materialFactory.PBRMaterial(options);
     return materialRef;
 }
 

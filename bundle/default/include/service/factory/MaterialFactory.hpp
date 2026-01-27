@@ -42,9 +42,9 @@ public:
     {
     }
 
-    MaterialRef PBR(const PBRMaterialParameters &options = {});
-    MaterialRef Phong(const PhongMaterialParameters &options = {});
-    MaterialRef Skybox(const SkyboxMaterialParameters &options = {});
+    MaterialRef PBRMaterial(const PBRMaterialParameters &options = {});
+    MaterialRef PhongMaterial(const PhongMaterialParameters &options = {});
+    MaterialRef SkyboxMaterial(const SkyboxMaterialParameters &options = {});
 
 private:
     MaterialResource &m_materialResource;
