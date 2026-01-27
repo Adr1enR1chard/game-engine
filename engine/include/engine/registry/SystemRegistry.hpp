@@ -7,6 +7,7 @@
 #include <vector>
 
 #include <engine/model/System.hpp>
+#include <engine/registry/SystemStorage.hpp>
 
 #include <engine/utils/Log.hpp>
 
@@ -15,92 +16,88 @@ class ServiceRegistry;
 
 class SystemRegistry
 {
-  public:
-    SystemRegistry()                                 = default;
-    ~SystemRegistry()                                = default;
-    SystemRegistry(const SystemRegistry&)            = delete;
-    SystemRegistry& operator=(const SystemRegistry&) = delete;
+public:
+    SystemRegistry() = default;
+    ~SystemRegistry() = default;
+    SystemRegistry(const SystemRegistry &) = delete;
+    SystemRegistry &operator=(const SystemRegistry &) = delete;
 
     /**
      * Add systems to the registry.
      */
-    template <SystemType... T> void add()
+    template <SystemType... T>
+    void add()
     {
-        (m_systems.try_emplace(std::type_index(typeid(T)), std::make_unique<T>()), ...);
+        (m_systems.emplace<T>(), ...);
         (..., Log::Print("Added system: " + std::string(typeid(T).name()), LogLevel::Info));
     }
 
-    template <SystemType T, typename... Args> void add(Args&&... args)
+    template <SystemType T, typename... Args>
+    void add(Args &&...args)
     {
-        m_systems.try_emplace(std::type_index(typeid(T)), std::make_unique<T>(std::forward<Args>(args)...));
+        m_systems.emplace<T>(std::forward<Args>(args)...);
         Log::Print("Added system: " + std::string(typeid(T).name()), LogLevel::Info);
     }
 
     /**
      * Remove systems from the registry.
      */
-    template <SystemType... T> void remove()
+    template <SystemType... T>
+    void remove()
     {
-        (m_systems.erase(std::type_index(typeid(T))), ...);
+        (m_systems.erase<T>(), ...);
     }
 
-    void setContext(World& world, ServiceRegistry& services)
+private:
+    friend class Engine;
+    void setContext(World &world, ServiceRegistry &services)
     {
-        for (auto& [typeIndex, system] : m_systems) {
-            system->setContext(world, services);
-        }
+        m_systems.map([&](System &sys)
+                      { sys.setContext(world, services); });
     }
 
     void init()
     {
-        for (auto& [typeIndex, system] : m_systems) {
-            system->init();
-        }
+        m_systems.map([&](System &system)
+                      { system.init(); });
     }
 
     void start()
     {
-        for (auto& [typeIndex, system] : m_systems) {
-            system->start();
-        }
+        m_systems.map([&](System &system)
+                      { system.start(); });
     }
 
     void preUpdate(float deltaTime)
     {
-        for (auto& [typeIndex, system] : m_systems) {
-            system->preUpdate(deltaTime);
-        }
+        m_systems.map([&](System &system)
+                      { system.preUpdate(deltaTime); });
     }
 
     void update(float deltaTime)
     {
-        for (auto& [typeIndex, system] : m_systems) {
-            system->update(deltaTime);
-        }
+        m_systems.map([&](System &system)
+                      { system.update(deltaTime); });
     }
 
     void preRender(float deltaTime)
     {
-        for (auto& [typeIndex, system] : m_systems) {
-            system->preRender(deltaTime);
-        }
+        m_systems.map([&](System &system)
+                      { system.preRender(deltaTime); });
     }
 
     void render(float deltaTime)
     {
-        for (auto& [typeIndex, system] : m_systems) {
-            system->render(deltaTime);
-        }
+        m_systems.map([&](System &system)
+                      { system.render(deltaTime); });
     }
 
     void present(float deltaTime)
     {
-        for (auto& [typeIndex, system] : m_systems) {
-            system->present(deltaTime);
-        }
+        m_systems.map([&](System &system)
+                      { system.present(deltaTime); });
     }
 
-  private:
-    // TODO : Use vector instead of unordered_map for better cache coherence
-    std::unordered_map<std::type_index, std::unique_ptr<System>> m_systems;
+private:
+    SystemStorage m_systems;
 };

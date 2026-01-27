@@ -13,7 +13,7 @@ public:
     void update(double deltaTime) override
     {
         float dt = static_cast<float>(deltaTime);
-        if (auto [entity, cCam, transform] = world().getAt<CCamera, CTransform>(0); entity != 0 && mouseCaptured)
+        if (auto [entity, cCam, transform] = world().fetchAt<CCamera, CTransform>(0); entity != 0 && mouseCaptured)
         {
             transform->rotation.y += -input->getMouseDelta().x * 0.2f;
             transform->rotation.x += -input->getMouseDelta().y * 0.2f;

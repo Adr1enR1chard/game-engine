@@ -1,17 +1,24 @@
 #pragma once
+#include <glm/glm.hpp>
 
 #include <engine/model/System.hpp>
+#include <engine/model/Entity.hpp>
+#include <component/CEnvironment.hpp>
+#include <component/cache/CSkyboxCache.hpp>
+#include <utils/RenderTypes.hpp>
 
 class EnvironmentSystem : public System
 {
-  public:
-    EnvironmentSystem()           = default;
-    ~EnvironmentSystem() override = default;
+public:
+  EnvironmentSystem() = default;
+  ~EnvironmentSystem() override = default;
 
-    void start() override;
-    void render(double deltaTime) override;
+  void update(double deltaTime) override;
 
-  private:
-    bool m_clearColorUpdated = false;
-    bool m_skyboxUpdated     = false;
+private:
+  CSkyboxCache createSkyboxCache();
+
+private:
+  glm::vec3 m_lastClearColor = glm::vec3(-1.0f);
+  CEnvironment *m_environment = nullptr;
 };

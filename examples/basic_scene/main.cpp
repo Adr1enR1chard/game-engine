@@ -7,11 +7,11 @@ public:
     void start() override
     {
         services().get<Window>()->setSize(1280, 720);
-        world().create(CCamera{}, CTransform{glm::vec3(0.0f, 0.0f, 3.0f)});
-        world().create(CDirectionalLight{glm::vec3(-3.0f, -1.0f, -1.0f), glm::vec3(1.0f), 10.0f, 10.0f});
-        world().create(CEnvironment{.skyboxMaterial = services().get<MaterialFactory>()->Skybox({})});
+        world().createEntity(CCamera{}, CTransform{glm::vec3(0.0f, 0.0f, 3.0f)});
+        world().createEntity(CDirectionalLight{glm::vec3(-3.0f, -1.0f, -1.0f), glm::vec3(1.0f), 10.0f, 10.0f});
+        world().createEntity(CEnvironment{.skyboxMaterial = services().get<MaterialFactory>()->Skybox({})});
 
-        m_metalSphere = world().create(
+        m_metalSphere = world().createEntity(
             CMeshRenderer{
                 .meshRef = services().get<MeshFactory>()->Sphere(),
                 .materialRef = services().get<MaterialFactory>()->PBR({
@@ -28,7 +28,7 @@ public:
             },
             CTransform{glm::vec3(-1.0f, 0.0f, 0.0f)});
 
-        m_groundSphere = world().create(
+        m_groundSphere = world().createEntity(
             CMeshRenderer{
                 .meshRef = services().get<MeshFactory>()->Sphere(),
                 .materialRef = services().get<MaterialFactory>()->PBR({
@@ -45,7 +45,7 @@ public:
             },
             CTransform{glm::vec3(1.0f, 0.0f, 0.0f)});
 
-        m_sword = world().create(
+        m_sword = world().createEntity(
             CModelRenderer{
                 .modelRef = services().get<ModelFactory>()->LoadModel("assets/models/sword/scene.gltf"),
             },
@@ -55,15 +55,15 @@ public:
     void update(double deltaTime) override
     {
         float angle = static_cast<float>(deltaTime) * 100.0f;
-        if (auto [_, transform] = world().getFrom<CTransform>(m_metalSphere); transform)
+        if (auto [_, transform] = world().fetchFrom<CTransform>(m_metalSphere); transform)
         {
             transform->rotation.y += angle;
         }
-        if (auto [_, transform] = world().getFrom<CTransform>(m_groundSphere); transform)
+        if (auto [_, transform] = world().fetchFrom<CTransform>(m_groundSphere); transform)
         {
             transform->rotation.y += angle;
         }
-        if (auto [_, transform] = world().getFrom<CTransform>(m_sword); transform)
+        if (auto [_, transform] = world().fetchFrom<CTransform>(m_sword); transform)
         {
             transform->rotation.x += angle;
         }

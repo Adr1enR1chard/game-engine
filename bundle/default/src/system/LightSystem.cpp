@@ -9,21 +9,23 @@
 
 void LightSystem::update(double /*deltaTime*/)
 {
-    const auto& [eCamera, cCamera, cCameraTransform] = world().getAt<CCamera, CTransform>(0);
+    const auto &[eCamera, cCamera, cCameraTransform] = world().fetchAt<CCamera, CTransform>(0);
 
     if (!eCamera)
         return;
 
-    const auto& [eDirLight, cDirLight] = world().getAt<CDirectionalLight>(0);
+    const auto &[eDirLight, cDirLight] = world().fetchAt<CDirectionalLight>(0);
 
-    const auto& pointLights = world().get<CPointLight, CTransform>();
+    const auto &pointLights = world().fetch<CPointLight, CTransform>();
 
-    MaterialResource* materialResource = services().get<MaterialResource>();
-    for (const auto& [eMeshRenderer, cMeshRenderer] : world().get<CMeshRenderer>()) {
-        auto& materialRef = cMeshRenderer->materialRef;
+    MaterialResource *materialResource = services().get<MaterialResource>();
+    for (const auto &[eMeshRenderer, cMeshRenderer] : world().fetch<CMeshRenderer>())
+    {
+        auto &materialRef = cMeshRenderer->materialRef;
         materialResource->setUniform(materialRef, "viewPos", cCameraTransform->position);
 
-        if (cDirLight) {
+        if (cDirLight)
+        {
             materialResource->setUniform(materialRef, "dirLight",
                                          Uniform::DirectionalLight{
                                              cDirLight->direction, // direction
@@ -35,7 +37,8 @@ void LightSystem::update(double /*deltaTime*/)
 
         materialResource->setUniform(materialRef, "pointLightCount", static_cast<int>(pointLights.size()));
         int i = 0;
-        for (const auto& [ePointLight, cPointLight, cPointLightTransform] : pointLights) {
+        for (const auto &[ePointLight, cPointLight, cPointLightTransform] : pointLights)
+        {
             std::string baseName = "pointLights[" + std::to_string(i) + "]";
 
             materialResource->setUniform(materialRef, baseName.c_str(),

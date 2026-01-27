@@ -7,38 +7,38 @@
 
 class System
 {
-  public:
-    System() {}
-    virtual ~System() = default;
-    virtual void init() {}
-    virtual void start() {}
-    virtual void preUpdate(double /*deltaTime*/) {}
-    virtual void update(double /*deltaTime*/) {}
-    virtual void preRender(double /*deltaTime*/) {}
-    virtual void render(double /*deltaTime*/) {}
-    virtual void present(double /*deltaTime*/) {}
+public:
+  System() {}
+  virtual ~System() = default;
+  virtual void init() {}
+  virtual void start() {}
+  virtual void preUpdate(double /*deltaTime*/) {}
+  virtual void update(double /*deltaTime*/) {}
+  virtual void preRender(double /*deltaTime*/) {}
+  virtual void render(double /*deltaTime*/) {}
+  virtual void present(double /*deltaTime*/) {}
 
-  protected:
-    World& world()
-    {
-        return *m_world;
-    }
-    ServiceRegistry& services()
-    {
-        return *m_services;
-    }
+protected:
+  World &world()
+  {
+    return *m_world;
+  }
+  ServiceRegistry &services()
+  {
+    return *m_services;
+  }
 
-  private:
-    friend class SystemRegistry;
-    void setContext(World& world, ServiceRegistry& services)
-    {
-        this->m_world    = &world;
-        this->m_services = &services;
-    }
+private:
+  friend class SystemRegistry;
+  void setContext(World &world, ServiceRegistry &services)
+  {
+    this->m_world = &world;
+    this->m_services = &services;
+  }
 
-  private:
-    World*           m_world;
-    ServiceRegistry* m_services;
+private:
+  World *m_world;
+  ServiceRegistry *m_services;
 };
 
 template <typename T>
