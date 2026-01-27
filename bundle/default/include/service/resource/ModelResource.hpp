@@ -1,6 +1,5 @@
 #pragma once
 
-#include <assimp/scene.h>
 #include <memory>
 #include <optional>
 #include <string>
@@ -14,22 +13,23 @@
 #include <utils/IdManager.hpp>
 #include <utils/RenderTypes.hpp>
 
-struct MeshMaterialBinding {
-    MeshRef     meshRef;
-    MaterialRef materialRef;
+struct MeshMaterialBinding
+{
+  MeshRef meshRef;
+  MaterialRef materialRef;
 };
 
 class ModelResource : public Service
 {
-  public:
-    ModelResource()           = default;
-    ~ModelResource() override = default;
+public:
+  ModelResource() = default;
+  ~ModelResource() override = default;
 
-    ModelRef create(std::vector<MeshMaterialBinding> meshMaterialBindings);
+  ModelRef create(std::vector<MeshMaterialBinding> meshMaterialBindings);
 
-    void forEach(ModelRef modelRef, const std::function<void(MeshRef, MaterialRef, size_t)>& func) const;
+  void forEach(ModelRef modelRef, const std::function<void(MeshRef, MaterialRef, size_t)> &func) const;
 
-  private:
-    IdManager                                                      m_idManager;
-    std::unordered_map<ModelRef, std::vector<MeshMaterialBinding>> m_modelMeshes;
+private:
+  IdManager m_idManager;
+  std::unordered_map<ModelRef, std::vector<MeshMaterialBinding>> m_modelMeshes;
 };

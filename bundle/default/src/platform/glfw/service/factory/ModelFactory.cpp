@@ -1,8 +1,6 @@
 #include <service/factory/ModelFactory.hpp>
 
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
-#include <assimp/scene.h>
+#include <engine/Engine.hpp>
 
 #include <engine/utils/Log.hpp>
 
@@ -10,6 +8,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <optional>
+#include <thread>
 
 glm::mat4 AiMatrixToGlmMat4(const aiMatrix4x4 &from)
 {
@@ -212,5 +211,6 @@ ModelRef ModelFactory::LoadModel(const char *modelPath)
         return 0;
     }
 
+    // TODO: Do not create meshes and materials resources in processNode, just gather data and create them here. This is mandatory to avoid race conditions
     return m_modelResource.create(processNode(scene->mRootNode, scene, glm::mat4(1.0f), modelPath));
 }

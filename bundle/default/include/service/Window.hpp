@@ -56,5 +56,5 @@ private:
   int m_height = 600;
   const char *m_title = "Game Engine";
   bool m_fullscreen = false;
-  glm::vec3 m_clearColor = glm::vec3(0.1f, 0.1f, 0.1f);
+  glm::vec3 m_clearColor = glm::vec3(0.0f, 0.0f, 0.0f);
 };

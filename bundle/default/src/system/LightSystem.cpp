@@ -1,11 +1,7 @@
 #include <system/LightSystem.hpp>
 
-#include <component/CCamera.hpp>
-#include <component/CDirectionalLight.hpp>
-#include <component/CMeshRenderer.hpp>
-#include <component/CPointLight.hpp>
-#include <component/CTransform.hpp>
 #include <service/resource/MaterialResource.hpp>
+#include <service/resource/ModelResource.hpp>
 
 void LightSystem::update(double /*deltaTime*/)
 {
@@ -18,36 +14,56 @@ void LightSystem::update(double /*deltaTime*/)
 
     const auto &pointLights = world().fetch<CPointLight, CTransform>();
 
+    // Mesh renderers
     MaterialResource *materialResource = services().get<MaterialResource>();
     for (const auto &[eMeshRenderer, cMeshRenderer] : world().fetch<CMeshRenderer>())
     {
-        auto &materialRef = cMeshRenderer->materialRef;
-        materialResource->setUniform(materialRef, "viewPos", cCameraTransform->position);
+        setMaterialLights(cMeshRenderer->materialRef, cCamera, cCameraTransform, cDirLight, pointLights);
+    }
 
-        if (cDirLight)
-        {
-            materialResource->setUniform(materialRef, "dirLight",
-                                         Uniform::DirectionalLight{
-                                             cDirLight->direction, // direction
-                                             cDirLight->color,     // color
-                                             cDirLight->ambient,   // ambient
-                                             cDirLight->intensity, // intensity
-                                         });
-        }
+    // Model renderers
+    ModelResource *modelResource = services().get<ModelResource>();
+    for (const auto &[eModelRenderer, cModelRenderer] : world().fetch<CModelRenderer>())
+    {
+        modelResource->forEach(cModelRenderer->modelRef,
+                               [&](MeshRef meshRef, MaterialRef materialRef, size_t /*index*/)
+                               {
+                                   setMaterialLights(materialRef, cCamera, cCameraTransform, cDirLight, pointLights);
+                               });
+    }
+}
 
-        materialResource->setUniform(materialRef, "pointLightCount", static_cast<int>(pointLights.size()));
-        int i = 0;
-        for (const auto &[ePointLight, cPointLight, cPointLightTransform] : pointLights)
-        {
-            std::string baseName = "pointLights[" + std::to_string(i) + "]";
+void LightSystem::setMaterialLights(MaterialRef materialRef, const CCamera *camera,
+                                    const CTransform *cameraTransform,
+                                    const CDirectionalLight *dirLight,
+                                    const std::vector<std::tuple<Entity, CPointLight *, CTransform *>> &pointLights)
+{
+    MaterialResource *materialResource = services().get<MaterialResource>();
+    materialResource->setUniform(materialRef, "viewPos", cameraTransform->position);
 
-            materialResource->setUniform(materialRef, baseName.c_str(),
-                                         Uniform::PointLight{
-                                             cPointLightTransform->position, // position
-                                             cPointLight->color,             // color
-                                             cPointLight->intensity,         // intensity
-                                         });
-            ++i;
-        }
+    if (dirLight)
+    {
+        materialResource->setUniform(materialRef, "dirLight",
+                                     Uniform::DirectionalLight{
+                                         dirLight->direction, // direction
+                                         dirLight->color,     // color
+                                         dirLight->ambient,   // ambient
+                                         dirLight->intensity, // intensity
+                                     });
+    }
+
+    materialResource->setUniform(materialRef, "pointLightCount", static_cast<int>(pointLights.size()));
+    int i = 0;
+    for (const auto &[ePointLight, cPointLight, cPointLightTransform] : pointLights)
+    {
+        std::string baseName = "pointLights[" + std::to_string(i) + "]";
+
+        materialResource->setUniform(materialRef, baseName.c_str(),
+                                     Uniform::PointLight{
+                                         cPointLightTransform->position, // position
+                                         cPointLight->color,             // color
+                                         cPointLight->intensity,         // intensity
+                                     });
+        ++i;
     }
 }
