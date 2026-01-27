@@ -44,7 +44,7 @@ void RenderSystem::render(double /*deltaTime*/)
     /// ------- Render Environment -------
     if (const auto &[envEntity, environment] = world().fetchAt<CEnvironment>(0); envEntity)
     {
-        if (auto [_, skyboxCache] = world().fetchFrom<CSkyboxCache>(envEntity); skyboxCache != nullptr)
+        if (auto [_, skyboxCache] = world().fetchFrom<CSkyboxCache>(envEntity); skyboxCache != nullptr && environment->skyboxMaterial != 0)
         {
             auto shaderRef = materialResource->getShaderRef(environment->skyboxMaterial);
             auto *uniforms = materialResource->getUniforms(environment->skyboxMaterial);
