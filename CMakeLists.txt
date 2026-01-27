@@ -48,6 +48,7 @@ add_library(default_bundle_glfw
     bundle/default/src/platform/glfw/service/factory/ShaderFactory.cpp
     bundle/default/src/platform/glfw/service/factory/ModelFactory.cpp
     bundle/default/src/platform/glfw/service/factory/MeshFactory.cpp
+    bundle/default/src/platform/glfw/service/factory/TextureFactory.cpp
     bundle/default/src/DefaultBundle.cpp
 )
 target_include_directories(default_bundle_glfw PUBLIC

@@ -8,23 +8,24 @@
 
 class TextureResource : public Service
 {
-  public:
-    TextureResource()           = default;
-    ~TextureResource() override = default;
+public:
+  TextureResource() = default;
+  ~TextureResource() override = default;
 
-    TextureRef texture2D(const char* imagePath);
-    TextureRef cubeMap(const std::vector<std::string>& faces);
+  TextureRef texture2d(unsigned int width, unsigned int height, unsigned int channels, unsigned char *data);
+  TextureRef cubeMap(std::vector<unsigned int> widths, std::vector<unsigned int> heights, std::vector<unsigned int> channels, const std::vector<unsigned char *> &facesData);
 
-    void remove(TextureRef textureRef);
-    void bind(TextureRef textureRef) const;
+  void remove(TextureRef textureRef);
+  void bind(TextureRef textureRef) const;
 
-  private:
-    struct TextureData;
+private:
+  struct TextureData;
 
-    struct TextureDataDeleter {
-        void operator()(TextureData* textureData);
-    };
+  struct TextureDataDeleter
+  {
+    void operator()(TextureData *textureData);
+  };
 
-    IdManager                                                                        m_idManager;
-    std::unordered_map<TextureRef, std::unique_ptr<TextureData, TextureDataDeleter>> m_textures;
+  IdManager m_idManager;
+  std::unordered_map<TextureRef, std::unique_ptr<TextureData, TextureDataDeleter>> m_textures;
 };
