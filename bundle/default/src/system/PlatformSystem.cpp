@@ -13,7 +13,7 @@ void PlatformSystem::init()
     }
 }
 
-void PlatformSystem::preUpdate(double deltaTime)
+void PlatformSystem::preUpdate(double /*deltaTime*/)
 {
     if (auto *input = services().get<Input>())
     {
@@ -25,7 +25,7 @@ void PlatformSystem::preUpdate(double deltaTime)
     }
 }
 
-void PlatformSystem::preRender(double deltaTime)
+void PlatformSystem::preRender(double /*deltaTime*/)
 {
     if (auto *window = services().get<Window>())
     {
@@ -33,7 +33,7 @@ void PlatformSystem::preRender(double deltaTime)
     }
 }
 
-void PlatformSystem::present(double deltaTime)
+void PlatformSystem::present(double /*deltaTime*/)
 {
     if (auto *window = services().get<Window>())
     {
