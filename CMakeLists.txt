@@ -108,6 +108,30 @@ set(ASSIMP_INJECT_DEBUG_POSTFIX OFF CACHE BOOL "" FORCE)
 set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(assimp)
 
+# Asset compiler
+include (FetchContent)
+FetchContent_Declare(
+    asset_compiler
+    GIT_REPOSITORY https://github.com/Adr1enR1chard/assets-compiler.git
+    GIT_TAG main
+)
+FetchContent_MakeAvailable(asset_compiler)
+
+# Compile asset compiler tool from git repository
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/assets.bin
+    COMMAND $<TARGET_FILE:AssetCompiler>
+            ${CMAKE_SOURCE_DIR}/assets
+            ${CMAKE_CURRENT_BINARY_DIR}/assets.bin
+    DEPENDS AssetCompiler
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Compiling assets"
+)
+
+add_custom_target(compile_assets
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/assets.bin
+)
+
 # Link third-party to engine libraries
 target_link_libraries(default_bundle_glfw PUBLIC
     glfw
@@ -136,7 +160,7 @@ target_link_libraries(BasicScene PRIVATE
     default_bundle_glfw
 )
 
-set(ASSET_COMPILER_EXE "${CMAKE_SOURCE_DIR}/tools/asset_compiler/bin/Debug/AssetCompiler.exe")
+set(ASSET_COMPILER_EXE "$<TARGET_FILE:AssetCompiler>")
 set(ASSETS_SRC "${CMAKE_SOURCE_DIR}/examples/basic_scene/assets")
 set(DEFAULT_BUNDLE_ASSETS_SRC "${CMAKE_SOURCE_DIR}/bundle/default/default-bundle-assets")
 
