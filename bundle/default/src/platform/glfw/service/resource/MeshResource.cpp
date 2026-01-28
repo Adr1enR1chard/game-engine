@@ -94,6 +94,7 @@ void MeshResource::draw(MeshRef meshRef) const
     }
 }
 
+// TODO: Don't store localModel but either compute it according to the node hierarchy dynamically or store the full transform hierarchy.
 glm::mat4 MeshResource::getLocalModel(MeshRef meshRef) const
 {
     auto it = m_meshes.find(meshRef);

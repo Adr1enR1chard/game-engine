@@ -6,6 +6,7 @@
 #include <filesystem>
 #include "utils/format.h"
 #include "texture_compiler.h"
+#include "model_compiler.h"
 
 int main(int argc, char **argv)
 {
@@ -39,12 +40,12 @@ int main(int argc, char **argv)
             std::filesystem::path relativePath = std::filesystem::relative(filePath, sourceDir);
             std::filesystem::path outputPath = std::filesystem::path(destDir) / relativePath;
             outputPath += ".asset";
+            std::filesystem::create_directories(outputPath.parent_path());
 
             switch (assetType)
             {
             case AssetType::Texture:
                 // Ensure the output directory exists
-                std::filesystem::create_directories(outputPath.parent_path());
 
                 // Compile the texture
                 CompileTexture(filePath.string().c_str(), outputPath.string().c_str());
@@ -52,9 +53,8 @@ int main(int argc, char **argv)
                 break;
 
             case AssetType::Model:
-                // Model compilation logic would go here
-                // For now, just print the model file being processed
-                std::cout << "Model processing not implemented yet: " << filePath << std::endl;
+                CompileModel(filePath.string().c_str(), outputPath.string().c_str());
+                std::cout << "Compiled model: " << filePath << " -> " << outputPath << std::endl;
                 break;
 
             default:
