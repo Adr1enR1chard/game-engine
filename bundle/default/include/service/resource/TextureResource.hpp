@@ -13,7 +13,7 @@ public:
   ~TextureResource() override = default;
 
   TextureRef texture2d(unsigned int width, unsigned int height, unsigned int channels, unsigned char *data);
-  TextureRef cubeMap(std::vector<unsigned int> widths, std::vector<unsigned int> heights, std::vector<unsigned int> channels, const std::vector<unsigned char *> &facesData);
+  TextureRef cubeMap(std::vector<unsigned int> widths, std::vector<unsigned int> heights, std::vector<unsigned int> channels, const std::vector<std::vector<unsigned char>> &facesData);
 
   void remove(TextureRef textureRef);
   void bind(TextureRef textureRef) const;

@@ -71,7 +71,7 @@ TextureRef TextureResource::texture2d(unsigned int width, unsigned int height, u
     return newTextureRef;
 }
 
-TextureRef TextureResource::cubeMap(std::vector<unsigned int> widths, std::vector<unsigned int> heights, std::vector<unsigned int> channels, const std::vector<unsigned char *> &facesData)
+TextureRef TextureResource::cubeMap(std::vector<unsigned int> widths, std::vector<unsigned int> heights, std::vector<unsigned int> channels, const std::vector<std::vector<unsigned char>> &facesData)
 {
     TextureRef newTextureRef = m_idManager.alloc();
     auto textureData = std::unique_ptr<TextureData, TextureDataDeleter>(new TextureData());
@@ -104,7 +104,7 @@ TextureRef TextureResource::cubeMap(std::vector<unsigned int> widths, std::vecto
         }
 
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, widths[i], heights[i], 0, format, GL_UNSIGNED_BYTE,
-                     facesData[i]);
+                     facesData[i].data());
     }
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

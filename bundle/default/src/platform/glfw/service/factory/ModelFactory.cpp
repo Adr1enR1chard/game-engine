@@ -69,12 +69,14 @@ MaterialRef ModelFactory::processMaterial(aiMesh *mesh, const aiScene *scene, co
         if (auto texture = loadMaterialTextures(material, aiTextureType_BASE_COLOR, modelPath))
         {
             options.baseColorMap = *texture;
-            Log::Print("Loaded base color map for model: " + std::string(modelPath), LogLevel::Debug);
         }
         else if (texture = loadMaterialTextures(material, aiTextureType_DIFFUSE, modelPath))
         {
             options.baseColorMap = *texture;
-            Log::Print("Loaded diffuse map for model: " + std::string(modelPath), LogLevel::Debug);
+        }
+        else
+        {
+            Log::Print("No base color map found for model: " + std::string(modelPath), LogLevel::Info);
         }
 
         ///// Metallic / Roughness
@@ -83,27 +85,26 @@ MaterialRef ModelFactory::processMaterial(aiMesh *mesh, const aiScene *scene, co
             options.metallicMap = *texture;
             options.roughnessMap = *texture;
             options.useMetallicRoughnessMap = true;
-            Log::Print("Loaded metallic-roughness map for model: " + std::string(modelPath), LogLevel::Debug);
         }
         else
         {
             if (texture = loadMaterialTextures(material, aiTextureType_METALNESS, modelPath))
             {
                 options.metallicMap = *texture;
-                Log::Print("Loaded metallic map for model: " + std::string(modelPath), LogLevel::Debug);
             }
             else
             {
                 options.metallic = 0.0f;
+                Log::Print("No metallic map found for model: " + std::string(modelPath), LogLevel::Info);
             }
             if (texture = loadMaterialTextures(material, aiTextureType_DIFFUSE_ROUGHNESS, modelPath))
             {
                 options.roughnessMap = *texture;
-                Log::Print("Loaded roughness map for model: " + std::string(modelPath), LogLevel::Debug);
             }
             else
             {
                 options.roughness = 0.0f;
+                Log::Print("No roughness map found for model: " + std::string(modelPath), LogLevel::Info);
             }
         }
 
@@ -111,14 +112,20 @@ MaterialRef ModelFactory::processMaterial(aiMesh *mesh, const aiScene *scene, co
         if (auto texture = loadMaterialTextures(material, aiTextureType_AMBIENT_OCCLUSION, modelPath))
         {
             options.aoMap = *texture;
-            Log::Print("Loaded ambient occlusion map for model: " + std::string(modelPath), LogLevel::Debug);
+        }
+        else
+        {
+            Log::Print("No ambient occlusion map found for model: " + std::string(modelPath), LogLevel::Info);
         }
 
         ////// Normal Map
         if (auto texture = loadMaterialTextures(material, aiTextureType_NORMALS, modelPath))
         {
             options.normalMap = *texture;
-            Log::Print("Loaded normal map for model: " + std::string(modelPath), LogLevel::Debug);
+        }
+        else
+        {
+            Log::Print("No normal map found for model: " + std::string(modelPath), LogLevel::Info);
         }
     }
     auto materialRef = m_materialFactory.PBRMaterial(options);
@@ -211,6 +218,5 @@ ModelRef ModelFactory::LoadModel(const char *modelPath)
         return 0;
     }
 
-    // TODO: Do not create meshes and materials resources in processNode, just gather data and create them here. This is mandatory to avoid race conditions
     return m_modelResource.create(processNode(scene->mRootNode, scene, glm::mat4(1.0f), modelPath));
 }

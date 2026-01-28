@@ -9,7 +9,7 @@ class TextureFactory : public Service
 public:
     TextureFactory(TextureResource &textureResource) : m_textureResource(textureResource) {}
 
-    TextureRef Texture2D(const char *imagePath);
+    TextureRef Texture2D(std::string imagePath);
     TextureRef CubeMap(const std::vector<std::string> &faces);
 
     TextureRef WhiteTexture2D()

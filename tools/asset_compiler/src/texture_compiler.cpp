@@ -27,8 +27,8 @@ void CompileTexture(const char *inputPath, const char *outputPath)
         0x30584554, // 'TEX0'
         static_cast<uint32_t>(width),
         static_cast<uint32_t>(height),
-        0, // format (placeholder)
-        1  // mipLevels
+        static_cast<uint32_t>(channels),
+        1 // mipLevels
     };
 
     fwrite(&header, sizeof(header), 1, outputFile);

@@ -45,9 +45,7 @@ constexpr const char *ITALIC_TEXT = "\033[3m";
 
 void Log::Print(const std::string &message, LogLevel level, bool logLocation,
                 const std::source_location &location)
-
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
     std::cout << "[" << BOLD_TEXT << LogLevelToColorCode(level) << LogLevelToString(level) << RESET_COLOR << "] ";
     if (logLocation)
     {
@@ -56,5 +54,3 @@ void Log::Print(const std::string &message, LogLevel level, bool logLocation,
     }
     std::cout << message << std::endl;
 }
-
-std::mutex Log::m_mutex;

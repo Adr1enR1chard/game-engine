@@ -31,28 +31,35 @@ int main(int argc, char **argv)
         if (entry.is_regular_file() && entry.path().has_extension())
         {
             const auto &filePath = entry.path();
-            if (hasTextureExtension(filePath))
-            {
-                std::filesystem::path relativePath = std::filesystem::relative(filePath, sourceDir);
-                std::filesystem::path outputPath = std::filesystem::path(destDir) / relativePath;
-                outputPath.replace_extension(".asset");
 
+            AssetType assetType = GetAssetType(filePath);
+            if (assetType == AssetType::Unknown)
+                continue;
+
+            std::filesystem::path relativePath = std::filesystem::relative(filePath, sourceDir);
+            std::filesystem::path outputPath = std::filesystem::path(destDir) / relativePath;
+            outputPath += ".asset";
+
+            switch (assetType)
+            {
+            case AssetType::Texture:
                 // Ensure the output directory exists
                 std::filesystem::create_directories(outputPath.parent_path());
 
                 // Compile the texture
                 CompileTexture(filePath.string().c_str(), outputPath.string().c_str());
                 std::cout << "Compiled texture: " << filePath << " -> " << outputPath << std::endl;
-            }
-            else if (hasModelExtension(filePath))
-            {
+                break;
+
+            case AssetType::Model:
                 // Model compilation logic would go here
                 // For now, just print the model file being processed
                 std::cout << "Model processing not implemented yet: " << filePath << std::endl;
-            }
-            else
-            {
-                std::cout << "Unsupported file type, skipping: " << filePath << std::endl;
+                break;
+
+            default:
+                std::cout << "Unsupported asset type for file: " << filePath << std::endl;
+                break;
             }
         }
     }

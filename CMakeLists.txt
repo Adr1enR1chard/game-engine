@@ -29,6 +29,7 @@ add_library(default_bundle
     bundle/default/src/system/PlatformSystem.cpp
     bundle/default/src/system/EnvironmentSystem.cpp
     bundle/default/src/service/Input.cpp
+    bundle/default/src/utils/AssetsLoader.cpp
 )
 target_include_directories(default_bundle PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
