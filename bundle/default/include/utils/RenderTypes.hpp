@@ -4,14 +4,6 @@
 #include <unordered_map>
 #include <variant>
 
-struct Vertex {
-    glm::vec3 position;
-    glm::vec3 normal;
-    glm::vec2 texCoords;
-    glm::vec3 tangent;
-    glm::vec3 bitangent;
-};
-
 using Index = unsigned int;
 
 using MeshRef = unsigned int;
@@ -24,25 +16,28 @@ using MaterialRef = unsigned int;
 
 using ModelRef = unsigned int;
 
-enum TextureType {
+enum TextureType
+{
     Texture2D,
     CubeMap,
 };
 
 class Uniform
 {
-  public:
-    struct DirectionalLight {
+public:
+    struct DirectionalLight
+    {
         glm::vec3 direction;
-        glm::vec3 color     = glm::vec3(1.0f);
-        float     ambient   = 0.1f;
-        float     intensity = 1.0f;
+        glm::vec3 color = glm::vec3(1.0f);
+        float ambient = 0.1f;
+        float intensity = 1.0f;
     };
 
-    struct PointLight {
+    struct PointLight
+    {
         glm::vec3 position;
-        glm::vec3 color     = glm::vec3(1.0f);
-        float     intensity = 1.0f;
+        glm::vec3 color = glm::vec3(1.0f);
+        float intensity = 1.0f;
     };
 };
 

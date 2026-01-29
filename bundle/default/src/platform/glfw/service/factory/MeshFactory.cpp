@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 
-const std::vector<Vertex> kCubeVertices = {
+const std::vector<VertexLayout> kCubeVertices = {
     // Back face (0, 0, -1)
     {{-0.5f, -0.5f, -0.5f}, {0, 0, -1}, {0, 0}, {1, 0, 0}, {0, 1, 0}},
     {{0.5f, -0.5f, -0.5f}, {0, 0, -1}, {1, 0}, {1, 0, 0}, {0, 1, 0}},
@@ -67,22 +67,24 @@ MeshRef MeshFactory::Cube()
 
 MeshRef MeshFactory::Sphere(float radius, unsigned int sectorCount, unsigned int stackCount)
 {
-    std::vector<Vertex> vertices;
-    std::vector<Index>  indices;
+    std::vector<VertexLayout> vertices;
+    std::vector<Index> indices;
 
-    for (unsigned int i = 0; i <= stackCount; ++i) {
+    for (unsigned int i = 0; i <= stackCount; ++i)
+    {
         float stackAngle = glm::pi<float>() / 2 - i * glm::pi<float>() / stackCount; // from pi/2 to -pi/2
-        float xy         = radius * cosf(stackAngle);                                // r * cos(u)
-        float z          = radius * sinf(stackAngle);                                // r * sin(u)
+        float xy = radius * cosf(stackAngle);                                        // r * cos(u)
+        float z = radius * sinf(stackAngle);                                         // r * sin(u)
 
-        for (unsigned int j = 0; j <= sectorCount; ++j) {
+        for (unsigned int j = 0; j <= sectorCount; ++j)
+        {
             float sectorAngle = j * 2 * glm::pi<float>() / sectorCount; // from 0 to 2pi
 
             float x = xy * cosf(sectorAngle); // r * cos(u) * cos(v)
             float y = xy * sinf(sectorAngle); // r * cos(u) * sin(v)
 
-            glm::vec3 position  = glm::vec3(x, y, z);
-            glm::vec3 normal    = glm::normalize(position);
+            glm::vec3 position = glm::vec3(x, y, z);
+            glm::vec3 normal = glm::normalize(position);
             glm::vec2 texCoords = glm::vec2(static_cast<float>(j) / sectorCount, static_cast<float>(i) / stackCount);
 
             // Tangent and Bitangent calculation
@@ -90,25 +92,29 @@ MeshRef MeshFactory::Sphere(float radius, unsigned int sectorCount, unsigned int
             tangent.x = -radius * sinf(stackAngle) * cosf(sectorAngle);
             tangent.y = -radius * sinf(stackAngle) * sinf(sectorAngle);
             tangent.z = radius * cosf(stackAngle);
-            tangent   = glm::normalize(tangent);
+            tangent = glm::normalize(tangent);
 
             glm::vec3 bitangent = glm::cross(normal, tangent);
 
-            vertices.push_back({position, normal, texCoords, tangent, bitangent});
+            vertices.push_back({{position.x, position.y, position.z}, {normal.x, normal.y, normal.z}, {texCoords.x, texCoords.y}, {tangent.x, tangent.y, tangent.z}, {bitangent.x, bitangent.y, bitangent.z}});
         }
     }
 
-    for (unsigned int i = 0; i < stackCount; ++i) {
+    for (unsigned int i = 0; i < stackCount; ++i)
+    {
         unsigned int k1 = i * (sectorCount + 1); // beginning of current stack
         unsigned int k2 = k1 + sectorCount + 1;  // beginning of next stack
 
-        for (unsigned int j = 0; j < sectorCount; ++j, ++k1, ++k2) {
-            if (i != 0) {
+        for (unsigned int j = 0; j < sectorCount; ++j, ++k1, ++k2)
+        {
+            if (i != 0)
+            {
                 indices.push_back(k1);
                 indices.push_back(k2);
                 indices.push_back(k1 + 1);
             }
-            if (i != (stackCount - 1)) {
+            if (i != (stackCount - 1))
+            {
                 indices.push_back(k1 + 1);
                 indices.push_back(k2);
                 indices.push_back(k2 + 1);

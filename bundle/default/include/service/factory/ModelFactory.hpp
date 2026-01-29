@@ -25,13 +25,6 @@ public:
   ModelRef LoadModel(const char *modelPath);
 
 private:
-  std::vector<MeshMaterialBinding> processNode(aiNode *node, const aiScene *scene, const glm::mat4 &parentTransform,
-                                               const char *modelPath);
-  MeshRef processMesh(aiMesh *mesh, const glm::mat4 &transform);
-  MaterialRef processMaterial(aiMesh *mesh, const aiScene *scene, const char *modelPath);
-  std::optional<TextureRef> loadMaterialTextures(aiMaterial *mat, aiTextureType type, const char *modelPath);
-
-private:
   MaterialFactory &m_materialFactory;
   ShaderFactory &m_shaderFactory;
   TextureFactory &m_textureFactory;

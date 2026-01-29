@@ -79,6 +79,9 @@ target_include_directories(default_bundle PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/engine/include
     ${CMAKE_CURRENT_SOURCE_DIR}/bundle/default/include
 )
+target_link_libraries(default_bundle PUBLIC
+    assets_format
+)
 enable_strict_warnings(default_bundle)
 
 # Library: GLFW platform

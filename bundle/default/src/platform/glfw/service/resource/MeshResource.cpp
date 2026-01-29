@@ -27,7 +27,7 @@ void MeshResource::MeshDataDeleter::operator()(MeshData *meshData)
 
 MeshResource::~MeshResource() = default;
 
-MeshRef MeshResource::create(std::vector<Vertex> vertices, std::vector<Index> indices, glm::mat4 localModel)
+MeshRef MeshResource::create(std::vector<VertexLayout> vertices, std::vector<unsigned int> indices, glm::mat4 localModel)
 {
     MeshRef newMeshRef = m_idManager.alloc();
     auto meshData = std::unique_ptr<MeshData, MeshDataDeleter>(new MeshData());
@@ -43,26 +43,26 @@ MeshRef MeshResource::create(std::vector<Vertex> vertices, std::vector<Index> in
     glBindVertexArray(meshData->VAO);
     glBindBuffer(GL_ARRAY_BUFFER, meshData->VBO);
 
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexLayout), vertices.data(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshData->EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
     // vertex positions
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexLayout), (void *)0);
     // vertex normals
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, normal));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexLayout), (void *)offsetof(VertexLayout, normal));
     // vertex texture coords
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, texCoords));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(VertexLayout), (void *)offsetof(VertexLayout, texCoord));
     // vertex tangents
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, tangent));
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexLayout), (void *)offsetof(VertexLayout, tangent));
     // vertex bitangents
     glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, bitangent));
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(VertexLayout), (void *)offsetof(VertexLayout, bitangent));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
