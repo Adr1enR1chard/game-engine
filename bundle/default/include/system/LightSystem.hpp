@@ -13,7 +13,7 @@ public:
   void update(double deltaTime) override;
 
 private:
-  void setMaterialLights(MaterialRef materialRef, const CCamera *camera,
+  void setMaterialLights(MaterialRef materialRef,
                          const CTransform *cameraTransform,
                          const CDirectionalLight *dirLight,
                          const std::vector<std::tuple<Entity, CPointLight *, CTransform *>> &pointLights);

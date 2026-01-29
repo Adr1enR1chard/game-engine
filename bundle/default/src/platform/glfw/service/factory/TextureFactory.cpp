@@ -1,13 +1,14 @@
 #include <service/factory/TextureFactory.hpp>
 
-#include <utils/AssetsLoader.hpp>
+#include <assets_loader/texture_loader.hpp>
+
 #include <engine/utils/Log.hpp>
 
 TextureRef TextureFactory::Texture2D(std::string imagePath)
 {
     unsigned int width, height, channels;
     std::vector<unsigned char> data;
-    bool loaded = AssetsLoader::LoadTextureAsset(imagePath, width, height, channels, data);
+    bool loaded = TextureLoader::LoadTexture(imagePath, width, height, channels, data);
     if (loaded)
     {
         TextureRef textureRef = m_textureResource.texture2d(width, height, channels, data.data());
@@ -28,7 +29,7 @@ TextureRef TextureFactory::CubeMap(const std::vector<std::string> &faces)
     {
         unsigned int width, height, channel;
         std::vector<unsigned char> data;
-        bool loaded = AssetsLoader::LoadTextureAsset(face, width, height, channel, data);
+        bool loaded = TextureLoader::LoadTexture(face, width, height, channel, data);
         if (!loaded)
         {
             Log::Print("Failed to load texture asset: " + face, LogLevel::Critical);

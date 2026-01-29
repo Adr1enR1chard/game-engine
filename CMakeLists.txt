@@ -73,7 +73,6 @@ add_library(default_bundle
     bundle/default/src/system/PlatformSystem.cpp
     bundle/default/src/system/EnvironmentSystem.cpp
     bundle/default/src/service/Input.cpp
-    bundle/default/src/utils/AssetsLoader.cpp
 )
 target_include_directories(default_bundle PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -107,6 +106,7 @@ enable_strict_warnings(default_bundle_glfw)
 target_link_libraries(default_bundle_glfw PUBLIC
     glfw
     OpenGL::GL
+    assets_loader
 )
 if (WIN32)
     target_link_libraries(default_bundle_glfw PUBLIC opengl32)
@@ -166,7 +166,7 @@ enable_strict_warnings(BasicScene)
 ###########################
 
 # Command: Compile assets
-set(ASSET_COMPILER_EXE "$<TARGET_FILE:AssetsCompiler>")
+set(ASSET_COMPILER_EXE "$<TARGET_FILE:assets_compiler>")
 set(ASSETS_SRC "${CMAKE_SOURCE_DIR}/examples/basic_scene/assets")
 set(DEFAULT_BUNDLE_ASSETS_SRC "${CMAKE_SOURCE_DIR}/bundle/default/default-bundle-assets")
 

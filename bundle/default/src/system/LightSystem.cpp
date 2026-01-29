@@ -15,10 +15,9 @@ void LightSystem::update(double /*deltaTime*/)
     const auto &pointLights = world().fetch<CPointLight, CTransform>();
 
     // Mesh renderers
-    MaterialResource *materialResource = services().get<MaterialResource>();
     for (const auto &[eMeshRenderer, cMeshRenderer] : world().fetch<CMeshRenderer>())
     {
-        setMaterialLights(cMeshRenderer->materialRef, cCamera, cCameraTransform, cDirLight, pointLights);
+        setMaterialLights(cMeshRenderer->materialRef, cCameraTransform, cDirLight, pointLights);
     }
 
     // Model renderers
@@ -26,14 +25,14 @@ void LightSystem::update(double /*deltaTime*/)
     for (const auto &[eModelRenderer, cModelRenderer] : world().fetch<CModelRenderer>())
     {
         modelResource->forEach(cModelRenderer->modelRef,
-                               [&](MeshRef meshRef, MaterialRef materialRef, size_t /*index*/)
+                               [&](MeshRef /*meshRef*/, MaterialRef materialRef, size_t /*index*/)
                                {
-                                   setMaterialLights(materialRef, cCamera, cCameraTransform, cDirLight, pointLights);
+                                   setMaterialLights(materialRef, cCameraTransform, cDirLight, pointLights);
                                });
     }
 }
 
-void LightSystem::setMaterialLights(MaterialRef materialRef, const CCamera *camera,
+void LightSystem::setMaterialLights(MaterialRef materialRef,
                                     const CTransform *cameraTransform,
                                     const CDirectionalLight *dirLight,
                                     const std::vector<std::tuple<Entity, CPointLight *, CTransform *>> &pointLights)
