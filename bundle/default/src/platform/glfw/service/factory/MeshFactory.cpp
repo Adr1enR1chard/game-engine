@@ -123,3 +123,25 @@ MeshRef MeshFactory::Sphere(float radius, unsigned int sectorCount, unsigned int
     }
     return m_meshResource.create(vertices, indices);
 }
+
+MeshRef MeshFactory::Plane()
+{
+    std::vector<VertexLayout> vertices = {
+        // Positions          // Normals         // TexCoords  // Tangents        // Bitangents
+        {{-0.5f, 0.0f, -0.5f}, {0, -1, 0}, {0, 0}, {1, 0, 0}, {0, 0, -1}},
+        {{0.5f, 0.0f, -0.5f}, {0, -1, 0}, {1, 0}, {1, 0, 0}, {0, 0, -1}},
+        {{0.5f, 0.0f, 0.5f}, {0, -1, 0}, {1, 1}, {1, 0, 0}, {0, 0, -1}},
+        {{-0.5f, 0.0f, 0.5f}, {0, -1, 0}, {0, 1}, {1, 0, 0}, {0, 0, -1}},
+    };
+
+    std::vector<Index> indices = {
+        0,
+        1,
+        2,
+        0,
+        2,
+        3,
+    };
+
+    return m_meshResource.create(vertices, indices);
+}

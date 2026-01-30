@@ -1,5 +1,7 @@
 #include <DefaultBundle.hpp>
 #include <systems/CameraControlSystem.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/rotate_vector.hpp>
 
 class MySystem : public System
 {
@@ -8,7 +10,7 @@ public:
     {
         services().get<Window>()->setSize(1280, 720);
         world().createEntity(CCamera{}, CTransform{glm::vec3(0.0f, 0.0f, 3.0f)});
-        world().createEntity(CDirectionalLight{glm::vec3(-3.0f, -1.0f, -1.0f), glm::vec3(1.0f), 10.0f, 10.0f});
+        m_dirLight = world().createEntity(CDirectionalLight{glm::vec3(-3.0f, -1.0f, -1.0f), glm::vec3(1.0f), 10.0f, 100.0f});
         world().createEntity(CEnvironment{.skyboxMaterial = services().get<MaterialFactory>()->SkyboxMaterial({})});
 
         m_metalSphere = world().createEntity(
@@ -50,6 +52,15 @@ public:
                 .modelRef = services().get<ModelFactory>()->LoadModel("assets/models/sword/scene.gltf"),
             },
             CTransform{glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 45.0f, 0.0f), glm::vec3(1.0f)});
+
+        world().createEntity(
+            CMeshRenderer({
+                .meshRef = services().get<MeshFactory>()->Plane(),
+                .materialRef = services().get<MaterialFactory>()->PBRMaterial({.metallic = 0.0f,
+                                                                               .roughness = 1.0f,
+                                                                               .ao = 0.0f}),
+            }),
+            CTransform{glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(180.0f, 0.0f, 0.0f), glm::vec3(10.0f)});
     }
 
     void update(double deltaTime) override
@@ -67,9 +78,15 @@ public:
         {
             transform->rotation.x += angle;
         }
+        if (auto [_, dirLight] = world().fetchFrom<CDirectionalLight>(m_dirLight); dirLight)
+        {
+            glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(angle / 2), glm::vec3(0.0f, 1.0f, 0.0f));
+            dirLight->direction = glm::vec3(rotation * glm::vec4(dirLight->direction, 0.0f));
+        }
     }
 
 private:
+    Entity m_dirLight = 0;
     Entity m_metalSphere = 0;
     Entity m_groundSphere = 0;
     Entity m_sword = 0;

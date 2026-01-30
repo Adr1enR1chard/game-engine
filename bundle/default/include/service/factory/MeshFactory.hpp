@@ -20,6 +20,8 @@ public:
 
   MeshRef Sphere(float radius = 0.5f, unsigned int sectorCount = 36, unsigned int stackCount = 18);
 
+  MeshRef Plane();
+
 private:
   MeshResource &m_meshResource;
 };
