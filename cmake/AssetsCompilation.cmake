@@ -49,7 +49,7 @@ function(add_asset_pipeline)
     # ------------------------------------------------------------
     # Per-asset compilation
     # ------------------------------------------------------------
-    set(ASSET_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/assets_stamps/${ASSETS_TARGET}")
+    set(ASSET_STAMPS_DIR "${CMAKE_CURRENT_BINARY_DIR}/assets_stamps/${ASSETS_TARGET}")
     set(ASSET_OUTPUTS "")
 
     foreach(ASSET_FILE IN LISTS ASSET_FILES)
@@ -63,7 +63,7 @@ function(add_asset_pipeline)
         get_filename_component(REL_NAME "${REL_PATH}" NAME)
 
         set(STAMP_FILE
-            "${ASSET_BUILD_DIR}/${REL_DIR}/${REL_NAME}.stamp"
+            "${ASSET_STAMPS_DIR}/${REL_DIR}/${REL_NAME}.stamp"
         )
 
         list(APPEND ASSET_OUTPUTS "${STAMP_FILE}")
@@ -71,7 +71,7 @@ function(add_asset_pipeline)
         add_custom_command(
             OUTPUT "${STAMP_FILE}"
             COMMAND "${CMAKE_COMMAND}" -E make_directory
-                    "${ASSET_BUILD_DIR}/${REL_DIR}"
+                    "${ASSET_STAMPS_DIR}/${REL_DIR}"
             COMMAND "${CMAKE_COMMAND}" -E make_directory
                     "${ASSETS_RUNTIME_DIR}/${REL_DIR}"
             COMMAND "${ASSETS_COMPILER}"
@@ -85,14 +85,14 @@ function(add_asset_pipeline)
     endforeach()
 
     # ------------------------------------------------------------
-    # Aggregate target
+    # Targets
     # ------------------------------------------------------------
-    set(PIPELINE_TARGET "${ASSETS_TARGET}_assets")
+    set(COMPILE_TARGET "${ASSETS_TARGET}_compile_assets")
 
-    add_custom_target("${PIPELINE_TARGET}"
+    add_custom_target("${COMPILE_TARGET}"
         DEPENDS ${ASSET_OUTPUTS}
     )
 
-    add_dependencies("${ASSETS_TARGET}" "${PIPELINE_TARGET}")
+    add_dependencies("${ASSETS_TARGET}" "${COMPILE_TARGET}")
 
 endfunction()
