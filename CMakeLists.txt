@@ -168,23 +168,53 @@ enable_strict_warnings(BasicScene)
 ## Commands and Targets
 ###########################
 
-# Command: Compile assets
+# Command: Assets compilation
 set(ASSET_COMPILER_EXE "$<TARGET_FILE:assets_compiler>")
-set(ASSETS_SRC "${CMAKE_SOURCE_DIR}/examples/basic_scene/assets")
+set(BASIC_SCENE_ASSETS_SRC "${CMAKE_SOURCE_DIR}/examples/basic_scene/assets")
+set(BASIC_SCENE_ASSETS_RUNTIME "$<TARGET_FILE_DIR:BasicScene>/assets")
 set(DEFAULT_BUNDLE_ASSETS_SRC "${CMAKE_SOURCE_DIR}/bundle/default/default-bundle-assets")
+set(DEFAULT_BUNDLE_ASSETS_RUNTIME "$<TARGET_FILE_DIR:BasicScene>/default-bundle-assets")
+set(EXTENSIONS jpg png bmp tga gif  obj fbx gltf vert frag)
 
-add_custom_command(TARGET BasicScene POST_BUILD
-    COMMAND ${ASSET_COMPILER_EXE} "${ASSETS_SRC}" "$<TARGET_FILE_DIR:BasicScene>/assets"
-    COMMAND ${ASSET_COMPILER_EXE} "${DEFAULT_BUNDLE_ASSETS_SRC}" "$<TARGET_FILE_DIR:BasicScene>/default-bundle-assets"
-    COMMENT "Running AssetCompiler to process assets for BasicScene..."
+list(APPEND CMAKE_MODULE_PATH
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake"
 )
 
+include(AssetsCompilation)
+
+add_asset_pipeline(
+    TARGET       BasicScene
+    SOURCE_DIR   "${BASIC_SCENE_ASSETS_SRC}"
+    RUNTIME_DIR  "${BASIC_SCENE_ASSETS_RUNTIME}"
+    COMPILER     "${ASSET_COMPILER_EXE}"
+    EXTENSIONS   ${EXTENSIONS}
+)
+
+add_asset_pipeline(
+    TARGET       default_bundle
+    SOURCE_DIR   "${DEFAULT_BUNDLE_ASSETS_SRC}"
+    RUNTIME_DIR  "${DEFAULT_BUNDLE_ASSETS_RUNTIME}"
+    COMPILER     "${ASSET_COMPILER_EXE}"
+    EXTENSIONS   ${EXTENSIONS}
+)
+
+# Command : Assets pruning (remove files in runtime dir that are not in source dir)
+
+
+
+
+# add_custom_command(TARGET BasicScene POST_BUILD
+#     COMMAND ${ASSET_COMPILER_EXE} "${ASSETS_SRC}" "$<TARGET_FILE_DIR:BasicScene>/assets"
+#     COMMAND ${ASSET_COMPILER_EXE} "${DEFAULT_BUNDLE_ASSETS_SRC}" "$<TARGET_FILE_DIR:BasicScene>/default-bundle-assets"
+#     COMMENT "Running AssetCompiler to process assets for BasicScene..."
+# )
+
 # Command: Copy assets (in case AssetCompiler is not available)
-add_custom_command(TARGET BasicScene POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:BasicScene>/assets"
-  COMMAND ${CMAKE_COMMAND} -E copy_directory
-          "${ASSETS_SRC}"
-          "$<TARGET_FILE_DIR:BasicScene>/assets"
-  COMMAND ${CMAKE_COMMAND} -E copy_directory
-          "${DEFAULT_BUNDLE_ASSETS_SRC}"
-          "$<TARGET_FILE_DIR:BasicScene>/default-bundle-assets")
+# add_custom_command(TARGET BasicScene POST_BUILD
+#   COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:BasicScene>/assets"
+#   COMMAND ${CMAKE_COMMAND} -E copy_directory
+#           "${ASSETS_SRC}"
+#           "$<TARGET_FILE_DIR:BasicScene>/assets"
+#   COMMAND ${CMAKE_COMMAND} -E copy_directory
+#           "${DEFAULT_BUNDLE_ASSETS_SRC}"
+#           "$<TARGET_FILE_DIR:BasicScene>/default-bundle-assets")
