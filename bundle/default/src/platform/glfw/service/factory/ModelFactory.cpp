@@ -8,11 +8,10 @@
 
 ModelRef ModelFactory::LoadModel(const char *modelPath)
 {
-    std::vector<std::vector<VertexLayout>> meshesVertices;
-    std::vector<std::vector<unsigned int>> meshesIndices;
+    std::vector<MeshData> meshes;
     std::vector<MaterialDescriptor> materials;
 
-    if (!ModelLoader::LoadModel(modelPath, meshesVertices, meshesIndices, materials))
+    if (!ModelLoader::LoadModel(modelPath, meshes, materials))
     {
         Log::Print("Error while loading model: " + std::string(modelPath), LogLevel::Error);
         return 0;
@@ -21,9 +20,9 @@ ModelRef ModelFactory::LoadModel(const char *modelPath)
     std::vector<MeshMaterialBinding> meshMaterialBindings;
     std::filesystem::path modelDir =
         std::filesystem::current_path() / std::filesystem::path(modelPath).parent_path();
-    for (size_t i = 0; i < meshesVertices.size(); i++)
+    for (size_t i = 0; i < meshes.size(); i++)
     {
-        auto meshRef = m_meshFactory.Raw(meshesVertices[i], meshesIndices[i], glm::mat4(1.0f));
+        auto meshRef = m_meshFactory.Raw(meshes[i].vertices, meshes[i].indices, meshes[i].localTransform);
         auto materialOptions = PBRMaterialParameters{};
         if (i < materials.size())
         {
