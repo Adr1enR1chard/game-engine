@@ -6,12 +6,17 @@
 
 TextureRef TextureFactory::Texture2D(std::string imagePath)
 {
-    unsigned int width, height, channels;
-    std::vector<unsigned char> data;
-    bool loaded = TextureLoader::LoadTexture(imagePath, width, height, channels, data);
+    LoadedTexture texture;
+    bool loaded = TextureLoader::LoadTexture(imagePath.c_str(), texture);
     if (loaded)
     {
-        TextureRef textureRef = m_textureResource.texture2d(width, height, channels, data.data());
+        TextureRef textureRef = m_textureResource.texture2D({
+            .width = texture.width,
+            .height = texture.height,
+            .channels = texture.channels,
+            .format = texture.format,
+            .data = std::move(texture.data),
+        });
         return textureRef;
     }
     Log::Print("Failed to load texture asset: " + imagePath, LogLevel::Critical);
@@ -20,29 +25,28 @@ TextureRef TextureFactory::Texture2D(std::string imagePath)
 
 TextureRef TextureFactory::CubeMap(const std::vector<std::string> &faces)
 {
-    std::vector<unsigned int> widths;
-    std::vector<unsigned int> heights;
-    std::vector<unsigned int> channels;
-    std::vector<std::vector<unsigned char>> facesData;
 
+    std::vector<TextureAttributes> textures;
     for (const auto &face : faces)
     {
-        unsigned int width, height, channel;
         std::vector<unsigned char> data;
-        bool loaded = TextureLoader::LoadTexture(face, width, height, channel, data);
+        LoadedTexture texture;
+        bool loaded = TextureLoader::LoadTexture(face.c_str(), texture);
         if (!loaded)
         {
             Log::Print("Failed to load texture asset: " + face, LogLevel::Critical);
             return 0;
         }
-
-        widths.push_back(width);
-        heights.push_back(height);
-        channels.push_back(channel);
-        facesData.push_back(std::move(data));
+        textures.push_back({
+            .width = texture.width,
+            .height = texture.height,
+            .channels = texture.channels,
+            .format = texture.format,
+            .data = std::move(texture.data),
+        });
     }
 
-    TextureRef textureRef = m_textureResource.cubeMap(widths, heights, channels, facesData);
+    TextureRef textureRef = m_textureResource.cubeMap(textures);
 
     return textureRef;
 }

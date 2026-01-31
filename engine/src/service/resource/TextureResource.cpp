@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 
 #include <engine/utils/Log.hpp>
+#include <assets_format/opengl_format.hpp>
 
 struct TextureResource::TextureData
 {
@@ -19,46 +20,35 @@ void TextureResource::TextureDataDeleter::operator()(TextureData *textureData)
     }
 }
 
-TextureRef TextureResource::texture2d(unsigned int width, unsigned int height, unsigned int channels, unsigned char *data)
+TextureRef TextureResource::texture2D(const TextureAttributes &texture)
 {
+    if (!OpenGLFormat::IsCompressed(texture.format))
+    {
+        Log::Print("Texture format is not compressed. Use the asset compiler to compress the texture.", LogLevel::Error);
+        return 0;
+    }
+
     TextureRef newTextureRef = m_idManager.alloc();
     auto textureData = std::unique_ptr<TextureData, TextureDataDeleter>(new TextureData());
     textureData->type = Texture2D;
 
-    GLenum format = GL_RGB;
-    GLenum internalFormat = GL_RGB8;
-
-    if (channels == 1)
-    {
-        format = GL_RED;
-        internalFormat = GL_R8;
-    }
-    else if (channels == 2)
-    {
-        format = GL_RG;
-        internalFormat = GL_RG8;
-    }
-    else if (channels == 3)
-    {
-        format = GL_RGB;
-        internalFormat = GL_RGB8;
-    }
-    else if (channels == 4)
-    {
-        format = GL_RGBA;
-        internalFormat = GL_RGBA8;
-    }
-    else
-    {
-        m_idManager.free(newTextureRef);
-        Log::Print("Unsupported number of channels for Texture2D: " + std::to_string(channels),
-                   LogLevel::Critical);
-        return 0;
-    }
+    GLuint glFormat = OpenGLFormat::GetOpenGLFormat(
+        texture.format,
+        texture.channels == 4);
 
     glGenTextures(1, &textureData->textureID);
     glBindTexture(GL_TEXTURE_2D, textureData->textureID);
-    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+
+    glCompressedTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        glFormat,
+        texture.width,
+        texture.height,
+        0,
+        texture.data.size(),
+        texture.data.data());
+
     glGenerateMipmap(GL_TEXTURE_2D);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -70,7 +60,7 @@ TextureRef TextureResource::texture2d(unsigned int width, unsigned int height, u
     return newTextureRef;
 }
 
-TextureRef TextureResource::cubeMap(std::vector<unsigned int> widths, std::vector<unsigned int> heights, std::vector<unsigned int> channels, const std::vector<std::vector<unsigned char>> &facesData)
+TextureRef TextureResource::cubeMap(const std::vector<TextureAttributes> &facesData)
 {
     TextureRef newTextureRef = m_idManager.alloc();
     auto textureData = std::unique_ptr<TextureData, TextureDataDeleter>(new TextureData());
@@ -81,30 +71,27 @@ TextureRef TextureResource::cubeMap(std::vector<unsigned int> widths, std::vecto
 
     for (unsigned int i = 0; i < facesData.size(); i++)
     {
-        GLenum format;
-        if (channels[i] == 1)
+        if (!OpenGLFormat::IsCompressed(facesData[i].format))
         {
-            format = GL_RED;
-        }
-        else if (channels[i] == 3)
-        {
-            format = GL_RGB;
-        }
-        else if (channels[i] == 4)
-        {
-            format = GL_RGBA;
-        }
-        else
-        {
-            m_idManager.free(newTextureRef);
-            Log::Print("Unsupported number of channels for CubeMap face: " + std::to_string(channels[i]),
-                       LogLevel::Critical);
+            Log::Print("CubeMap face format is not compressed. Use the asset compiler to compress the texture.", LogLevel::Error);
             return 0;
         }
 
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, widths[i], heights[i], 0, format, GL_UNSIGNED_BYTE,
-                     facesData[i].data());
+        GLuint glFormat = OpenGLFormat::GetOpenGLFormat(
+            facesData[i].format,
+            facesData[i].channels == 4);
+
+        glCompressedTexImage2D(
+            GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+            0,
+            glFormat,
+            facesData[i].width,
+            facesData[i].height,
+            0,
+            facesData[i].data.size(),
+            facesData[i].data.data());
     }
+
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

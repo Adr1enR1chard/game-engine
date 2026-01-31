@@ -2,9 +2,21 @@
 
 #include <engine/model/Service.hpp>
 #include <memory>
+#include <vector>
 #include <unordered_map>
 #include <engine/utils/IdManager.hpp>
 #include <engine/utils/RenderTypes.hpp>
+
+#include <assets_format/texture_format.hpp>
+
+struct TextureAttributes
+{
+  unsigned int width;
+  unsigned int height;
+  unsigned int channels;
+  TextureFormat format;
+  std::vector<unsigned char> data;
+};
 
 class TextureResource : public Service
 {
@@ -12,8 +24,8 @@ public:
   TextureResource() = default;
   ~TextureResource() override = default;
 
-  TextureRef texture2d(unsigned int width, unsigned int height, unsigned int channels, unsigned char *data);
-  TextureRef cubeMap(std::vector<unsigned int> widths, std::vector<unsigned int> heights, std::vector<unsigned int> channels, const std::vector<std::vector<unsigned char>> &facesData);
+  TextureRef texture2D(const TextureAttributes &texture);
+  TextureRef cubeMap(const std::vector<TextureAttributes> &faces);
 
   void remove(TextureRef textureRef);
   void bind(TextureRef textureRef) const;
