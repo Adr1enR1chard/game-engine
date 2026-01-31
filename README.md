@@ -2,7 +2,7 @@
 
 A lightweight, modular C++20 game engine built around an Entity-Component-System (ECS) architecture with OpenGL rendering.
 
-<img width="796" height="592" alt="image" src="https://github.com/user-attachments/assets/7cbb6f04-30ef-465a-b937-1a098f166b44" />
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/d166ca30-8bbb-464b-9f04-7bb72550f1ff" />
 
 ## Project Description
 
