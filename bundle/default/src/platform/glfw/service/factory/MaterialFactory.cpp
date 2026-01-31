@@ -59,3 +59,15 @@ MaterialRef MaterialFactory::SkyboxMaterial(const SkyboxMaterialParameters &opti
 
     return materialRef;
 }
+
+MaterialRef MaterialFactory::CustomMaterial(ShaderRef shaderRef, const UniformCollection &defaultUniforms)
+{
+    MaterialRef materialRef = m_materialResource.create(shaderRef);
+
+    for (const auto &[name, value] : defaultUniforms)
+    {
+        m_materialResource.setUniform(materialRef, name, value);
+    }
+
+    return materialRef;
+}

@@ -105,7 +105,7 @@ void ShaderResource::applyUniforms(ShaderRef shaderRef, const UniformCollection 
     auto it = m_loadedShaders.find(shaderRef);
     if (it == m_loadedShaders.end())
     {
-        Log::Print("Shader not found", LogLevel::Warning, true);
+        Log::Print("Shader not found during applyUniforms", LogLevel::Warning);
         return;
     }
 
@@ -172,7 +172,7 @@ void ShaderResource::bind(ShaderRef shaderRef, glm::mat4 viewMatrix, glm::mat4 p
     auto it = m_loadedShaders.find(shaderRef);
     if (it == m_loadedShaders.end())
     {
-        Log::Print("Shader not found", LogLevel::Warning, true);
+        Log::Print("Shader not found during bind", LogLevel::Warning);
         return;
     }
 

@@ -13,9 +13,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-# Output directories (useful for Visual Studio multi-config)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
 # Enable CTest for unit tests
 enable_testing()
 
@@ -126,6 +123,8 @@ enable_strict_warnings(engine_vendor)
 ## Executables
 ###########################
 
+set(EXAMPLES_OUTPUT_DIR ${CMAKE_BINARY_DIR}/examples)
+
 # Executable: BasicScene
 add_executable(BasicScene
     examples/basic_scene/main.cpp
@@ -143,14 +142,50 @@ target_link_libraries(BasicScene PRIVATE
 )
 enable_strict_warnings(BasicScene)
 
+set_target_properties(BasicScene PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${EXAMPLES_OUTPUT_DIR}/BasicScene"
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${EXAMPLES_OUTPUT_DIR}/BasicScene"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${EXAMPLES_OUTPUT_DIR}/BasicScene"
+    RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${EXAMPLES_OUTPUT_DIR}/BasicScene"
+    RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${EXAMPLES_OUTPUT_DIR}/BasicScene"
+)
+
+#Executable: Space Game
+file(GLOB_RECURSE SPACE_GAME_SOURCES
+    examples/space_game/src/*.cpp
+)
+
+add_executable(SpaceGame
+    examples/space_game/main.cpp
+    ${SPACE_GAME_SOURCES}
+)
+
+target_include_directories(SpaceGame PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/space_game/include
+)
+
+target_link_libraries(SpaceGame
+PUBLIC
+    default_bundle
+    default_bundle_glfw
+    engine_core
+    engine_vendor
+)
+
+set_target_properties(SpaceGame PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${EXAMPLES_OUTPUT_DIR}/SpaceGame"
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${EXAMPLES_OUTPUT_DIR}/SpaceGame"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${EXAMPLES_OUTPUT_DIR}/SpaceGame"
+    RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${EXAMPLES_OUTPUT_DIR}/SpaceGame"
+    RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${EXAMPLES_OUTPUT_DIR}/SpaceGame"
+)
+
 ###########################
 ## Commands and Targets
 ###########################
 
 # Command: Assets compilation
 set(ASSET_COMPILER_EXE "$<TARGET_FILE:assets_compiler>")
-set(BASIC_SCENE_ASSETS_SRC "${CMAKE_SOURCE_DIR}/examples/basic_scene/assets")
-set(BASIC_SCENE_ASSETS_RUNTIME "$<TARGET_FILE_DIR:BasicScene>/assets")
 set(DEFAULT_BUNDLE_ASSETS_SRC "${CMAKE_SOURCE_DIR}/bundle/default/default-bundle-assets")
 set(DEFAULT_BUNDLE_ASSETS_RUNTIME "$<TARGET_FILE_DIR:BasicScene>/default-bundle-assets")
 set(EXTENSIONS jpg png bmp tga gif  obj fbx gltf vert frag)
@@ -163,16 +198,34 @@ include(AssetsCompilation)
 
 add_asset_pipeline(
     TARGET       BasicScene
-    SOURCE_DIR   "${BASIC_SCENE_ASSETS_SRC}"
-    RUNTIME_DIR  "${BASIC_SCENE_ASSETS_RUNTIME}"
+    SOURCE_DIR   "${CMAKE_SOURCE_DIR}/examples/basic_scene/assets"
+    RUNTIME_DIR  "$<TARGET_FILE_DIR:BasicScene>/assets"
     COMPILER     "${ASSET_COMPILER_EXE}"
     EXTENSIONS   ${EXTENSIONS}
 )
 
 add_asset_pipeline(
-    TARGET       default_bundle
+    TARGET       BasicScene
+    ALIAS        default_bundle
     SOURCE_DIR   "${DEFAULT_BUNDLE_ASSETS_SRC}"
     RUNTIME_DIR  "${DEFAULT_BUNDLE_ASSETS_RUNTIME}"
+    COMPILER     "${ASSET_COMPILER_EXE}"
+    EXTENSIONS   ${EXTENSIONS}
+)
+
+add_asset_pipeline(
+    TARGET       SpaceGame
+    SOURCE_DIR   "${CMAKE_SOURCE_DIR}/examples/space_game/assets"
+    RUNTIME_DIR  "$<TARGET_FILE_DIR:SpaceGame>/assets"
+    COMPILER     "${ASSET_COMPILER_EXE}"
+    EXTENSIONS   ${EXTENSIONS}
+)
+
+add_asset_pipeline(
+    TARGET       SpaceGame
+    ALIAS        default_bundle
+    SOURCE_DIR   "${DEFAULT_BUNDLE_ASSETS_SRC}"
+    RUNTIME_DIR  "$<TARGET_FILE_DIR:SpaceGame>/default-bundle-assets"
     COMPILER     "${ASSET_COMPILER_EXE}"
     EXTENSIONS   ${EXTENSIONS}
 )

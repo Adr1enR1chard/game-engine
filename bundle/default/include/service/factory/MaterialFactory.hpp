@@ -45,6 +45,7 @@ public:
     MaterialRef PBRMaterial(const PBRMaterialParameters &options = {});
     MaterialRef PhongMaterial(const PhongMaterialParameters &options = {});
     MaterialRef SkyboxMaterial(const SkyboxMaterialParameters &options = {});
+    MaterialRef CustomMaterial(ShaderRef shaderRef, const UniformCollection &defaultUniforms = {});
 
 private:
     MaterialResource &m_materialResource;

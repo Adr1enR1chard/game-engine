@@ -2,6 +2,7 @@ function(add_asset_pipeline)
     set(options)
     set(oneValueArgs
         TARGET
+        ALIAS
         SOURCE_DIR
         RUNTIME_DIR
         COMPILER
@@ -87,7 +88,7 @@ function(add_asset_pipeline)
     # ------------------------------------------------------------
     # Targets
     # ------------------------------------------------------------
-    set(COMPILE_TARGET "${ASSETS_TARGET}_compile_assets")
+    set(COMPILE_TARGET "${ASSETS_TARGET}_${ASSETS_ALIAS}_compile_assets")
 
     add_custom_target("${COMPILE_TARGET}"
         DEPENDS ${ASSET_OUTPUTS}
