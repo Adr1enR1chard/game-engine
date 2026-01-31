@@ -8,7 +8,6 @@ class MySystem : public System
 public:
     void start() override
     {
-        services().get<Window>()->setSize(1280, 720);
         world().createEntity(CCamera{}, CTransform{glm::vec3(0.0f, 0.0f, 3.0f)});
         m_dirLight = world().createEntity(CDirectionalLight{glm::vec3(-3.0f, -1.0f, -1.0f), glm::vec3(1.0f), 10.0f, 100.0f});
         world().createEntity(CEnvironment{.skyboxMaterial = services().get<MaterialFactory>()->SkyboxMaterial({})});
@@ -94,7 +93,7 @@ private:
 
 int main()
 {
-    Engine::Init().addBundle<DefaultBundle>().addSystems<CameraControlSystem, MySystem>().run();
+    Engine::Init().addBundle<DefaultBundle>().addSystems<CameraControlSystem, MySystem>().run(1280, 720, "Basic Scene", false);
 
     return 0;
 }

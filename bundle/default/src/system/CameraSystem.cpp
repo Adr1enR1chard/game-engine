@@ -4,7 +4,7 @@
 
 #include <component/CCamera.hpp>
 #include <component/cache/CCameraCache.hpp>
-#include <service/Window.hpp>
+#include <engine/service/platform/Window.hpp>
 
 glm::mat4 getProjectionMatrix(float fov, float aspectRatio, float nearPlane, float farPlane)
 {

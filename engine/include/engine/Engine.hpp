@@ -16,6 +16,17 @@
 #include <engine/utils/types.hpp>
 #include "threading/ThreadQueue.hpp"
 
+// Resources
+#include <engine/service/resource/TextureResource.hpp>
+#include <engine/service/resource/ShaderResource.hpp>
+#include <engine/service/resource/MeshResource.hpp>
+#include <engine/service/resource/MaterialResource.hpp>
+#include <engine/service/resource/ModelResource.hpp>
+
+// Platform Services
+#include <engine/service/platform/Window.hpp>
+#include <engine/service/platform/Input.hpp>
+
 class Engine
 {
 
@@ -47,7 +58,7 @@ public:
     }
 
 private:
-    Engine() = default;
+    Engine();
 
     static std::unique_ptr<Engine> m_instance;
 
@@ -55,11 +66,19 @@ public:
     Engine(const Engine &) = delete;
     Engine &operator=(const Engine &) = delete;
 
-    /**
-     * Run the engine with the specified window service type.
-     */
+    void run(unsigned int width, unsigned int height, const char *title, bool fullscreen = false)
+    {
+        m_window->setResolution(width, height);
+        m_window->setTitle(title);
+        m_window->setFullscreen(fullscreen);
+
+        run();
+    }
+
     void run()
     {
+        m_window->create();
+
         m_systems.setContext(m_world, m_services);
         m_systems.init();
 
@@ -81,11 +100,14 @@ public:
             deltaTime = static_cast<float>(delta.count());
 
             // --- Engine loop ---
+            m_input->clear();
+            m_window->pollEvents();
             m_systems.preUpdate(deltaTime);
             m_systems.update(deltaTime);
+            m_window->clear();
             m_systems.preRender(deltaTime);
             m_systems.render(deltaTime);
-            m_systems.present(deltaTime);
+            m_window->swapBuffers();
 
             m_mainThreadQueue.executeAll();
         }
@@ -173,4 +195,6 @@ private:
     ServiceRegistry m_services;
     std::vector<std::unique_ptr<Bundle>> m_bundles;
     ThreadQueue m_mainThreadQueue;
+    Window *m_window = nullptr;
+    Input *m_input = nullptr;
 };

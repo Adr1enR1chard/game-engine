@@ -38,18 +38,6 @@ FetchContent_MakeAvailable(glfw)
 #### OpenGL
 find_package(OpenGL REQUIRED)
 
-#### Assimp
-include(FetchContent)
-FetchContent_Declare(assimp
-    GIT_REPOSITORY https://github.com/assimp/assimp.git
-    GIT_TAG master
-)
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(ASSIMP_INJECT_DEBUG_POSTFIX OFF CACHE BOOL "" FORCE)
-set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(assimp)
-
 #### Assets Compiler
 include (FetchContent)
 FetchContent_Declare(
@@ -64,15 +52,13 @@ FetchContent_MakeAvailable(assets_compiler)
 ###########################
 
 # Library: Default bundle
+file(GLOB_RECURSE DEFAULT_BUNDLE_SYSTEMS
+    bundle/default/src/system/*.cpp
+)
+
 add_library(default_bundle
-    bundle/default/src/system/RenderSystem.cpp
-    bundle/default/src/system/CameraSystem.cpp
-    bundle/default/src/system/TransformSystem.cpp
-    bundle/default/src/system/LightSystem.cpp
-    bundle/default/src/system/LightSystem.cpp
-    bundle/default/src/system/PlatformSystem.cpp
-    bundle/default/src/system/EnvironmentSystem.cpp
-    bundle/default/src/service/Input.cpp
+    ${DEFAULT_BUNDLE_SYSTEMS}
+    bundle/default/src/DefaultBundle.cpp
 )
 target_include_directories(default_bundle PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -86,18 +72,11 @@ enable_strict_warnings(default_bundle)
 
 # Library: GLFW platform
 add_library(default_bundle_glfw
-    bundle/default/src/platform/glfw/service/Window.cpp
-    bundle/default/src/platform/glfw/service/resource/MeshResource.cpp
-    bundle/default/src/platform/glfw/service/resource/ShaderResource.cpp
-    bundle/default/src/platform/glfw/service/resource/MaterialResource.cpp
-    bundle/default/src/platform/glfw/service/resource/TextureResource.cpp
-    bundle/default/src/platform/glfw/service/resource/ModelResource.cpp
     bundle/default/src/platform/glfw/service/factory/MaterialFactory.cpp
     bundle/default/src/platform/glfw/service/factory/ShaderFactory.cpp
     bundle/default/src/platform/glfw/service/factory/ModelFactory.cpp
     bundle/default/src/platform/glfw/service/factory/MeshFactory.cpp
     bundle/default/src/platform/glfw/service/factory/TextureFactory.cpp
-    bundle/default/src/DefaultBundle.cpp
 )
 target_include_directories(default_bundle_glfw PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -116,27 +95,27 @@ if (WIN32)
 endif()
 
 # Library: Rendering
+file(GLOB_RECURSE ENGINE_SOURCES
+    engine/src/*.cpp
+)
+
 add_library(engine_core
-    engine/src/Engine.cpp
-    engine/src/registry/World.cpp
-    engine/src/utils/key_mapping.cpp
-    engine/src/utils/Log.cpp
-    engine/src/model/Service.cpp
+    ${ENGINE_SOURCES}
 )
 target_include_directories(engine_core PUBLIC
      ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/engine/include
 )
 target_compile_definitions(engine_core PUBLIC GLFW_INCLUDE_NONE)
-target_link_libraries(engine_core PUBLIC
-    assimp::assimp
+target_link_libraries(engine_core
+PUBLIC
+    assets_format
 )
 enable_strict_warnings(engine_core)
 
 # Library: third-party single-file implementations (GLAD, stb_image)
 add_library(engine_vendor
     engine/src/third_party/glad/glad.c
-    engine/src/third_party/stb_image/stb_image.cpp
 )
 target_include_directories(engine_vendor PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -197,24 +176,3 @@ add_asset_pipeline(
     COMPILER     "${ASSET_COMPILER_EXE}"
     EXTENSIONS   ${EXTENSIONS}
 )
-
-# Command : Assets pruning (remove files in runtime dir that are not in source dir)
-
-
-
-
-# add_custom_command(TARGET BasicScene POST_BUILD
-#     COMMAND ${ASSET_COMPILER_EXE} "${ASSETS_SRC}" "$<TARGET_FILE_DIR:BasicScene>/assets"
-#     COMMAND ${ASSET_COMPILER_EXE} "${DEFAULT_BUNDLE_ASSETS_SRC}" "$<TARGET_FILE_DIR:BasicScene>/default-bundle-assets"
-#     COMMENT "Running AssetCompiler to process assets for BasicScene..."
-# )
-
-# Command: Copy assets (in case AssetCompiler is not available)
-# add_custom_command(TARGET BasicScene POST_BUILD
-#   COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:BasicScene>/assets"
-#   COMMAND ${CMAKE_COMMAND} -E copy_directory
-#           "${ASSETS_SRC}"
-#           "$<TARGET_FILE_DIR:BasicScene>/assets"
-#   COMMAND ${CMAKE_COMMAND} -E copy_directory
-#           "${DEFAULT_BUNDLE_ASSETS_SRC}"
-#           "$<TARGET_FILE_DIR:BasicScene>/default-bundle-assets")

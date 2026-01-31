@@ -11,12 +11,12 @@
 #include <component/cache/CSkyboxCache.hpp>
 #include <component/cache/CTransformCache.hpp>
 
-#include <service/Window.hpp>
-#include <service/resource/MaterialResource.hpp>
-#include <service/resource/MeshResource.hpp>
-#include <service/resource/ModelResource.hpp>
-#include <service/resource/ShaderResource.hpp>
-#include <service/resource/TextureResource.hpp>
+#include <engine/service/platform/Window.hpp>
+#include <engine/service/resource/MaterialResource.hpp>
+#include <engine/service/resource/MeshResource.hpp>
+#include <engine/service/resource/ModelResource.hpp>
+#include <engine/service/resource/ShaderResource.hpp>
+#include <engine/service/resource/TextureResource.hpp>
 
 void RenderSystem::render(double /*deltaTime*/)
 {

@@ -16,7 +16,6 @@ public:
   virtual void update(double /*deltaTime*/) {}
   virtual void preRender(double /*deltaTime*/) {}
   virtual void render(double /*deltaTime*/) {}
-  virtual void present(double /*deltaTime*/) {}
 
 protected:
   World &world()

@@ -92,12 +92,6 @@ private:
                       { system.render(deltaTime); });
     }
 
-    void present(float deltaTime)
-    {
-        m_systems.map([&](System &system)
-                      { system.present(deltaTime); });
-    }
-
 private:
     SystemStorage m_systems;
 };

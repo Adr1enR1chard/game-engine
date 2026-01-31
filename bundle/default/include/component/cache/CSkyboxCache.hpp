@@ -1,7 +1,8 @@
 #pragma once
 
-#include <utils/RenderTypes.hpp>
+#include <engine/utils/RenderTypes.hpp>
 
-struct CSkyboxCache {
+struct CSkyboxCache
+{
     MeshRef meshRef;
 };

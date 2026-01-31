@@ -2,7 +2,7 @@
 
 #include <engine/model/Service.hpp>
 #include <service/factory/TextureFactory.hpp>
-#include <service/resource/ShaderResource.hpp>
+#include <engine/service/resource/ShaderResource.hpp>
 
 class ShaderFactory : public Service
 {

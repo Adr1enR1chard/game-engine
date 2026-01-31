@@ -2,14 +2,16 @@
 
 #include <memory>
 
-#include <utils/RenderTypes.hpp>
+#include <engine/utils/RenderTypes.hpp>
 
-struct CMeshRenderer {
-    MeshRef     meshRef;
+struct CMeshRenderer
+{
+    MeshRef meshRef;
     MaterialRef materialRef;
 };
 
-struct CModelRenderer {
-    ModelRef                 modelRef;
+struct CModelRenderer
+{
+    ModelRef modelRef;
     std::vector<MaterialRef> materialOverrides;
 };

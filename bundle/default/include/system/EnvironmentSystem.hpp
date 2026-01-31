@@ -5,7 +5,7 @@
 #include <engine/model/Entity.hpp>
 #include <component/CEnvironment.hpp>
 #include <component/cache/CSkyboxCache.hpp>
-#include <utils/RenderTypes.hpp>
+#include <engine/utils/RenderTypes.hpp>
 
 class EnvironmentSystem : public System
 {

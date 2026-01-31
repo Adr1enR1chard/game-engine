@@ -1,7 +1,7 @@
 #include <system/LightSystem.hpp>
 
-#include <service/resource/MaterialResource.hpp>
-#include <service/resource/ModelResource.hpp>
+#include <engine/service/resource/MaterialResource.hpp>
+#include <engine/service/resource/ModelResource.hpp>
 
 void LightSystem::update(double /*deltaTime*/)
 {

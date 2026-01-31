@@ -2,7 +2,7 @@
 
 #include <service/factory/ShaderFactory.hpp>
 #include <service/factory/TextureFactory.hpp>
-#include <service/resource/MaterialResource.hpp>
+#include <engine/service/resource/MaterialResource.hpp>
 
 struct PBRMaterialParameters
 {

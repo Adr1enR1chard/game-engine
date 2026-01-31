@@ -4,7 +4,7 @@
 #include <component/cache/CSkyboxCache.hpp>
 #include <engine/utils/Log.hpp>
 #include <service/factory/MeshFactory.hpp>
-#include <service/Window.hpp>
+#include <engine/service/platform/Window.hpp>
 
 void EnvironmentSystem::update(double /*deltaTime*/)
 {

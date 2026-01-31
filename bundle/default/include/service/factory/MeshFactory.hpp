@@ -2,7 +2,7 @@
 
 #include <engine/model/Service.hpp>
 
-#include <service/resource/MeshResource.hpp>
+#include <engine/service/resource/MeshResource.hpp>
 
 class MeshFactory : public Service
 {

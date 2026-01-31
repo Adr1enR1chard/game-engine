@@ -1,8 +1,8 @@
 #pragma once
 
 #include <engine/model/Service.hpp>
-#include <service/resource/TextureResource.hpp>
-#include <utils/RenderTypes.hpp>
+#include <engine/service/resource/TextureResource.hpp>
+#include <engine/utils/RenderTypes.hpp>
 
 class TextureFactory : public Service
 {

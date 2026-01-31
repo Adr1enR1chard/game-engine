@@ -5,11 +5,7 @@
 #include <service/factory/MeshFactory.hpp>
 #include <service/factory/ShaderFactory.hpp>
 #include <service/factory/TextureFactory.hpp>
-#include <service/resource/ModelResource.hpp>
-
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
-#include <assimp/scene.h>
+#include <engine/service/resource/ModelResource.hpp>
 
 class ModelFactory : public Service
 {
