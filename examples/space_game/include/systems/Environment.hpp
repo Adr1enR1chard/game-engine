@@ -1,6 +1,8 @@
 #pragma once
 
 #include <DefaultBundle.hpp>
+#include <random>
+#include <glm/gtc/random.hpp>
 
 class Environment : public System
 {
@@ -30,20 +32,27 @@ public:
             .direction = glm::vec3(1.0f, 0.0f, 0.0f),
             .color = glm::vec3(1.0f, 1.0f, 1.0f),
             .ambient = 1.0f,
-            .intensity = 100.0f,
+            .intensity = 10.0f,
         });
 
-        world().createEntity(CMeshRenderer{
-                                 .meshRef = services().get<MeshFactory>()->Sphere(1.0f, 32, 32),
-                                 .materialRef = services().get<MaterialFactory>()->PBRMaterial({
-                                     .baseColor = glm::vec3(1.0f, 0.5f, 0.0f),
-                                     .metallic = 1.0f,
-                                 }),
-                             },
-                             CTransform{
-                                 .position = glm::vec3(100.0f, 0.0f, 0.0f),
-                                 .scale = glm::vec3(50.0f),
-                             });
+        ModelRef planetModel = services().get<ModelFactory>()->LoadModel("assets/models/planet/planet.gltf");
+
+        // Spawn multiple random planets
+        for (int i = 0; i < 50; ++i)
+        {
+            glm::vec3 position = glm::sphericalRand(500.0f);
+            float scaleValue = static_cast<float>(rand() % 50 + 5);
+            glm::vec3 scale = glm::vec3(scaleValue);
+
+            world().createEntity(
+                CModelRenderer{
+                    .modelRef = planetModel,
+                },
+                CTransform{
+                    .position = position,
+                    .scale = scale,
+                });
+        }
     }
 
 private:

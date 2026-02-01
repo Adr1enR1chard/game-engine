@@ -2,6 +2,10 @@
 
 #include <DefaultBundle.hpp>
 #include <components/Spaceship.hpp>
+#include <components/OrbitCamera.hpp>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 class Spaceship : public System
 {
@@ -12,7 +16,12 @@ public:
             CModelRenderer{
                 .modelRef = services().get<ModelFactory>()->LoadModel("assets/models/spaceship/spaceship.gltf"),
             },
-            CTransform{glm::vec3(0.0f, 0.0f, 0.0f)}, CSpaceship{});
+            CTransform{
+                .rotation = glm::angleAxis(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
+            },
+            CSpaceship{});
+        m_targetRotation =
+            glm::angleAxis(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     }
 
     void update(float deltaTime) override
@@ -24,9 +33,12 @@ public:
         if (cameraTransform == nullptr)
             return;
 
-        m_yaw = lerpAngle(m_yaw, orbitCamera->yaw + 180.0f, m_rotationSpeed * deltaTime);
-        m_pitch = lerpAngle(m_pitch, -orbitCamera->pitch, m_rotationSpeed * deltaTime);
-        transform->setRotationFromEuler(glm::vec3(glm::radians(m_pitch), glm::radians(m_yaw), 0.0f));
+        glm::quat delta =
+            orbitCamera->yawRot * orbitCamera->pitchRot;
+        m_targetRotation = delta * m_targetRotation;
+
+        glm::quat lerpedRotation = glm::slerp(transform->rotation, m_targetRotation, m_rotationSpeed * deltaTime);
+        transform->setRotation(lerpedRotation);
 
         if (services().get<Input>()->isKeyDown(Key::LShift))
         {
@@ -39,13 +51,6 @@ public:
             if (glm::length(m_velocity) > 0.0f)
                 m_velocity -= m_deceleration * deltaTime * glm::normalize(m_velocity);
         }
-
-        // Compute the roll based on lateral movement
-        glm::vec3 right = glm::normalize(glm::cross(transform->forward(), glm::vec3(0.0f, 1.0f, 0.0f)));
-        float lateralSpeed = glm::dot(m_velocity, right);
-        float targetRoll = -lateralSpeed / m_maxSpeed * m_targetRoll;
-        m_roll = lerpAngle(m_roll, targetRoll, m_rotationSpeed * deltaTime);
-        transform->rotate(glm::radians(m_roll), transform->forward());
 
         transform->position += m_velocity * deltaTime;
     }
@@ -64,8 +69,10 @@ private:
     float m_acceleration = 10.0f;
     float m_deceleration = 5.0f;
     float m_rotationSpeed = 1.0f;
-    float m_yaw = 0.0f;
-    float m_pitch = 0.0f;
+    glm::quat m_targetRotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
     float m_roll = 0.0f;
     float m_targetRoll = 45.0f;
+
+    const glm::quat yFlip =
+        glm::angleAxis(glm::radians(180.0f), glm::vec3(0, 1, 0));
 };

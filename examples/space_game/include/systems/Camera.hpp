@@ -27,16 +27,13 @@ public:
             glm::vec2 mouseDelta = m_input->getMouseDelta();
             float sensitivity = 0.2f;
 
-            orbitCamera->yawDelta = -mouseDelta.x * sensitivity;
-            orbitCamera->yaw += -mouseDelta.x * sensitivity;
-            orbitCamera->pitch += -mouseDelta.y * sensitivity;
+            glm::vec3 right = transform->right();
+            glm::vec3 up = transform->up();
 
-            orbitCamera->pitch = glm::clamp(orbitCamera->pitch, -89.0f, 89.0f);
+            orbitCamera->yawRot = glm::angleAxis(glm::radians(-mouseDelta.x * sensitivity), up);
+            orbitCamera->pitchRot = glm::angleAxis(glm::radians(-mouseDelta.y * sensitivity), right);
 
-            transform->setRotationFromEuler(glm::vec3(
-                glm::radians(orbitCamera->pitch),
-                glm::radians(orbitCamera->yaw),
-                0.0f));
+            transform->rotate(orbitCamera->yawRot * orbitCamera->pitchRot);
 
             // Follow the spaceship
             if (auto [e, s, shipTransform] = world().fetchAt<CSpaceship, CTransform>(0);
@@ -44,7 +41,7 @@ public:
             {
                 transform->position =
                     shipTransform->position - transform->forward() * m_orbitRadius +
-                    glm::vec3(0.0f, m_orbitHeight, 0.0f);
+                    transform->up() * m_orbitHeight;
             }
         }
 
