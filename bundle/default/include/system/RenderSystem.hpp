@@ -10,6 +10,7 @@ namespace default_bundle
   class RenderSystem : public engine::System
   {
   public:
+    void start() override;
     void render(float deltaTime) override;
 
   private:

@@ -30,6 +30,8 @@ namespace engine
     TextureRef texture2D(const TextureAttributes &texture);
     TextureRef cubeMap(const std::vector<TextureAttributes> &faces);
 
+    TextureRef depthMap(const unsigned int width, const unsigned int height);
+
     void remove(TextureRef textureRef);
     void bind(TextureRef textureRef) const;
 

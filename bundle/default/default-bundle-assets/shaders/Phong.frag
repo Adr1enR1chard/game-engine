@@ -29,6 +29,7 @@ in vec2 vUV;
 in vec3 vWorldPos;
 in vec3 vWorldNormal;
 in mat3 vTBN;
+in vec4 vFragPosLightSpace;
 
 // ------ MATERIAL UNIFORMS -------
 // --- Require defaults value per -
@@ -45,7 +46,21 @@ uniform int pointLightCount;
 uniform vec3 viewPos; // Set in the LightSystem
 // ----------------------------
 
-vec3 CalcDirLight(DirLight light, vec3 N, vec3 V, vec3 ambient, vec3 diffuse, vec3 specular, float shininess) {
+// ------- SHADOW UNIFORMS ------
+uniform sampler2D uShadowMap;
+// -------------------------------
+
+float ShadowCalculation(vec4 fragPosLightSpace) {
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+    float closestDepth = texture(uShadowMap, projCoords.xy).r;
+    float currentDepth = projCoords.z;
+    float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
+
+    return shadow;
+}
+
+vec3 CalcDirLight(DirLight light, vec3 N, vec3 V, vec3 ambient, vec3 diffuse, vec3 specular, float shininess, float shadow) {
     vec3 L = normalize(-light.direction);
     vec3 H = normalize(V + L);
 
@@ -58,7 +73,7 @@ vec3 CalcDirLight(DirLight light, vec3 N, vec3 V, vec3 ambient, vec3 diffuse, ve
     vec3 diffuseComp = diffuse * diff * radiance;
     vec3 specularComp = specular * spec * radiance;
 
-    return (ambientComp + diffuseComp + specularComp);
+    return (ambientComp + (1 - shadow) * (diffuseComp + specularComp));
 }
 
 vec3 CalcPointLight(PointLight light, vec3 N, vec3 worldPos, vec3 V, vec3 ambient, vec3 diffuse, vec3 specular, float shininess) {
@@ -88,7 +103,9 @@ void main() {
     vec3 specular = texture(material.specularMap, vUV).rgb * material.specular;
     float shininess = material.shininess;
 
-    vec3 result = CalcDirLight(dirLight, N, V, ambient, diffuse, specular, shininess);
+    float shadow = ShadowCalculation(vFragPosLightSpace);
+
+    vec3 result = CalcDirLight(dirLight, N, V, ambient, diffuse, specular, shininess, shadow);
     for(int i = 0; i < pointLightCount; ++i) {
         result += CalcPointLight(pointLights[i], N, vWorldPos, V, ambient, diffuse, specular, shininess);
     }

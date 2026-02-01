@@ -4,9 +4,12 @@
 #include <stdio.h>
 #include <string>
 
+#include <service/ShadowMapping.hpp>
+
 #include <component/CCamera.hpp>
 #include <component/CEnvironment.hpp>
 #include <component/CMeshRenderer.hpp>
+#include <component/CDirectionalLight.hpp>
 #include <component/cache/CCameraCache.hpp>
 #include <component/cache/CSkyboxCache.hpp>
 #include <component/cache/CTransformCache.hpp>
@@ -21,6 +24,11 @@
 namespace default_bundle
 {
     using namespace engine;
+
+    void RenderSystem::start()
+    {
+        services().get<ShadowMapping>()->createDepthMap();
+    }
 
     void RenderSystem::render(float /*deltaTime*/)
     {
@@ -62,6 +70,48 @@ namespace default_bundle
             {
                 services().get<Window>()->clearColor(environment->backgroundColor);
             }
+        }
+
+        /// ------- Render Depth -------
+        auto shadowMapping = services().get<ShadowMapping>();
+        if (shadowMapping->getDepthMap() != 0)
+        {
+            auto [_, dirLight] = world().fetchAt<CDirectionalLight>(0);
+            if (!dirLight)
+                return;
+
+            shadowMapping->renderDepth(
+                [&](ShaderRef depthShader, TextureRef depthMap, glm::mat4 lightSpaceMatrix)
+                {
+                    /// ------- Render Meshes for Depth -------
+                    for (const auto &[entity, meshRenderer, transform] : world().fetch<CMeshRenderer, CTransformCache>())
+                    {
+                        auto meshRef = meshRenderer->meshRef;
+
+                        // Settings uniforms for later use in regular rendering
+                        materialResource->setUniform(meshRenderer->materialRef, "uShadowMap", depthMap);
+                        materialResource->setUniform(meshRenderer->materialRef, "uDirLightSpaceMatrix", lightSpaceMatrix);
+
+                        shaderResource->bind(depthShader, glm::mat4(1.0f), glm::mat4(1.0f),
+                                             transform->modelMatrix * meshResource->getLocalModel(meshRef));
+
+                        meshResource->draw(meshRef);
+                    }
+
+                    /// ------- Render Models for Depth -------
+                    for (const auto &[entity, modelRenderer, transform] : world().fetch<CModelRenderer, CTransformCache>())
+                    {
+                        auto &modelRef = modelRenderer->modelRef;
+
+                        modelResource->forEach(modelRef, [&](MeshRef meshRef, MaterialRef /*materialRef*/, size_t /*index*/)
+                                               {
+                            shaderResource->bind(depthShader, glm::mat4(1.0f), glm::mat4(1.0f),
+                                                 transform->modelMatrix * meshResource->getLocalModel(meshRef));
+
+                            meshResource->draw(meshRef); });
+                    }
+                },
+                dirLight->direction);
         }
 
         /// ------- Render Meshes -------

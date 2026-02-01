@@ -8,6 +8,7 @@
 #include <service/factory/MeshFactory.hpp>
 #include <service/factory/ModelFactory.hpp>
 #include <service/factory/TextureFactory.hpp>
+#include <service/ShadowMapping.hpp>
 
 // --- Systems ---
 #include <system/CameraSystem.hpp>

@@ -10,12 +10,14 @@ out vec2 vUV;
 out vec3 vWorldPos;
 out vec3 vWorldNormal;
 out mat3 vTBN;
+out vec4 vFragPosLightSpace;
 
 // ------ WORLD UNIFORMS ------
 // -- Set in the RenderSystem -
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform mat4 uDirLightSpaceMatrix;
 // -----------------------------
 
 void main() {
@@ -38,4 +40,6 @@ void main() {
 
     vWorldNormal = N;
     vTBN = mat3(T, B, N);
+
+    vFragPosLightSpace = uDirLightSpaceMatrix * vec4(vWorldPos, 1.0);
 }

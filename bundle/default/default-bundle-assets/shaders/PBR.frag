@@ -32,6 +32,7 @@ in vec2 vUV;
 in vec3 vWorldPos;
 in vec3 vWorldNormal;
 in mat3 vTBN;
+in vec4 vFragPosLightSpace;
 
 // ------ MATERIAL UNIFORMS -------
 // --- Require defaults value per -
@@ -47,7 +48,22 @@ uniform int pointLightCount;
 // ------ WORLD UNIFORM ------
 uniform vec3 viewPos; // Set in the LightSystem
 // ----------------------------
+
+// ------- SHADOW UNIFORMS ------
+uniform sampler2D uShadowMap;
+// -------------------------------
+
 const float PI = 3.14159265359;
+
+float ShadowCalculation(vec4 fragPosLightSpace) {
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+    float closestDepth = texture(uShadowMap, projCoords.xy).r;
+    float currentDepth = projCoords.z;
+    float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
+
+    return shadow;
+}
 
 vec3 fresnelSchlick(float cosTheta, vec3 F0) {
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
@@ -152,6 +168,9 @@ void main() {
     float ao = material.ao * texture(material.aoMap, vUV).r;
 
     vec3 Lo = CalcDirLight(dirLight, N, V, baseColor, metallic, roughness, ao);
+    float shadow = ShadowCalculation(vFragPosLightSpace);
+    Lo *= (1.0 - shadow);
+
     for(int i = 0; i < pointLightCount; ++i) {
         Lo += CalcPointLight(pointLights[i], N, vWorldPos, V, baseColor, metallic, roughness, ao);
     }
