@@ -13,9 +13,12 @@ class OrbitCameraSystem : public System
 public:
     void start() override
     {
-        m_cameraEntity = world().createEntity(CCamera{}, CTransform{
-                                                             .rotation = glm::vec3(0.0f, 0.0f, 0.0f),
-                                                         },
+        m_cameraEntity = world().createEntity(CCamera{
+                                                  .fov = 80.0f,
+                                              },
+                                              CTransform{
+                                                  .rotation = glm::vec3(0.0f, 0.0f, 0.0f),
+                                              },
                                               COrbitCamera{});
 
         m_input = services().get<Input>();
