@@ -11,7 +11,7 @@ glm::mat4 getProjectionMatrix(float fov, float aspectRatio, float nearPlane, flo
     return glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
 }
 
-void CameraSystem::update(double /*deltaTime*/)
+void CameraSystem::update(float /*deltaTime*/)
 {
     if (auto [entity, cameraComponent] = world().fetchAt<CCamera>(0); entity)
     {

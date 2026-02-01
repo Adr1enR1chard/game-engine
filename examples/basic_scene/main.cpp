@@ -62,7 +62,7 @@ public:
             CTransform{glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(180.0f, 0.0f, 0.0f), glm::vec3(10.0f)});
     }
 
-    void update(double deltaTime) override
+    void update(float deltaTime) override
     {
         float angle = static_cast<float>(deltaTime) * 100.0f;
         if (auto [_, transform] = world().fetchFrom<CTransform>(m_metalSphere); transform)

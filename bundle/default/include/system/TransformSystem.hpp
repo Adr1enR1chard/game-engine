@@ -4,6 +4,6 @@
 
 class TransformSystem : public System
 {
-  public:
-    void update(double deltaTime) override;
+public:
+  void update(float deltaTime) override;
 };

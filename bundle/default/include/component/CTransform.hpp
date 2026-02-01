@@ -1,10 +1,29 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 /// @brief Component representing a dynamic entity's transform in 3D space.
-struct CTransform {
+struct CTransform
+{
     glm::vec3 position{0.0f, 0.0f, 0.0f};
-    glm::vec3 rotation{0.0f, 0.0f, 0.0f};
+    glm::quat rotation{1.0f, 0.0f, 0.0f, 0.0f};
     glm::vec3 scale{1.0f, 1.0f, 1.0f};
+
+    glm::vec3 forward() const
+    {
+        glm::vec3 dir = rotation * glm::vec3(0.0f, 0.0f, -1.0f);
+        return glm::normalize(dir);
+    }
+
+    void rotate(float angle, const glm::vec3 &axis)
+    {
+        rotation = glm::rotate(rotation, angle, axis);
+    }
+
+    void setRotationFromEuler(const glm::vec3 &eulerAngles)
+    {
+        rotation = glm::quat(eulerAngles);
+    }
 };

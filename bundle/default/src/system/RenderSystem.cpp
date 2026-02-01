@@ -18,7 +18,7 @@
 #include <engine/service/resource/ShaderResource.hpp>
 #include <engine/service/resource/TextureResource.hpp>
 
-void RenderSystem::render(double /*deltaTime*/)
+void RenderSystem::render(float /*deltaTime*/)
 {
     const auto &[cameraEntity, cameraCache, cameraTransform] = world().fetchAt<CCameraCache, CTransformCache>(0);
 

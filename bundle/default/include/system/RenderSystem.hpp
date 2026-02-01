@@ -6,9 +6,9 @@
 
 class RenderSystem : public System
 {
-  public:
-    void render(double deltaTime) override;
+public:
+  void render(float deltaTime) override;
 
-  private:
-    bool m_cameraNotFoundLogged = false;
+private:
+  bool m_cameraNotFoundLogged = false;
 };

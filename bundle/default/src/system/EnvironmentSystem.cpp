@@ -6,7 +6,7 @@
 #include <service/factory/MeshFactory.hpp>
 #include <engine/service/platform/Window.hpp>
 
-void EnvironmentSystem::update(double /*deltaTime*/)
+void EnvironmentSystem::update(float /*deltaTime*/)
 {
     // Fetch the environment entity if not already done
     if (auto [envEntity, environment] = world().fetchAt<CEnvironment>(0); envEntity && !m_environment)

@@ -12,10 +12,10 @@ public:
   virtual ~System() = default;
   virtual void init() {}
   virtual void start() {}
-  virtual void preUpdate(double /*deltaTime*/) {}
-  virtual void update(double /*deltaTime*/) {}
-  virtual void preRender(double /*deltaTime*/) {}
-  virtual void render(double /*deltaTime*/) {}
+  virtual void preUpdate(float /*deltaTime*/) {}
+  virtual void update(float /*deltaTime*/) {}
+  virtual void preRender(float /*deltaTime*/) {}
+  virtual void render(float /*deltaTime*/) {}
 
 protected:
   World &world()

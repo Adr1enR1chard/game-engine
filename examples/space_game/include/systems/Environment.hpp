@@ -32,6 +32,18 @@ public:
             .ambient = 1.0f,
             .intensity = 100.0f,
         });
+
+        world().createEntity(CMeshRenderer{
+                                 .meshRef = services().get<MeshFactory>()->Sphere(1.0f, 32, 32),
+                                 .materialRef = services().get<MaterialFactory>()->PBRMaterial({
+                                     .baseColor = glm::vec3(1.0f, 0.5f, 0.0f),
+                                     .metallic = 1.0f,
+                                 }),
+                             },
+                             CTransform{
+                                 .position = glm::vec3(100.0f, 0.0f, 0.0f),
+                                 .scale = glm::vec3(50.0f),
+                             });
     }
 
 private:

@@ -10,7 +10,7 @@ public:
         window = services().get<Window>();
     }
 
-    void update(double deltaTime) override
+    void update(float deltaTime) override
     {
         float dt = static_cast<float>(deltaTime);
         if (auto [entity, cCam, transform] = world().fetchAt<CCamera, CTransform>(0); entity != 0 && mouseCaptured)

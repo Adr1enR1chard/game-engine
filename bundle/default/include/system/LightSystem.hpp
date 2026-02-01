@@ -10,7 +10,7 @@
 class LightSystem : public System
 {
 public:
-  void update(double deltaTime) override;
+  void update(float deltaTime) override;
 
 private:
   void setMaterialLights(MaterialRef materialRef,

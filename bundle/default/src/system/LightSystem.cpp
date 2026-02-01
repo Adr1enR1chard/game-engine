@@ -3,7 +3,7 @@
 #include <engine/service/resource/MaterialResource.hpp>
 #include <engine/service/resource/ModelResource.hpp>
 
-void LightSystem::update(double /*deltaTime*/)
+void LightSystem::update(float /*deltaTime*/)
 {
     const auto &[eCamera, cCamera, cCameraTransform] = world().fetchAt<CCamera, CTransform>(0);
 

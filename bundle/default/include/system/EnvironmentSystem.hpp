@@ -13,7 +13,7 @@ public:
   EnvironmentSystem() = default;
   ~EnvironmentSystem() override = default;
 
-  void update(double deltaTime) override;
+  void update(float deltaTime) override;
 
 private:
   CSkyboxCache createSkyboxCache();
