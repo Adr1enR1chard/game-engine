@@ -48,6 +48,8 @@ glm::vec2 Input::getMouseDelta() const
 void Input::clear()
 {
     m_mouseDelta = glm::vec2(0.0f);
+    m_pressedKeys.clear();
+    m_releasedKeys.clear();
 }
 
 void Input::processKey(Key key, Key /*scancode*/, KeyAction action, int /*mods*/)
@@ -62,12 +64,9 @@ void Input::processKey(Key key, Key /*scancode*/, KeyAction action, int /*mods*/
     case KeyAction::Released:
         m_releasedKeys.insert(key);
         m_downKeys.erase(key);
-        m_pressedKeys.erase(key);
         break;
     case KeyAction::Down:
         m_downKeys.insert(key);
-        m_pressedKeys.erase(key);
-        m_releasedKeys.erase(key);
         break;
     default:
         break;

@@ -65,9 +65,9 @@ private:
     Entity m_spaceshipEntity;
 
     glm::vec3 m_velocity = glm::vec3(0.0f);
-    float m_maxSpeed = 20.0f;
-    float m_acceleration = 10.0f;
-    float m_deceleration = 5.0f;
+    float m_maxSpeed = 50.0f;
+    float m_acceleration = 20.0f;
+    float m_deceleration = 13.0f;
     float m_rotationSpeed = 1.0f;
     glm::quat m_targetRotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
     float m_roll = 0.0f;

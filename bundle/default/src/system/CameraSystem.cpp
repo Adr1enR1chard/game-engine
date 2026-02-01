@@ -20,9 +20,10 @@ void CameraSystem::update(float /*deltaTime*/)
             world().addComponents(entity, CCameraCache{});
         }
 
-        // TODO: Use events to only update when necessary
         int width, height;
         services().get<Window>()->getSize(width, height);
+        if (height == 0 || width == 0)
+            return;
 
         const auto &[_, cameraCache] = world().fetchFrom<CCameraCache>(entity);
         cameraCache->projectionMatrix =

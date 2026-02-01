@@ -22,18 +22,25 @@ public:
     void update(float deltaTime) override
     {
         float dt = static_cast<float>(deltaTime);
-        if (auto [entity, cCam, transform, orbitCamera] = world().fetchAt<CCamera, CTransform, COrbitCamera>(0); entity != 0 && m_mouseCaptured)
+        if (auto [entity, cCam, transform, orbitCamera] = world().fetchAt<CCamera, CTransform, COrbitCamera>(0); entity != 0)
         {
             glm::vec2 mouseDelta = m_input->getMouseDelta();
             float sensitivity = 0.2f;
 
             glm::vec3 right = transform->right();
             glm::vec3 up = transform->up();
+            if (m_mouseCaptured)
+            {
+                orbitCamera->yawRot = glm::angleAxis(glm::radians(-mouseDelta.x * sensitivity), up);
+                orbitCamera->pitchRot = glm::angleAxis(glm::radians(-mouseDelta.y * sensitivity), right);
 
-            orbitCamera->yawRot = glm::angleAxis(glm::radians(-mouseDelta.x * sensitivity), up);
-            orbitCamera->pitchRot = glm::angleAxis(glm::radians(-mouseDelta.y * sensitivity), right);
-
-            transform->rotate(orbitCamera->yawRot * orbitCamera->pitchRot);
+                transform->rotate(orbitCamera->yawRot * orbitCamera->pitchRot);
+            }
+            else
+            {
+                orbitCamera->yawRot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+                orbitCamera->pitchRot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+            }
 
             // Follow the spaceship
             if (auto [e, s, shipTransform] = world().fetchAt<CSpaceship, CTransform>(0);
@@ -47,13 +54,30 @@ public:
 
         if (m_input->isKeyPressed(Key::Escape))
         {
-            m_window->captureMouse(false);
-            m_mouseCaptured = false;
+            m_mouseCaptured = !m_mouseCaptured;
+            m_window->captureMouse(m_mouseCaptured);
         }
-        if (m_input->isKeyPressed(Key::LAlt))
+
+        if (m_input->isKeyDown(Key::E))
         {
-            m_window->captureMouse(true);
-            m_mouseCaptured = true;
+            m_orbitRadius += 1.0f * dt * 10.0f;
+            m_orbitHeight += 0.25f * dt * 10.0f;
+            if (m_orbitRadius > 100.0f)
+            {
+                m_orbitRadius = 100.0f;
+                m_orbitHeight = 25.0f;
+            }
+        }
+
+        if (m_input->isKeyDown(Key::Q))
+        {
+            m_orbitRadius -= 1.0f * dt * 10.0f;
+            m_orbitHeight -= 0.25f * dt * 10.0f;
+            if (m_orbitRadius < 5.0f)
+            {
+                m_orbitRadius = 5.0f;
+                m_orbitHeight = 1.25f;
+            }
         }
     }
 
