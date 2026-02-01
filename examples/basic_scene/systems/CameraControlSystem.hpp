@@ -18,22 +18,8 @@ public:
         float dt = static_cast<float>(deltaTime);
         if (auto [entity, cCam, transform] = world().fetchAt<CCamera, CTransform>(0); entity != 0 && mouseCaptured)
         {
-            transform->rotation.y += -input->getMouseDelta().x * 0.2f;
-            transform->rotation.x += -input->getMouseDelta().y * 0.2f;
-
-            transform->rotation.x = glm::clamp(transform->rotation.x, -89.0f, 89.0f);
-
-            float yaw = glm::radians(transform->rotation.y);
-            float pitch = glm::radians(transform->rotation.x);
-
-            glm::vec3 forward;
-            forward.x = -cos(pitch) * sin(yaw);
-            forward.y = sin(pitch);
-            forward.z = -cos(pitch) * cos(yaw);
-
-            forward = glm::normalize(forward);
-
-            glm::vec3 right = glm::normalize(glm::cross(forward, glm::vec3(0, 1, 0)));
+            transform->rotate(glm::radians(-input->getMouseDelta().y * 0.2f), transform->right());
+            transform->rotate(glm::radians(-input->getMouseDelta().x * 0.2f), glm::vec3(0, 1, 0));
 
             glm::vec2 direction(0.0f);
 
@@ -51,8 +37,8 @@ public:
             if (input->isKeyDown(Key::LShift))
                 speed *= 2.0f;
 
-            transform->position += forward * direction.y * speed;
-            transform->position += right * direction.x * speed;
+            transform->position += transform->forward() * direction.y * speed;
+            transform->position += transform->right() * direction.x * speed;
         }
 
         if (input->isKeyPressed(Key::Escape))

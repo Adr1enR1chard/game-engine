@@ -53,7 +53,7 @@ public:
             CModelRenderer{
                 .modelRef = services().get<ModelFactory>()->LoadModel("assets/models/sword/scene.gltf"),
             },
-            CTransform{glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 45.0f, 0.0f), glm::vec3(1.0f)});
+            CTransform{glm::vec3(0.0f, 0.0f, 0.0f), glm::quat(glm::vec3(0.0f, glm::radians(40.0f), 0.0f)), glm::vec3(1.0f)});
 
         world().createEntity(
             CMeshRenderer({
@@ -62,7 +62,7 @@ public:
                                                                                .roughness = 1.0f,
                                                                                .ao = 0.0f}),
             }),
-            CTransform{glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(180.0f, 0.0f, 0.0f), glm::vec3(10.0f)});
+            CTransform{glm::vec3(0.0f, -1.0f, 0.0f), glm::quat(glm::vec3(glm::radians(180.0f), 0.0f, 0.0f)), glm::vec3(10.0f)});
     }
 
     void update(float deltaTime) override
@@ -70,20 +70,19 @@ public:
         float angle = static_cast<float>(deltaTime) * 100.0f;
         if (auto [_, transform] = world().fetchFrom<CTransform>(m_metalSphere); transform)
         {
-            transform->rotation.y += angle;
+            transform->rotate(glm::radians(angle), glm::vec3(0, 1, 0));
         }
         if (auto [_, transform] = world().fetchFrom<CTransform>(m_groundSphere); transform)
         {
-            transform->rotation.y += angle;
+            transform->rotate(glm::radians(angle), glm::vec3(0, 1, 0));
         }
         if (auto [_, transform] = world().fetchFrom<CTransform>(m_sword); transform)
         {
-            transform->rotation.x += angle;
+            transform->rotate(glm::radians(angle), glm::vec3(1, 0, 0));
         }
         if (auto [_, dirLight] = world().fetchFrom<CDirectionalLight>(m_dirLight); dirLight)
         {
-            glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(angle / 2), glm::vec3(0.0f, 1.0f, 0.0f));
-            dirLight->direction = glm::vec3(rotation * glm::vec4(dirLight->direction, 0.0f));
+            dirLight->direction = glm::rotateY(dirLight->direction, glm::radians(angle));
         }
     }
 
