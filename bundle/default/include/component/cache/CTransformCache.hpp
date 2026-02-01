@@ -2,8 +2,13 @@
 
 #include <glm/glm.hpp>
 
-struct CTransformCache
+namespace default_bundle
 {
-    glm::mat4 modelMatrix{1.0f};
-    glm::mat4 viewMatrix{1.0f};
-};
+
+    struct CTransformCache
+    {
+        glm::mat4 modelMatrix{1.0f};
+        glm::mat4 viewMatrix{1.0f};
+    };
+
+} // namespace default_bundle

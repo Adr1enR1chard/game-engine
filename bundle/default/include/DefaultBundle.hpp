@@ -24,9 +24,14 @@
 #include <component/CPointLight.hpp>
 #include <component/CTransform.hpp>
 
-class DefaultBundle : public Bundle
+namespace default_bundle
 {
-public:
-  void install(SystemRegistry &systems, ServiceRegistry &services) const override;
-  void uninstall(SystemRegistry &systems, ServiceRegistry &services) const override;
-};
+
+  class DefaultBundle : public engine::Bundle
+  {
+  public:
+    void install(engine::SystemRegistry &systems, engine::ServiceRegistry &services) const override;
+    void uninstall(engine::SystemRegistry &systems, engine::ServiceRegistry &services) const override;
+  };
+
+} // namespace default_bundle

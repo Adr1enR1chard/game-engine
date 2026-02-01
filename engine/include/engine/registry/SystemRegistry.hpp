@@ -11,87 +11,92 @@
 
 #include <engine/utils/Log.hpp>
 
-class World;
-class ServiceRegistry;
-
-class SystemRegistry
+namespace engine
 {
-public:
-    SystemRegistry() = default;
-    ~SystemRegistry() = default;
-    SystemRegistry(const SystemRegistry &) = delete;
-    SystemRegistry &operator=(const SystemRegistry &) = delete;
 
-    /**
-     * Add systems to the registry.
-     */
-    template <SystemType... T>
-    void add()
+    class World;
+    class ServiceRegistry;
+
+    class SystemRegistry
     {
-        (m_systems.emplace<T>(), ...);
-        (..., Log::Print("Added system: " + std::string(typeid(T).name()), LogLevel::Info));
-    }
+    public:
+        SystemRegistry() = default;
+        ~SystemRegistry() = default;
+        SystemRegistry(const SystemRegistry &) = delete;
+        SystemRegistry &operator=(const SystemRegistry &) = delete;
 
-    template <SystemType T, typename... Args>
-    void add(Args &&...args)
-    {
-        m_systems.emplace<T>(std::forward<Args>(args)...);
-        Log::Print("Added system: " + std::string(typeid(T).name()), LogLevel::Info);
-    }
+        /**
+         * Add systems to the registry.
+         */
+        template <SystemType... T>
+        void add()
+        {
+            (m_systems.emplace<T>(), ...);
+            (..., Log::Print("Added system: " + std::string(typeid(T).name()), LogLevel::Info));
+        }
 
-    /**
-     * Remove systems from the registry.
-     */
-    template <SystemType... T>
-    void remove()
-    {
-        (m_systems.erase<T>(), ...);
-    }
+        template <SystemType T, typename... Args>
+        void add(Args &&...args)
+        {
+            m_systems.emplace<T>(std::forward<Args>(args)...);
+            Log::Print("Added system: " + std::string(typeid(T).name()), LogLevel::Info);
+        }
 
-private:
-    friend class Engine;
-    void setContext(World &world, ServiceRegistry &services)
-    {
-        m_systems.map([&](System &sys)
-                      { sys.setContext(world, services); });
-    }
+        /**
+         * Remove systems from the registry.
+         */
+        template <SystemType... T>
+        void remove()
+        {
+            (m_systems.erase<T>(), ...);
+        }
 
-    void init()
-    {
-        m_systems.map([&](System &system)
-                      { system.init(); });
-    }
+    private:
+        friend class Engine;
+        void setContext(World &world, ServiceRegistry &services)
+        {
+            m_systems.map([&](System &sys)
+                          { sys.setContext(world, services); });
+        }
 
-    void start()
-    {
-        m_systems.map([&](System &system)
-                      { system.start(); });
-    }
+        void init()
+        {
+            m_systems.map([&](System &system)
+                          { system.init(); });
+        }
 
-    void preUpdate(float deltaTime)
-    {
-        m_systems.map([&](System &system)
-                      { system.preUpdate(deltaTime); });
-    }
+        void start()
+        {
+            m_systems.map([&](System &system)
+                          { system.start(); });
+        }
 
-    void update(float deltaTime)
-    {
-        m_systems.map([&](System &system)
-                      { system.update(deltaTime); });
-    }
+        void preUpdate(float deltaTime)
+        {
+            m_systems.map([&](System &system)
+                          { system.preUpdate(deltaTime); });
+        }
 
-    void preRender(float deltaTime)
-    {
-        m_systems.map([&](System &system)
-                      { system.preRender(deltaTime); });
-    }
+        void update(float deltaTime)
+        {
+            m_systems.map([&](System &system)
+                          { system.update(deltaTime); });
+        }
 
-    void render(float deltaTime)
-    {
-        m_systems.map([&](System &system)
-                      { system.render(deltaTime); });
-    }
+        void preRender(float deltaTime)
+        {
+            m_systems.map([&](System &system)
+                          { system.preRender(deltaTime); });
+        }
 
-private:
-    SystemStorage m_systems;
-};
+        void render(float deltaTime)
+        {
+            m_systems.map([&](System &system)
+                          { system.render(deltaTime); });
+        }
+
+    private:
+        SystemStorage m_systems;
+    };
+
+} // namespace engine

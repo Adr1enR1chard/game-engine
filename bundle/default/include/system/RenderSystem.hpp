@@ -4,11 +4,16 @@
 
 #include <engine/model/System.hpp>
 
-class RenderSystem : public System
+namespace default_bundle
 {
-public:
-  void render(float deltaTime) override;
 
-private:
-  bool m_cameraNotFoundLogged = false;
-};
+  class RenderSystem : public engine::System
+  {
+  public:
+    void render(float deltaTime) override;
+
+  private:
+    bool m_cameraNotFoundLogged = false;
+  };
+
+} // namespace default_bundle

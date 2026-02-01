@@ -7,26 +7,31 @@
 #include <engine/utils/IdManager.hpp>
 #include <engine/utils/RenderTypes.hpp>
 
-class MaterialResource : public Service
+namespace engine
 {
-public:
-  MaterialResource() = default;
-  ~MaterialResource() override = default;
 
-  MaterialRef create(ShaderRef shaderRef);
-  void remove(MaterialRef materialRef);
-
-  void setUniform(MaterialRef materialRef, const std::string &uniformName, const UniformValue &value);
-  const UniformCollection *getUniforms(MaterialRef materialRef) const;
-  ShaderRef getShaderRef(MaterialRef materialRef) const;
-
-private:
-  struct MaterialData
+  class MaterialResource : public Service
   {
-    ShaderRef shaderRef;
-    UniformCollection uniforms;
+  public:
+    MaterialResource() = default;
+    ~MaterialResource() override = default;
+
+    MaterialRef create(ShaderRef shaderRef);
+    void remove(MaterialRef materialRef);
+
+    void setUniform(MaterialRef materialRef, const std::string &uniformName, const UniformValue &value);
+    const UniformCollection *getUniforms(MaterialRef materialRef) const;
+    ShaderRef getShaderRef(MaterialRef materialRef) const;
+
+  private:
+    struct MaterialData
+    {
+      ShaderRef shaderRef;
+      UniformCollection uniforms;
+    };
+
+    IdManager m_idManager;
+    std::unordered_map<MaterialRef, MaterialData> m_materials;
   };
 
-  IdManager m_idManager;
-  std::unordered_map<MaterialRef, MaterialData> m_materials;
-};
+} // namespace engine

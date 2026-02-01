@@ -2,29 +2,35 @@
 
 #include <queue>
 
-/// @brief Utility class to manage unique IDs.
-class IdManager
+namespace engine
 {
-  public:
-    IdManager()  = default;
-    ~IdManager() = default;
 
-    unsigned int alloc()
+    /// @brief Utility class to manage unique IDs.
+    class IdManager
     {
-        if (!m_freeIds.empty()) {
-            unsigned int id = m_freeIds.front();
-            m_freeIds.pop();
-            return id;
+    public:
+        IdManager() = default;
+        ~IdManager() = default;
+
+        unsigned int alloc()
+        {
+            if (!m_freeIds.empty())
+            {
+                unsigned int id = m_freeIds.front();
+                m_freeIds.pop();
+                return id;
+            }
+            return m_nextId++;
         }
-        return m_nextId++;
-    }
 
-    void free(unsigned int id)
-    {
-        m_freeIds.push(id);
-    }
+        void free(unsigned int id)
+        {
+            m_freeIds.push(id);
+        }
 
-  private:
-    unsigned int             m_nextId = 1;
-    std::queue<unsigned int> m_freeIds;
-};
+    private:
+        unsigned int m_nextId = 1;
+        std::queue<unsigned int> m_freeIds;
+    };
+
+} // namespace engine

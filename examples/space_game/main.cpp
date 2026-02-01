@@ -4,12 +4,15 @@
 #include <systems/Environment.hpp>
 #include <systems/Spaceship.hpp>
 
+using namespace engine;
+using namespace default_bundle;
+
 int main()
 {
     Engine::Init()
         .addBundle<DefaultBundle>()
-        .addSystems<Camera, Environment, Spaceship>()
-        .run(1280, 720, "Space Game", false);
+        .addSystems<OrbitCameraSystem, SpaceEnvironmentSystem, SpaceshipControlSystem>()
+        .run(1920, 1080, "Space Game", true);
 
     return 0;
 }

@@ -7,14 +7,19 @@
 #include <component/CTransform.hpp>
 #include <engine/model/System.hpp>
 
-class LightSystem : public System
+namespace default_bundle
 {
-public:
-  void update(float deltaTime) override;
 
-private:
-  void setMaterialLights(MaterialRef materialRef,
-                         const CTransform *cameraTransform,
-                         const CDirectionalLight *dirLight,
-                         const std::vector<std::tuple<Entity, CPointLight *, CTransform *>> &pointLights);
-};
+  class LightSystem : public engine::System
+  {
+  public:
+    void update(float deltaTime) override;
+
+  private:
+    void setMaterialLights(engine::MaterialRef materialRef,
+                           const CTransform *cameraTransform,
+                           const CDirectionalLight *dirLight,
+                           const std::vector<std::tuple<engine::Entity, CPointLight *, CTransform *>> &pointLights);
+  };
+
+} // namespace default_bundle

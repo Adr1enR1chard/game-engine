@@ -7,7 +7,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-class Spaceship : public System
+using namespace engine;
+using namespace default_bundle;
+
+class SpaceshipControlSystem : public System
 {
 public:
     void start() override

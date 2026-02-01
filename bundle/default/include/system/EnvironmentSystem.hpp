@@ -7,18 +7,23 @@
 #include <component/cache/CSkyboxCache.hpp>
 #include <engine/utils/RenderTypes.hpp>
 
-class EnvironmentSystem : public System
+namespace default_bundle
 {
-public:
-  EnvironmentSystem() = default;
-  ~EnvironmentSystem() override = default;
 
-  void update(float deltaTime) override;
+  class EnvironmentSystem : public engine::System
+  {
+  public:
+    EnvironmentSystem() = default;
+    ~EnvironmentSystem() override = default;
 
-private:
-  CSkyboxCache createSkyboxCache();
+    void update(float deltaTime) override;
 
-private:
-  glm::vec3 m_lastClearColor = glm::vec3(-1.0f);
-  CEnvironment *m_environment = nullptr;
-};
+  private:
+    CSkyboxCache createSkyboxCache();
+
+  private:
+    glm::vec3 m_lastClearColor = glm::vec3(-1.0f);
+    CEnvironment *m_environment = nullptr;
+  };
+
+} // namespace default_bundle

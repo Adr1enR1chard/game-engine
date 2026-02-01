@@ -4,7 +4,10 @@
 #include <random>
 #include <glm/gtc/random.hpp>
 
-class Environment : public System
+using namespace engine;
+using namespace default_bundle;
+
+class SpaceEnvironmentSystem : public System
 {
 public:
     void start() override

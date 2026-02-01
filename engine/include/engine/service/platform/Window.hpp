@@ -5,56 +5,61 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-class Window : public Service
+namespace engine
 {
-public:
-  Window();
-  ~Window() override;
 
-  void setResolution(int width, int height)
+  class Window : public Service
   {
-    this->m_width = width;
-    this->m_height = height;
-  }
+  public:
+    Window();
+    ~Window() override;
 
-  void setTitle(const char *title)
-  {
-    this->m_title = title;
-  }
+    void setResolution(int width, int height)
+    {
+      this->m_width = width;
+      this->m_height = height;
+    }
 
-  void setFullscreen(bool fullscreen)
-  {
-    m_fullscreen = fullscreen;
-  }
+    void setTitle(const char *title)
+    {
+      this->m_title = title;
+    }
 
-  void clearColor(const glm::vec3 &color)
-  {
-    m_clearColor = color;
-  }
+    void setFullscreen(bool fullscreen)
+    {
+      m_fullscreen = fullscreen;
+    }
 
-  void setSize(int width, int height);
+    void clearColor(const glm::vec3 &color)
+    {
+      m_clearColor = color;
+    }
 
-  void captureMouse(bool capture);
+    void setSize(int width, int height);
 
-private:
-  friend class Engine;
+    void captureMouse(bool capture);
 
-  bool shouldClose() const;
-  void create();
-  void makeContextCurrent();
-  void swapBuffers();
-  void pollEvents();
-  void clear();
+  private:
+    friend class Engine;
 
-public:
-  void getSize(int &width, int &height) const;
+    bool shouldClose() const;
+    void create();
+    void makeContextCurrent();
+    void swapBuffers();
+    void pollEvents();
+    void clear();
 
-private:
-  struct WindowImpl;
-  std::unique_ptr<WindowImpl> m_impl;
-  int m_width = 800;
-  int m_height = 600;
-  const char *m_title = "Game Engine";
-  bool m_fullscreen = false;
-  glm::vec3 m_clearColor = glm::vec3(0.0f, 0.0f, 0.0f);
-};
+  public:
+    void getSize(int &width, int &height) const;
+
+  private:
+    struct WindowImpl;
+    std::unique_ptr<WindowImpl> m_impl;
+    int m_width = 800;
+    int m_height = 600;
+    const char *m_title = "Game Engine";
+    bool m_fullscreen = false;
+    glm::vec3 m_clearColor = glm::vec3(0.0f, 0.0f, 0.0f);
+  };
+
+} // namespace engine

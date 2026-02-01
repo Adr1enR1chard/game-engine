@@ -7,23 +7,28 @@
 #include <service/factory/TextureFactory.hpp>
 #include <engine/service/resource/ModelResource.hpp>
 
-class ModelFactory : public Service
+namespace default_bundle
 {
-public:
-  ModelFactory(MaterialFactory &materialFactory, ShaderFactory &shaderFactory, TextureFactory &textureFactory,
-               MeshFactory &meshFactory, ModelResource &modelResource)
-      : m_materialFactory(materialFactory), m_shaderFactory(shaderFactory), m_textureFactory(textureFactory),
-        m_meshFactory(meshFactory), m_modelResource(modelResource)
+
+  class ModelFactory : public engine::Service
   {
-  }
-  ~ModelFactory() override = default;
+  public:
+    ModelFactory(MaterialFactory &materialFactory, ShaderFactory &shaderFactory, TextureFactory &textureFactory,
+                 MeshFactory &meshFactory, engine::ModelResource &modelResource)
+        : m_materialFactory(materialFactory), m_shaderFactory(shaderFactory), m_textureFactory(textureFactory),
+          m_meshFactory(meshFactory), m_modelResource(modelResource)
+    {
+    }
+    ~ModelFactory() override = default;
 
-  ModelRef LoadModel(const char *modelPath);
+    engine::ModelRef LoadModel(const char *modelPath);
 
-private:
-  MaterialFactory &m_materialFactory;
-  ShaderFactory &m_shaderFactory;
-  TextureFactory &m_textureFactory;
-  MeshFactory &m_meshFactory;
-  ModelResource &m_modelResource;
-};
+  private:
+    MaterialFactory &m_materialFactory;
+    ShaderFactory &m_shaderFactory;
+    TextureFactory &m_textureFactory;
+    MeshFactory &m_meshFactory;
+    engine::ModelResource &m_modelResource;
+  };
+
+} // namespace default_bundle

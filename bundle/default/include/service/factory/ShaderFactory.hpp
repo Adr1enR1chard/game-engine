@@ -4,23 +4,28 @@
 #include <service/factory/TextureFactory.hpp>
 #include <engine/service/resource/ShaderResource.hpp>
 
-class ShaderFactory : public Service
+namespace default_bundle
 {
-public:
-  ShaderFactory(ShaderResource &shaderResource, TextureFactory &textureFactory)
-      : m_shaderResource(shaderResource), m_textureFactory(textureFactory) {};
-  ~ShaderFactory() override = default;
 
-public:
-  ShaderRef CustomShader(const char *name, const char *vertexShaderPath, const char *fragmentShaderPath,
-                         const UniformCollection &defaultUniforms, const ShaderParameters &params = {});
-  ShaderRef PBRShader(const char *name);
-  ShaderRef PhongShader(const char *name);
-  ShaderRef SkyboxShader(const char *name);
+  class ShaderFactory : public engine::Service
+  {
+  public:
+    ShaderFactory(engine::ShaderResource &shaderResource, TextureFactory &textureFactory)
+        : m_shaderResource(shaderResource), m_textureFactory(textureFactory) {};
+    ~ShaderFactory() override = default;
 
-private:
-  void loadShaderFromFile(const char *filePath, std::string &outShaderCode);
+  public:
+    engine::ShaderRef CustomShader(const char *name, const char *vertexShaderPath, const char *fragmentShaderPath,
+                                   const engine::UniformCollection &defaultUniforms, const engine::ShaderParameters &params = {});
+    engine::ShaderRef PBRShader(const char *name);
+    engine::ShaderRef PhongShader(const char *name);
+    engine::ShaderRef SkyboxShader(const char *name);
 
-  ShaderResource &m_shaderResource;
-  TextureFactory &m_textureFactory;
-};
+  private:
+    void loadShaderFromFile(const char *filePath, std::string &outShaderCode);
+
+    engine::ShaderResource &m_shaderResource;
+    TextureFactory &m_textureFactory;
+  };
+
+} // namespace default_bundle

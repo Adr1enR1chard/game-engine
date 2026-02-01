@@ -5,114 +5,119 @@
 #include <engine/utils/Log.hpp>
 #include <assets_format/opengl_format.hpp>
 
-struct TextureResource::TextureData
+namespace engine
 {
-    unsigned int textureID = 0;
-    TextureType type = Texture2D;
-};
 
-void TextureResource::TextureDataDeleter::operator()(TextureData *textureData)
-{
-    if (textureData)
+    struct TextureResource::TextureData
     {
-        glDeleteTextures(1, &textureData->textureID);
-        delete textureData;
-    }
-}
+        unsigned int textureID = 0;
+        TextureType type = Texture2D;
+    };
 
-TextureRef TextureResource::texture2D(const TextureAttributes &texture)
-{
-    if (!OpenGLFormat::IsCompressed(texture.format))
+    void TextureResource::TextureDataDeleter::operator()(TextureData *textureData)
     {
-        Log::Print("Texture format is not compressed. Use the asset compiler to compress the texture.", LogLevel::Error);
-        return 0;
-    }
-
-    TextureRef newTextureRef = m_idManager.alloc();
-    auto textureData = std::unique_ptr<TextureData, TextureDataDeleter>(new TextureData());
-    textureData->type = Texture2D;
-
-    GLuint glFormat = OpenGLFormat::GetOpenGLFormat(
-        texture.format,
-        texture.channels == 4);
-
-    glGenTextures(1, &textureData->textureID);
-    glBindTexture(GL_TEXTURE_2D, textureData->textureID);
-
-    glCompressedTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        glFormat,
-        texture.width,
-        texture.height,
-        0,
-        texture.data.size(),
-        texture.data.data());
-
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    m_textures[newTextureRef] = std::move(textureData);
-    return newTextureRef;
-}
-
-TextureRef TextureResource::cubeMap(const std::vector<TextureAttributes> &facesData)
-{
-    TextureRef newTextureRef = m_idManager.alloc();
-    auto textureData = std::unique_ptr<TextureData, TextureDataDeleter>(new TextureData());
-    textureData->type = CubeMap;
-
-    glGenTextures(1, &textureData->textureID);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, textureData->textureID);
-
-    for (unsigned int i = 0; i < facesData.size(); i++)
-    {
-        if (!OpenGLFormat::IsCompressed(facesData[i].format))
+        if (textureData)
         {
-            Log::Print("CubeMap face format is not compressed. Use the asset compiler to compress the texture.", LogLevel::Error);
+            glDeleteTextures(1, &textureData->textureID);
+            delete textureData;
+        }
+    }
+
+    TextureRef TextureResource::texture2D(const TextureAttributes &texture)
+    {
+        if (!OpenGLFormat::IsCompressed(texture.format))
+        {
+            Log::Print("Texture format is not compressed. Use the asset compiler to compress the texture.", LogLevel::Error);
             return 0;
         }
 
+        TextureRef newTextureRef = m_idManager.alloc();
+        auto textureData = std::unique_ptr<TextureData, TextureDataDeleter>(new TextureData());
+        textureData->type = Texture2D;
+
         GLuint glFormat = OpenGLFormat::GetOpenGLFormat(
-            facesData[i].format,
-            facesData[i].channels == 4);
+            texture.format,
+            texture.channels == 4);
+
+        glGenTextures(1, &textureData->textureID);
+        glBindTexture(GL_TEXTURE_2D, textureData->textureID);
 
         glCompressedTexImage2D(
-            GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+            GL_TEXTURE_2D,
             0,
             glFormat,
-            facesData[i].width,
-            facesData[i].height,
+            texture.width,
+            texture.height,
             0,
-            facesData[i].data.size(),
-            facesData[i].data.data());
+            texture.data.size(),
+            texture.data.data());
+
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        m_textures[newTextureRef] = std::move(textureData);
+        return newTextureRef;
     }
 
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-    m_textures[newTextureRef] = std::move(textureData);
-    return newTextureRef;
-}
-
-void TextureResource::remove(TextureRef textureRef)
-{
-    m_idManager.free(textureRef);
-    m_textures.erase(textureRef);
-}
-
-void TextureResource::bind(TextureRef textureRef) const
-{
-    auto it = m_textures.find(textureRef);
-    if (it != m_textures.end())
+    TextureRef TextureResource::cubeMap(const std::vector<TextureAttributes> &facesData)
     {
-        glBindTexture(it->second->type == Texture2D ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP, it->second->textureID);
+        TextureRef newTextureRef = m_idManager.alloc();
+        auto textureData = std::unique_ptr<TextureData, TextureDataDeleter>(new TextureData());
+        textureData->type = CubeMap;
+
+        glGenTextures(1, &textureData->textureID);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, textureData->textureID);
+
+        for (unsigned int i = 0; i < facesData.size(); i++)
+        {
+            if (!OpenGLFormat::IsCompressed(facesData[i].format))
+            {
+                Log::Print("CubeMap face format is not compressed. Use the asset compiler to compress the texture.", LogLevel::Error);
+                return 0;
+            }
+
+            GLuint glFormat = OpenGLFormat::GetOpenGLFormat(
+                facesData[i].format,
+                facesData[i].channels == 4);
+
+            glCompressedTexImage2D(
+                GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                0,
+                glFormat,
+                facesData[i].width,
+                facesData[i].height,
+                0,
+                facesData[i].data.size(),
+                facesData[i].data.data());
+        }
+
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+        m_textures[newTextureRef] = std::move(textureData);
+        return newTextureRef;
     }
-}
+
+    void TextureResource::remove(TextureRef textureRef)
+    {
+        m_idManager.free(textureRef);
+        m_textures.erase(textureRef);
+    }
+
+    void TextureResource::bind(TextureRef textureRef) const
+    {
+        auto it = m_textures.find(textureRef);
+        if (it != m_textures.end())
+        {
+            glBindTexture(it->second->type == Texture2D ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP, it->second->textureID);
+        }
+    }
+
+} // namespace engine

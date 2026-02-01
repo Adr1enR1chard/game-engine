@@ -2,7 +2,12 @@
 
 #include <engine/utils/RenderTypes.hpp>
 
-struct CSkyboxCache
+namespace default_bundle
 {
-    MeshRef meshRef;
-};
+
+    struct CSkyboxCache
+    {
+        engine::MeshRef meshRef;
+    };
+
+} // namespace default_bundle

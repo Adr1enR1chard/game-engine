@@ -4,24 +4,29 @@
 
 #include <engine/service/resource/MeshResource.hpp>
 
-class MeshFactory : public Service
+namespace default_bundle
 {
-public:
-  MeshFactory(MeshResource &meshResource) : m_meshResource(meshResource) {}
-  ~MeshFactory() override = default;
 
-  MeshRef Raw(const std::vector<VertexLayout> &vertices, const std::vector<unsigned int> &indices,
-              glm::mat4 localModel = glm::mat4(1.0f))
+  class MeshFactory : public engine::Service
   {
-    return m_meshResource.create(vertices, indices, localModel);
-  }
+  public:
+    MeshFactory(engine::MeshResource &meshResource) : m_meshResource(meshResource) {}
+    ~MeshFactory() override = default;
 
-  MeshRef Cube();
+    engine::MeshRef Raw(const std::vector<VertexLayout> &vertices, const std::vector<unsigned int> &indices,
+                        glm::mat4 localModel = glm::mat4(1.0f))
+    {
+      return m_meshResource.create(vertices, indices, localModel);
+    }
 
-  MeshRef Sphere(float radius = 0.5f, unsigned int sectorCount = 36, unsigned int stackCount = 18);
+    engine::MeshRef Cube();
 
-  MeshRef Plane();
+    engine::MeshRef Sphere(float radius = 0.5f, unsigned int sectorCount = 36, unsigned int stackCount = 18);
 
-private:
-  MeshResource &m_meshResource;
-};
+    engine::MeshRef Plane();
+
+  private:
+    engine::MeshResource &m_meshResource;
+  };
+
+} // namespace default_bundle

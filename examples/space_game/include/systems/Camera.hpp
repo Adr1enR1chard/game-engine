@@ -5,7 +5,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <components/OrbitCamera.hpp>
 
-class Camera : public System
+using namespace engine;
+using namespace default_bundle;
+
+class OrbitCameraSystem : public System
 {
 public:
     void start() override

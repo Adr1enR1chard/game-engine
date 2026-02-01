@@ -4,14 +4,19 @@
 
 #include <engine/utils/RenderTypes.hpp>
 
-struct CMeshRenderer
+namespace default_bundle
 {
-    MeshRef meshRef;
-    MaterialRef materialRef;
-};
 
-struct CModelRenderer
-{
-    ModelRef modelRef;
-    std::vector<MaterialRef> materialOverrides;
-};
+    struct CMeshRenderer
+    {
+        engine::MeshRef meshRef;
+        engine::MaterialRef materialRef;
+    };
+
+    struct CModelRenderer
+    {
+        engine::ModelRef modelRef;
+        std::vector<engine::MaterialRef> materialOverrides;
+    };
+
+} // namespace default_bundle

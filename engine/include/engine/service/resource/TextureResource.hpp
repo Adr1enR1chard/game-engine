@@ -9,35 +9,40 @@
 
 #include <assets_format/texture_format.hpp>
 
-struct TextureAttributes
+namespace engine
 {
-  unsigned int width;
-  unsigned int height;
-  unsigned int channels;
-  TextureFormat format;
-  std::vector<unsigned char> data;
-};
 
-class TextureResource : public Service
-{
-public:
-  TextureResource() = default;
-  ~TextureResource() override = default;
-
-  TextureRef texture2D(const TextureAttributes &texture);
-  TextureRef cubeMap(const std::vector<TextureAttributes> &faces);
-
-  void remove(TextureRef textureRef);
-  void bind(TextureRef textureRef) const;
-
-private:
-  struct TextureData;
-
-  struct TextureDataDeleter
+  struct TextureAttributes
   {
-    void operator()(TextureData *textureData);
+    unsigned int width;
+    unsigned int height;
+    unsigned int channels;
+    TextureFormat format;
+    std::vector<unsigned char> data;
   };
 
-  IdManager m_idManager;
-  std::unordered_map<TextureRef, std::unique_ptr<TextureData, TextureDataDeleter>> m_textures;
-};
+  class TextureResource : public Service
+  {
+  public:
+    TextureResource() = default;
+    ~TextureResource() override = default;
+
+    TextureRef texture2D(const TextureAttributes &texture);
+    TextureRef cubeMap(const std::vector<TextureAttributes> &faces);
+
+    void remove(TextureRef textureRef);
+    void bind(TextureRef textureRef) const;
+
+  private:
+    struct TextureData;
+
+    struct TextureDataDeleter
+    {
+      void operator()(TextureData *textureData);
+    };
+
+    IdManager m_idManager;
+    std::unordered_map<TextureRef, std::unique_ptr<TextureData, TextureDataDeleter>> m_textures;
+  };
+
+} // namespace engine

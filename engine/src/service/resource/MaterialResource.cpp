@@ -4,74 +4,79 @@
 
 #include <mutex>
 
-MaterialRef MaterialResource::create(ShaderRef shaderRef)
+namespace engine
 {
-    MaterialRef newMaterialRef = m_idManager.alloc();
-    m_materials[newMaterialRef] = {shaderRef, {}};
-    return newMaterialRef;
-}
 
-void MaterialResource::remove(MaterialRef materialRef)
-{
-    m_idManager.free(materialRef);
-    m_materials.erase(materialRef);
-}
-
-void MaterialResource::setUniform(MaterialRef materialRef, const std::string &uniformName, const UniformValue &value)
-{
-    auto it = m_materials.find(materialRef);
-    if (it == m_materials.end())
+    MaterialRef MaterialResource::create(ShaderRef shaderRef)
     {
-        Log::Print("Material not found", LogLevel::Warning, true);
-        return;
+        MaterialRef newMaterialRef = m_idManager.alloc();
+        m_materials[newMaterialRef] = {shaderRef, {}};
+        return newMaterialRef;
     }
 
-    std::visit(
-        [&](auto const &v)
+    void MaterialResource::remove(MaterialRef materialRef)
+    {
+        m_idManager.free(materialRef);
+        m_materials.erase(materialRef);
+    }
+
+    void MaterialResource::setUniform(MaterialRef materialRef, const std::string &uniformName, const UniformValue &value)
+    {
+        auto it = m_materials.find(materialRef);
+        if (it == m_materials.end())
         {
-            using T = std::decay_t<decltype(v)>;
+            Log::Print("Material not found", LogLevel::Warning, true);
+            return;
+        }
 
-            if constexpr (std::is_same_v<T, Uniform::DirectionalLight>)
+        std::visit(
+            [&](auto const &v)
             {
-                setUniform(materialRef, uniformName + ".direction", v.direction);
-                setUniform(materialRef, uniformName + ".color", v.color);
-                setUniform(materialRef, uniformName + ".intensity", v.intensity);
-                setUniform(materialRef, uniformName + ".ambient", v.ambient);
-            }
-            else if constexpr (std::is_same_v<T, Uniform::PointLight>)
-            {
-                setUniform(materialRef, uniformName + ".position", v.position);
-                setUniform(materialRef, uniformName + ".color", v.color);
-                setUniform(materialRef, uniformName + ".intensity", v.intensity);
-            }
-            else
-            {
-                it->second.uniforms[uniformName] = value;
-            }
-        },
-        value);
-}
+                using T = std::decay_t<decltype(v)>;
 
-const UniformCollection *MaterialResource::getUniforms(MaterialRef materialRef) const
-{
-    auto it = m_materials.find(materialRef);
-    if (it == m_materials.end())
-    {
-        Log::Print("Material not found for materialRef " + std::to_string(materialRef) + " out of " +
-                       std::to_string(m_materials.size()),
-                   LogLevel::Warning);
-        return nullptr;
+                if constexpr (std::is_same_v<T, Uniform::DirectionalLight>)
+                {
+                    setUniform(materialRef, uniformName + ".direction", v.direction);
+                    setUniform(materialRef, uniformName + ".color", v.color);
+                    setUniform(materialRef, uniformName + ".intensity", v.intensity);
+                    setUniform(materialRef, uniformName + ".ambient", v.ambient);
+                }
+                else if constexpr (std::is_same_v<T, Uniform::PointLight>)
+                {
+                    setUniform(materialRef, uniformName + ".position", v.position);
+                    setUniform(materialRef, uniformName + ".color", v.color);
+                    setUniform(materialRef, uniformName + ".intensity", v.intensity);
+                }
+                else
+                {
+                    it->second.uniforms[uniformName] = value;
+                }
+            },
+            value);
     }
-    return &(it->second.uniforms);
-}
 
-ShaderRef MaterialResource::getShaderRef(MaterialRef materialRef) const
-{
-    auto it = m_materials.find(materialRef);
-    if (it == m_materials.end())
+    const UniformCollection *MaterialResource::getUniforms(MaterialRef materialRef) const
     {
-        Log::Print("Material not found", LogLevel::Warning, true);
-        return 0;
+        auto it = m_materials.find(materialRef);
+        if (it == m_materials.end())
+        {
+            Log::Print("Material not found for materialRef " + std::to_string(materialRef) + " out of " +
+                           std::to_string(m_materials.size()),
+                       LogLevel::Warning);
+            return nullptr;
+        }
+        return &(it->second.uniforms);
     }
-    return it->second.shaderRef;
-}
+
+    ShaderRef MaterialResource::getShaderRef(MaterialRef materialRef) const
+    {
+        auto it = m_materials.find(materialRef);
+        if (it == m_materials.end())
+        {
+            Log::Print("Material not found", LogLevel::Warning, true);
+            return 0;
+        }
+        return it->second.shaderRef;
+    }
+
+} // namespace engine

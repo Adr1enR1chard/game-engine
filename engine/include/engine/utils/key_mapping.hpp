@@ -2,6 +2,11 @@
 
 #include <engine/utils/types.hpp>
 
-Key GLFWKeyToEngineKey(int glfwKey);
+namespace engine
+{
 
-KeyAction GLFWActionToEngineAction(int glfwAction);
+    Key GLFWKeyToEngineKey(int glfwKey);
+
+    KeyAction GLFWActionToEngineAction(int glfwAction);
+
+} // namespace engine

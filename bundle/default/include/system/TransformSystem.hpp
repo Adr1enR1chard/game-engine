@@ -2,8 +2,13 @@
 
 #include <engine/model/System.hpp>
 
-class TransformSystem : public System
+namespace default_bundle
 {
-public:
-  void update(float deltaTime) override;
-};
+
+  class TransformSystem : public engine::System
+  {
+  public:
+    void update(float deltaTime) override;
+  };
+
+} // namespace default_bundle

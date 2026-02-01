@@ -4,29 +4,33 @@
 #include <engine/service/resource/TextureResource.hpp>
 #include <engine/utils/RenderTypes.hpp>
 
-class TextureFactory : public Service
+namespace default_bundle
 {
-public:
-    TextureFactory(TextureResource &textureResource) : m_textureResource(textureResource) {}
-
-    TextureRef Texture2D(std::string imagePath);
-    TextureRef CubeMap(const std::vector<std::string> &faces);
-
-    TextureRef WhiteTexture2D()
+    class TextureFactory : public engine::Service
     {
-        return Texture2D("default-bundle-assets/textures/white1x1.png");
-    }
+    public:
+        TextureFactory(engine::TextureResource &textureResource) : m_textureResource(textureResource) {}
 
-    TextureRef BlackTexture2D()
-    {
-        return Texture2D("default-bundle-assets/textures/black1x1.png");
-    }
+        engine::TextureRef Texture2D(std::string imagePath);
+        engine::TextureRef CubeMap(const std::vector<std::string> &faces);
 
-    TextureRef NormalTexture2D()
-    {
-        return Texture2D("default-bundle-assets/textures/normal1x1.png");
-    }
+        engine::TextureRef WhiteTexture2D()
+        {
+            return Texture2D("default-bundle-assets/textures/white1x1.png");
+        }
 
-private:
-    TextureResource &m_textureResource;
-};
+        engine::TextureRef BlackTexture2D()
+        {
+            return Texture2D("default-bundle-assets/textures/black1x1.png");
+        }
+
+        engine::TextureRef NormalTexture2D()
+        {
+            return Texture2D("default-bundle-assets/textures/normal1x1.png");
+        }
+
+    private:
+        engine::TextureResource &m_textureResource;
+    };
+
+} // namespace default_bundle

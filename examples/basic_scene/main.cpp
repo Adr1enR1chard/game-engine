@@ -3,6 +3,9 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/rotate_vector.hpp>
 
+using namespace engine;
+using namespace default_bundle;
+
 class MySystem : public System
 {
 public:
