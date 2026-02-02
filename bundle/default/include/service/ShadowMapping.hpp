@@ -19,10 +19,16 @@ namespace default_bundle
         ShadowMapping(TextureResource &textureResource, ShaderFactory &shaderFactory);
         ~ShadowMapping() override;
 
-        void setDimensions(unsigned int width, unsigned int height);
+        void setShadowMapDimensions(unsigned int width, unsigned int height);
         // void getDimensions(unsigned int &outWidth, unsigned int &outHeight) const;
         void setBias(float bias) { m_bias = bias; }
         float getBias() const { return m_bias; }
+        void setLightProjection(float nearPlane, float farPlane, float extent)
+        {
+            m_nearPlane = nearPlane;
+            m_farPlane = farPlane;
+            m_lightProjectionMatrix = glm::ortho(-extent, extent, -extent, extent, m_nearPlane, m_farPlane);
+        }
 
     private:
         friend class RenderSystem;
@@ -46,7 +52,7 @@ namespace default_bundle
         unsigned int m_width = 1024;
         unsigned int m_height = 1024;
         float m_bias = 0.005f;
-        float m_nearPlane = 0.1f;
+        float m_nearPlane = -100.0f;
         float m_farPlane = 100.0f;
 
         TextureRef m_depthMap;

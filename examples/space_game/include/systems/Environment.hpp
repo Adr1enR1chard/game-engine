@@ -31,6 +31,9 @@ public:
         m_environmentEntity = world().createEntity(CEnvironment{
             .skyboxMaterial = services().get<MaterialFactory>()->CustomMaterial(skyboxShader)});
 
+        services().get<ShadowMapping>()->setShadowMapDimensions(2048, 2048);
+        services().get<ShadowMapping>()->setLightProjection(-1000.0f, 1000.0f, 100.0f);
+
         world().createEntity(CDirectionalLight{
             .direction = glm::vec3(1.0f, 0.0f, 0.0f),
             .color = glm::vec3(1.0f, 1.0f, 1.0f),
@@ -38,6 +41,7 @@ public:
             .intensity = 10.0f,
         });
 
+        ModelRef planetModel = services().get<ModelFactory>()->LoadModel("assets/models/planet/planet.gltf");
         // Spawn multiple random planets
         for (int i = 0; i < 50; ++i)
         {
@@ -45,22 +49,9 @@ public:
             float scaleValue = static_cast<float>(rand() % 50 + 5);
             glm::vec3 scale = glm::vec3(scaleValue);
 
-            // world().createEntity(
-            //     CModelRenderer{
-            //         .modelRef = services().get<ModelFactory>()->LoadModel("assets/models/planet/planet.gltf"),
-            //     },
-            //     CTransform{
-            //         .position = position,
-            //         .scale = scale,
-            //     });
             world().createEntity(
-                CMeshRenderer{
-                    .meshRef = services().get<MeshFactory>()->Sphere(),
-                    .materialRef = services().get<MaterialFactory>()->PBRMaterial({
-                        .metallic = 0.0f,
-                        .roughness = 1.0f,
-                        .ao = 1.0f,
-                    }),
+                CModelRenderer{
+                    .modelRef = planetModel,
                 },
                 CTransform{
                     .position = position,

@@ -127,8 +127,6 @@ namespace engine
         // Attach depth texture as FBO's depth buffer, this requires binding the FBO before calling this method
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
 
-        Log::Print("Created depth map texture with ID: " + std::to_string(depthMap) + "(" + std::to_string(width) + "x" + std::to_string(height) + ")", LogLevel::Debug);
-
         m_textures[newTextureRef] = std::move(textureData);
         return newTextureRef;
     }

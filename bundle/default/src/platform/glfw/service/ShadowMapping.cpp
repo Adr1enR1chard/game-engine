@@ -12,7 +12,7 @@ namespace default_bundle
     ShadowMapping::ShadowMapping(TextureResource &textureResource, ShaderFactory &shaderFactory)
         : m_textureResource(textureResource), m_shaderFactory(shaderFactory), m_width(4096), m_height(4096), m_depthMap(0)
     {
-        float extent = 10.0f;
+        float extent = 20.0f;
         m_lightProjectionMatrix = glm::ortho(-extent, extent, -extent, extent, m_nearPlane, m_farPlane);
     }
     ShadowMapping::~ShadowMapping() = default;
@@ -53,7 +53,6 @@ namespace default_bundle
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        Log::Print("Created framebuffer for shadow mapping with FBO ID: " + std::to_string(fbo), LogLevel::Debug);
         m_framebuffer = std::unique_ptr<FramebufferImpl, FramebufferDeleter>(new FramebufferImpl{fbo});
 
         return m_depthMap;
@@ -84,7 +83,7 @@ namespace default_bundle
         glViewport(m_viewportBackup[0], m_viewportBackup[1], m_viewportBackup[2], m_viewportBackup[3]);
     }
 
-    void ShadowMapping::setDimensions(unsigned int width, unsigned int height)
+    void ShadowMapping::setShadowMapDimensions(unsigned int width, unsigned int height)
     {
         m_width = width;
         m_height = height;
