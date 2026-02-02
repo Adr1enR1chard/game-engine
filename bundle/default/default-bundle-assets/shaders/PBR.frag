@@ -51,6 +51,7 @@ uniform vec3 viewPos; // Set in the LightSystem
 
 // ------- SHADOW UNIFORMS ------
 uniform sampler2D uShadowMap;
+uniform float uBias;
 // -------------------------------
 
 const float PI = 3.14159265359;
@@ -58,11 +59,13 @@ const float PI = 3.14159265359;
 float ShadowCalculation(vec4 fragPosLightSpace) {
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
-    float closestDepth = texture(uShadowMap, projCoords.xy).r;
-    float currentDepth = projCoords.z;
-    float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
+    if(projCoords.z > 1.0)
+        return 0.0;
 
-    return shadow;
+    float closestDepth = texture(uShadowMap, projCoords.xy).r;
+    float currentDepth = projCoords.z - uBias;
+
+    return currentDepth > closestDepth ? 1.0 : 0.0;
 }
 
 vec3 fresnelSchlick(float cosTheta, vec3 F0) {
@@ -109,7 +112,7 @@ vec3 CalcDirLight(DirLight light, vec3 N, vec3 V, vec3 baseColor, float metallic
 
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, baseColor, metallic);
-    vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
+    vec3 F = fresnelSchlick(max(dot(N, L), 0.0), F0);
 
     float NDF = DistributionGGX(N, H, roughness);
     float G = GeometrySmith(N, V, L, roughness);
@@ -135,7 +138,7 @@ vec3 CalcPointLight(PointLight light, vec3 N, vec3 worldPos, vec3 V, vec3 baseCo
 
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, baseColor, metallic);
-    vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
+    vec3 F = fresnelSchlick(max(dot(N, L), 0.0), F0);
 
     float NDF = DistributionGGX(N, H, roughness);
     float G = GeometrySmith(N, V, L, roughness);

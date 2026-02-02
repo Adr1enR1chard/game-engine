@@ -38,8 +38,6 @@ public:
             .intensity = 10.0f,
         });
 
-        ModelRef planetModel = services().get<ModelFactory>()->LoadModel("assets/models/planet/planet.gltf");
-
         // Spawn multiple random planets
         for (int i = 0; i < 50; ++i)
         {
@@ -47,9 +45,22 @@ public:
             float scaleValue = static_cast<float>(rand() % 50 + 5);
             glm::vec3 scale = glm::vec3(scaleValue);
 
+            // world().createEntity(
+            //     CModelRenderer{
+            //         .modelRef = services().get<ModelFactory>()->LoadModel("assets/models/planet/planet.gltf"),
+            //     },
+            //     CTransform{
+            //         .position = position,
+            //         .scale = scale,
+            //     });
             world().createEntity(
-                CModelRenderer{
-                    .modelRef = planetModel,
+                CMeshRenderer{
+                    .meshRef = services().get<MeshFactory>()->Sphere(),
+                    .materialRef = services().get<MaterialFactory>()->PBRMaterial({
+                        .metallic = 0.0f,
+                        .roughness = 1.0f,
+                        .ao = 1.0f,
+                    }),
                 },
                 CTransform{
                     .position = position,

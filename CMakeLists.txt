@@ -65,7 +65,6 @@ target_include_directories(default_bundle PUBLIC
 target_link_libraries(default_bundle PUBLIC
     assets_format
 )
-enable_strict_warnings(default_bundle)
 
 # Library: GLFW platform
 add_library(default_bundle_glfw
@@ -81,7 +80,6 @@ target_include_directories(default_bundle_glfw PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/engine/include
     ${CMAKE_CURRENT_SOURCE_DIR}/bundle/default/include
 )
-enable_strict_warnings(default_bundle_glfw)
 
 target_link_libraries(default_bundle_glfw PUBLIC
     glfw

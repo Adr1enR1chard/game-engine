@@ -12,7 +12,7 @@ public:
     void start() override
     {
         world().createEntity(CCamera{}, CTransform{glm::vec3(0.0f, 0.0f, 3.0f)});
-        m_dirLight = world().createEntity(CDirectionalLight{glm::vec3(-3.0f, -1.0f, -1.0f), glm::vec3(1.0f), 10.0f, 100.0f});
+        m_dirLight = world().createEntity(CDirectionalLight{glm::vec3(-3.0f, -1.0f, -1.0f), glm::vec3(1.0f), 5.0f, 10.0f});
         world().createEntity(CEnvironment{.skyboxMaterial = services().get<MaterialFactory>()->SkyboxMaterial({})});
 
         m_metalSphere = world().createEntity(
@@ -82,7 +82,7 @@ public:
         }
         if (auto [_, dirLight] = world().fetchFrom<CDirectionalLight>(m_dirLight); dirLight)
         {
-            dirLight->direction = glm::rotateY(dirLight->direction, glm::radians(angle));
+            dirLight->direction = glm::rotateY(dirLight->direction, glm::radians(angle / 3.0f));
         }
     }
 

@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 #include <engine/utils/Log.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace default_bundle
 {
@@ -9,8 +10,10 @@ namespace default_bundle
     using namespace engine;
 
     ShadowMapping::ShadowMapping(TextureResource &textureResource, ShaderFactory &shaderFactory)
-        : m_textureResource(textureResource), m_shaderFactory(shaderFactory), m_width(1024), m_height(1024), m_depthMap(0)
+        : m_textureResource(textureResource), m_shaderFactory(shaderFactory), m_width(4096), m_height(4096), m_depthMap(0)
     {
+        float extent = 10.0f;
+        m_lightProjectionMatrix = glm::ortho(-extent, extent, -extent, extent, m_nearPlane, m_farPlane);
     }
     ShadowMapping::~ShadowMapping() = default;
 
@@ -43,14 +46,14 @@ namespace default_bundle
 
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         {
             Log::Print("Failed to create framebuffer for shadow mapping.", LogLevel::Error);
         }
-
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        Log::Print("Created framebuffer for shadow mapping with FBO ID: " + std::to_string(fbo), LogLevel::Debug);
         m_framebuffer = std::unique_ptr<FramebufferImpl, FramebufferDeleter>(new FramebufferImpl{fbo});
 
         return m_depthMap;
@@ -61,35 +64,24 @@ namespace default_bundle
         return m_depthMap;
     }
 
-    void ShadowMapping::renderDepth(std::function<void(ShaderRef shaderRef, TextureRef depthMap, glm::mat4 lightSpaceMatrix)> renderScene, glm::vec3 lightDir)
+    void ShadowMapping::prepareForRender(ShaderResource *shaderResource, glm::vec3 lightDir, glm::vec3 target)
     {
-        if (m_depthMap == 0)
-        {
-            Log::Print("Depth map not created for shadow mapping.", LogLevel::Error);
-            return;
-        }
+        shaderResource->bind(m_depthShader, glm::mat4(1.0f), glm::mat4(1.0f), glm::mat4(1.0f));
 
-        // Bind the depth map framebuffer
-        GLint viewport[4];
-        glGetIntegerv(GL_VIEWPORT, viewport);
+        glGetIntegerv(GL_VIEWPORT, m_viewportBackup);
         glViewport(0, 0, m_width, m_height); // Assuming a fixed size for simplicity
         glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer->fbo);
         glClear(GL_DEPTH_BUFFER_BIT);
 
-        glm::mat4 lightProjection, lightView;
-        glm::mat4 lightSpaceMatrix;
-        float near_plane = 1.0f, far_plane = 100.0f;
-        lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-        lightView = glm::lookAt(-lightDir * 5.0f, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        lightSpaceMatrix = lightProjection * lightView;
+        m_lightViewMatrix = glm::lookAt(target - lightDir * 5.0f, target, glm::vec3(0.0f, 1.0f, 0.0f));
 
-        // Render the scene to populate the depth map
-        renderScene(m_depthShader, m_depthMap, lightSpaceMatrix);
+        shaderResource->setUniform(m_depthShader, "uLightSpaceMatrix", getLightSpaceMatrix());
+    }
 
-        // Unbind the framebuffer
+    void ShadowMapping::restoreAfterRender()
+    {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glViewport(m_viewportBackup[0], m_viewportBackup[1], m_viewportBackup[2], m_viewportBackup[3]);
     }
 
     void ShadowMapping::setDimensions(unsigned int width, unsigned int height)

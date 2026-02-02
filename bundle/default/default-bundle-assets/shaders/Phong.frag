@@ -48,16 +48,19 @@ uniform vec3 viewPos; // Set in the LightSystem
 
 // ------- SHADOW UNIFORMS ------
 uniform sampler2D uShadowMap;
+uniform float uBias;
 // -------------------------------
 
 float ShadowCalculation(vec4 fragPosLightSpace) {
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
-    float closestDepth = texture(uShadowMap, projCoords.xy).r;
-    float currentDepth = projCoords.z;
-    float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
+    if(projCoords.z > 1.0)
+        return 0.0;
 
-    return shadow;
+    float closestDepth = texture(uShadowMap, projCoords.xy).r;
+    float currentDepth = projCoords.z - uBias;
+
+    return currentDepth > closestDepth ? 1.0 : 0.0;
 }
 
 vec3 CalcDirLight(DirLight light, vec3 N, vec3 V, vec3 ambient, vec3 diffuse, vec3 specular, float shininess, float shadow) {

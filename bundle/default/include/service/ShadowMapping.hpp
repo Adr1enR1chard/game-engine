@@ -19,20 +19,39 @@ namespace default_bundle
         ShadowMapping(TextureResource &textureResource, ShaderFactory &shaderFactory);
         ~ShadowMapping() override;
 
+        void setDimensions(unsigned int width, unsigned int height);
+        // void getDimensions(unsigned int &outWidth, unsigned int &outHeight) const;
+        void setBias(float bias) { m_bias = bias; }
+        float getBias() const { return m_bias; }
+
+    private:
+        friend class RenderSystem;
+
+        float getNearPlane() const { return m_nearPlane; }
+        float getFarPlane() const { return m_farPlane; }
+
         TextureRef createDepthMap();
         TextureRef getDepthMap() const;
+        ShaderRef getDepthShader() const { return m_depthShader; }
 
-        void renderDepth(std::function<void(ShaderRef shaderRef, TextureRef depthMap, glm::mat4 lightSpaceMatrix)> renderScene, glm::vec3 lightDir);
+        glm::mat4 getLightSpaceMatrix() const { return m_lightProjectionMatrix * m_lightViewMatrix; }
 
-        void setDimensions(unsigned int width, unsigned int height);
+        void prepareForRender(ShaderResource *shaderResource, glm::vec3 lightDir, glm::vec3 target);
+        void restoreAfterRender();
 
     private:
         TextureResource &m_textureResource;
         ShaderFactory &m_shaderFactory;
 
+        unsigned int m_width = 1024;
+        unsigned int m_height = 1024;
+        float m_bias = 0.005f;
+        float m_nearPlane = 0.1f;
+        float m_farPlane = 100.0f;
+
         TextureRef m_depthMap;
-        unsigned int m_width;
-        unsigned int m_height;
+        glm::mat4 m_lightProjectionMatrix;
+        glm::mat4 m_lightViewMatrix;
 
         struct FramebufferImpl;
         struct FramebufferDeleter
@@ -42,6 +61,8 @@ namespace default_bundle
         std::unique_ptr<FramebufferImpl, FramebufferDeleter> m_framebuffer;
 
         ShaderRef m_depthShader;
+
+        int m_viewportBackup[4];
     };
 
 } // namespace default_bundle

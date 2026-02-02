@@ -7,6 +7,25 @@
 
 #include <engine/service/resource/TextureResource.hpp>
 
+/// @brief Macro to execute code within a specific OpenGL shader program context
+#define SCOPED_GL_PROGRAM(programID)                       \
+    GLint __prevProgram;                                   \
+    if (1)                                                 \
+    {                                                      \
+        glGetIntegerv(GL_CURRENT_PROGRAM, &__prevProgram); \
+        glUseProgram(programID);                           \
+        goto __end_scoped_gl_program;                      \
+    }                                                      \
+    else                                                   \
+        while (1)                                          \
+            if (1)                                         \
+            {                                              \
+                glUseProgram(__prevProgram);               \
+                break;                                     \
+            }                                              \
+            else                                           \
+            __end_scoped_gl_program:
+
 namespace engine
 {
 
@@ -107,26 +126,91 @@ namespace engine
     {
         auto it = m_loadedShaders.find(shaderRef);
         if (it == m_loadedShaders.end())
-        {
-            Log::Print("Shader not found during applyUniforms", LogLevel::Warning);
             return;
-        }
 
-        unsigned int textureUnit = 0;
-        UniformCollection combinedUniforms = it->second->defaultUniforms;
-        if (uniforms)
+        int shaderProgram = it->second->impl->programID;
+        SCOPED_GL_PROGRAM(shaderProgram)
         {
-            for (const auto &[name, value] : *uniforms)
+            unsigned int textureUnit = 0;
+            UniformCollection combinedUniforms = it->second->defaultUniforms;
+            if (uniforms)
             {
-                combinedUniforms[name] = value;
+                for (const auto &[name, value] : *uniforms)
+                {
+                    combinedUniforms[name] = value;
+                }
+            }
+            for (const auto &[name, value] : combinedUniforms)
+            {
+                uint32_t location = glGetUniformLocation(it->second->impl->programID, name.c_str());
+                if (location == static_cast<uint32_t>(-1))
+                {
+                    continue;
+                }
+                std::visit(
+                    [&](auto const &v)
+                    {
+                        using T = std::decay_t<decltype(v)>;
+
+                        if constexpr (std::is_same_v<T, int>)
+                        {
+                            glUniform1i(location, v);
+                        }
+                        else if constexpr (std::is_same_v<T, float>)
+                        {
+                            glUniform1f(location, v);
+                        }
+                        else if constexpr (std::is_same_v<T, glm::vec2>)
+                        {
+                            glUniform2fv(location, 1, glm::value_ptr(v));
+                        }
+                        else if constexpr (std::is_same_v<T, glm::vec3>)
+                        {
+                            glUniform3fv(location, 1, glm::value_ptr(v));
+                        }
+                        else if constexpr (std::is_same_v<T, glm::vec4>)
+                        {
+                            glUniform4fv(location, 1, glm::value_ptr(v));
+                        }
+                        else if constexpr (std::is_same_v<T, glm::mat4>)
+                        {
+                            glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(v));
+                        }
+                        else if constexpr (std::is_same_v<T, TextureRef>)
+                        {
+                            glActiveTexture(GL_TEXTURE0 + textureUnit);
+                            textureResource.bind(v);
+                            glUniform1i(location, textureUnit);
+                            textureUnit++;
+                        }
+                    },
+                    value);
             }
         }
-        for (const auto &[name, value] : combinedUniforms)
+    }
+
+    void ShaderResource::setParameters(ShaderRef shaderRef, const ShaderParameters &params)
+    {
+        auto it = m_loadedShaders.find(shaderRef);
+        if (it == m_loadedShaders.end())
+            return;
+
+        it->second->parameters = params;
+    }
+
+    void ShaderResource::setUniform(ShaderRef shaderRef, const std::string &uniformName, const UniformValue &value) const
+    {
+        auto it = m_loadedShaders.find(shaderRef);
+        if (it == m_loadedShaders.end())
+            return;
+
+        unsigned int shaderProgram = it->second->impl->programID;
+        SCOPED_GL_PROGRAM(shaderProgram)
         {
-            uint32_t location = glGetUniformLocation(it->second->impl->programID, name.c_str());
+            uint32_t location = glGetUniformLocation(it->second->impl->programID, uniformName.c_str());
             if (location == static_cast<uint32_t>(-1))
             {
-                continue;
+                return;
             }
             std::visit(
                 [&](auto const &v)
@@ -157,13 +241,6 @@ namespace engine
                     {
                         glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(v));
                     }
-                    else if constexpr (std::is_same_v<T, TextureRef>)
-                    {
-                        glActiveTexture(GL_TEXTURE0 + textureUnit);
-                        textureResource.bind(v);
-                        glUniform1i(location, textureUnit);
-                        textureUnit++;
-                    }
                 },
                 value);
         }
@@ -174,13 +251,10 @@ namespace engine
     {
         auto it = m_loadedShaders.find(shaderRef);
         if (it == m_loadedShaders.end())
-        {
-            Log::Print("Shader not found during bind", LogLevel::Warning);
             return;
-        }
 
         unsigned int shaderProgram = it->second->impl->programID;
-        glUseProgram(shaderProgram); // Note: Not sure OpenGL handles redundant calls to glUseProgram
+        glUseProgram(shaderProgram);
 
         uint32_t viewLoc = glGetUniformLocation(shaderProgram, "view");
         uint32_t projLoc = glGetUniformLocation(shaderProgram, "projection");

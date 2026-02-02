@@ -38,6 +38,8 @@ namespace engine
 
     void applyUniforms(ShaderRef shaderRef, const UniformCollection *uniforms,
                        const TextureResource &textureResource) const;
+    void setParameters(ShaderRef shaderRef, const ShaderParameters &params);
+    void setUniform(ShaderRef shaderRef, const std::string &uniformName, const UniformValue &value) const;
     void bind(ShaderRef shaderRef, glm::mat4 viewMatrix, glm::mat4 projectionMatrix, glm::mat4 modelMatrix) const;
 
   private:
