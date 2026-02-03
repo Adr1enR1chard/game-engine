@@ -3,6 +3,8 @@
 #include <memory>
 
 #include <engine/utils/RenderTypes.hpp>
+#include <service/factory/MaterialFactory.hpp>
+#include <service/factory/ModelFactory.hpp>
 
 namespace default_bundle
 {
@@ -10,13 +12,13 @@ namespace default_bundle
     struct CMeshRenderer
     {
         engine::MeshRef meshRef;
-        engine::MaterialRef materialRef;
+        Material material;
     };
 
     struct CModelRenderer
     {
-        engine::ModelRef modelRef;
-        std::vector<engine::MaterialRef> materialOverrides;
+        Model model;
+        std::vector<Material> materialOverrides;
     };
 
 } // namespace default_bundle

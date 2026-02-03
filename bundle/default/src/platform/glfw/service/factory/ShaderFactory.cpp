@@ -9,9 +9,9 @@ namespace default_bundle
     using namespace engine;
 
     ShaderRef ShaderFactory::CustomShader(const char *name, const char *vertexShaderPath, const char *fragmentShaderPath,
-                                          const UniformCollection &defaultUniforms, const ShaderParameters &params)
+                                          const engine::UniformCollection &defaultUniforms, const Renderer::ShaderParameters &params)
     {
-        if (ShaderRef existingShaderRef = m_shaderResource.get(name); existingShaderRef != 0)
+        if (ShaderRef existingShaderRef = m_renderer.getShaderByName(name); existingShaderRef != 0)
         {
             return existingShaderRef;
         }
@@ -32,12 +32,12 @@ namespace default_bundle
             return 0;
         }
 
-        return m_shaderResource.create(name, vertexShaderCode.c_str(), fragmentShaderCode.c_str(), defaultUniforms, params);
+        return m_renderer.allocateShader({name, vertexShaderCode.c_str(), fragmentShaderCode.c_str(), defaultUniforms, params});
     }
 
     ShaderRef ShaderFactory::PBRShader(const char *name)
     {
-        if (ShaderRef existingShaderRef = m_shaderResource.get(name); existingShaderRef != 0)
+        if (ShaderRef existingShaderRef = m_renderer.getShaderByName(name); existingShaderRef != 0)
         {
             return existingShaderRef;
         }
@@ -59,7 +59,7 @@ namespace default_bundle
 
     ShaderRef ShaderFactory::PhongShader(const char *name)
     {
-        if (ShaderRef existingShaderRef = m_shaderResource.get(name); existingShaderRef != 0)
+        if (ShaderRef existingShaderRef = m_renderer.getShaderByName(name); existingShaderRef != 0)
         {
             return existingShaderRef;
         }
@@ -78,7 +78,7 @@ namespace default_bundle
 
     ShaderRef ShaderFactory::SkyboxShader(const char *name)
     {
-        if (ShaderRef existingShaderRef = m_shaderResource.get(name); existingShaderRef != 0)
+        if (ShaderRef existingShaderRef = m_renderer.getShaderByName(name); existingShaderRef != 0)
         {
             return existingShaderRef;
         }
@@ -92,9 +92,9 @@ namespace default_bundle
                                            "default-bundle-assets/textures/skybox/front.jpg", "default-bundle-assets/textures/skybox/back.jpg"})},
             },
             {
-                .cullFaceEnabled = false,
-                .depthTestEnabled = false,
-                .depthWriteEnabled = false,
+                .enableBackfaceCulling = false,
+                .enableDepthTest = false,
+                .enableDepthWrite = false,
             });
     }
 

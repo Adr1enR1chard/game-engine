@@ -18,7 +18,7 @@ public:
         m_metalSphere = world().createEntity(
             CMeshRenderer{
                 .meshRef = services().get<MeshFactory>()->Sphere(),
-                .materialRef = services().get<MaterialFactory>()->PBRMaterial({
+                .material = services().get<MaterialFactory>()->PBRMaterial({
                     .ao = 0.1f,
                     .baseColorMap =
                         services().get<TextureFactory>()->Texture2D("assets/textures/metal/Metal055A_1K-JPG_Color.jpg"),
@@ -35,7 +35,7 @@ public:
         m_groundSphere = world().createEntity(
             CMeshRenderer{
                 .meshRef = services().get<MeshFactory>()->Sphere(),
-                .materialRef = services().get<MaterialFactory>()->PBRMaterial({
+                .material = services().get<MaterialFactory>()->PBRMaterial({
                     .metallic = 0.0f,
                     .baseColorMap = services().get<TextureFactory>()->Texture2D(
                         "assets/textures/ground/Ground104_1K-JPG_Color.jpg"),
@@ -51,16 +51,16 @@ public:
 
         m_sword = world().createEntity(
             CModelRenderer{
-                .modelRef = services().get<ModelFactory>()->LoadModel("assets/models/sword/scene.gltf"),
+                .model = services().get<ModelFactory>()->LoadModel("assets/models/sword/scene.gltf"),
             },
             CTransform{glm::vec3(0.0f, 0.0f, 0.0f), glm::quat(glm::vec3(0.0f, glm::radians(40.0f), 0.0f)), glm::vec3(1.0f)});
 
         world().createEntity(
             CMeshRenderer({
                 .meshRef = services().get<MeshFactory>()->Plane(),
-                .materialRef = services().get<MaterialFactory>()->PBRMaterial({.metallic = 0.0f,
-                                                                               .roughness = 1.0f,
-                                                                               .ao = 0.0f}),
+                .material = services().get<MaterialFactory>()->PBRMaterial({.metallic = 0.0f,
+                                                                            .roughness = 1.0f,
+                                                                            .ao = 0.0f}),
             }),
             CTransform{glm::vec3(0.0f, -1.0f, 0.0f), glm::quat(glm::vec3(glm::radians(180.0f), 0.0f, 0.0f)), glm::vec3(10.0f)});
     }

@@ -17,7 +17,7 @@ public:
     {
         m_spaceshipEntity = world().createEntity(
             CModelRenderer{
-                .modelRef = services().get<ModelFactory>()->LoadModel("assets/models/spaceship/spaceship.gltf"),
+                .model = services().get<ModelFactory>()->LoadModel("assets/models/spaceship/spaceship.gltf"),
             },
             CTransform{
                 .rotation = glm::angleAxis(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)),

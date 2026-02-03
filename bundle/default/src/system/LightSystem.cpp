@@ -1,7 +1,6 @@
 #include <system/LightSystem.hpp>
 
-#include <engine/service/resource/MaterialResource.hpp>
-#include <engine/service/resource/ModelResource.hpp>
+#include <engine/service/platform/Renderer.hpp>
 
 namespace default_bundle
 {
@@ -21,52 +20,42 @@ namespace default_bundle
         // Mesh renderers
         for (const auto &[eMeshRenderer, cMeshRenderer] : world().fetch<CMeshRenderer>())
         {
-            setMaterialLights(cMeshRenderer->materialRef, cCameraTransform, cDirLight, pointLights);
+            setMaterialLights(cMeshRenderer->material, cCameraTransform, cDirLight, pointLights);
         }
 
         // Model renderers
-        ModelResource *modelResource = services().get<ModelResource>();
+        Renderer *renderer = services().get<Renderer>();
         for (const auto &[eModelRenderer, cModelRenderer] : world().fetch<CModelRenderer>())
         {
-            modelResource->forEach(cModelRenderer->modelRef,
-                                   [&](MeshRef /*meshRef*/, MaterialRef materialRef, size_t /*index*/)
-                                   {
-                                       setMaterialLights(materialRef, cCameraTransform, cDirLight, pointLights);
-                                   });
+            cModelRenderer->model.forEach([&](MeshRef /*meshRef*/, Material &material, size_t /*index*/)
+                                          { setMaterialLights(material, cCameraTransform, cDirLight, pointLights); });
         }
     }
 
-    void LightSystem::setMaterialLights(MaterialRef materialRef,
+    void LightSystem::setMaterialLights(Material &material,
                                         const CTransform *cameraTransform,
                                         const CDirectionalLight *dirLight,
                                         const std::vector<std::tuple<Entity, CPointLight *, CTransform *>> &pointLights)
     {
-        MaterialResource *materialResource = services().get<MaterialResource>();
-        materialResource->setUniform(materialRef, "viewPos", cameraTransform->position);
+        material.uniforms["viewPos"] = cameraTransform->position;
 
         if (dirLight)
         {
-            materialResource->setUniform(materialRef, "dirLight",
-                                         Uniform::DirectionalLight{
-                                             dirLight->direction, // direction
-                                             dirLight->color,     // color
-                                             dirLight->ambient,   // ambient
-                                             dirLight->intensity, // intensity
-                                         });
+            material.uniforms["dirLight.direction"] = dirLight->direction;
+            material.uniforms["dirLight.color"] = dirLight->color;
+            material.uniforms["dirLight.ambient"] = dirLight->ambient;
+            material.uniforms["dirLight.intensity"] = dirLight->intensity;
         }
 
-        materialResource->setUniform(materialRef, "pointLightCount", static_cast<int>(pointLights.size()));
+        material.uniforms["pointLightCount"] = static_cast<int>(pointLights.size());
         int i = 0;
         for (const auto &[ePointLight, cPointLight, cPointLightTransform] : pointLights)
         {
             std::string baseName = "pointLights[" + std::to_string(i) + "]";
 
-            materialResource->setUniform(materialRef, baseName.c_str(),
-                                         Uniform::PointLight{
-                                             cPointLightTransform->position, // position
-                                             cPointLight->color,             // color
-                                             cPointLight->intensity,         // intensity
-                                         });
+            material.uniforms[baseName + ".position"] = cPointLightTransform->position;
+            material.uniforms[baseName + ".color"] = cPointLight->color;
+            material.uniforms[baseName + ".intensity"] = cPointLight->intensity;
             ++i;
         }
     }

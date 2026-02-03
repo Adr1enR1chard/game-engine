@@ -8,13 +8,15 @@ namespace default_bundle
     void DefaultBundle::install(SystemRegistry &systems, ServiceRegistry &services) const
     {
         systems.add<TransformSystem, CameraSystem, RenderSystem, LightSystem, EnvironmentSystem>();
-        services.add<TextureFactory>(*(services.get<TextureResource>()));
-        services.add<MeshFactory>(*(services.get<MeshResource>()));
-        services.add<ShaderFactory>(*(services.get<ShaderResource>()), *(services.get<TextureFactory>()));
-        services.add<MaterialFactory>(*(services.get<MaterialResource>()), *(services.get<ShaderFactory>()));
+
+        services.add<TextureFactory>(*(services.get<Renderer>()));
+        services.add<MeshFactory>(*(services.get<Renderer>()));
+        services.add<ShaderFactory>(*(services.get<Renderer>()), *(services.get<TextureFactory>()));
+
+        services.add<MaterialFactory>(*(services.get<Renderer>()), *(services.get<ShaderFactory>()));
         services.add<ModelFactory>(*(services.get<MaterialFactory>()), *(services.get<ShaderFactory>()),
-                                   *(services.get<TextureFactory>()), *(services.get<MeshFactory>()),
-                                   *(services.get<ModelResource>()));
+                                   *(services.get<TextureFactory>()), *(services.get<MeshFactory>()));
+
         services.add<ShadowMapping>(*(services.get<TextureResource>()), *(services.get<ShaderFactory>()));
     }
     void DefaultBundle::uninstall(SystemRegistry &systems, ServiceRegistry &services) const

@@ -20,9 +20,9 @@ public:
                                                                                    {"uPlanetSize", 0.5f},
                                                                                },
                                                                                {
-                                                                                   .cullFaceEnabled = false,
-                                                                                   .depthTestEnabled = false,
-                                                                                   .depthWriteEnabled = false,
+                                                                                   .enableBackfaceCulling = false,
+                                                                                   .enableDepthTest = false,
+                                                                                   .enableDepthWrite = false,
                                                                                });
 
         if (skyboxShader == 0)
@@ -41,7 +41,7 @@ public:
             .intensity = 10.0f,
         });
 
-        ModelRef planetModel = services().get<ModelFactory>()->LoadModel("assets/models/planet/planet.gltf");
+        Model planetModel = services().get<ModelFactory>()->LoadModel("assets/models/planet/planet.gltf");
         // Spawn multiple random planets
         for (int i = 0; i < 50; ++i)
         {
@@ -51,7 +51,7 @@ public:
 
             world().createEntity(
                 CModelRenderer{
-                    .modelRef = planetModel,
+                    .model = planetModel,
                 },
                 CTransform{
                     .position = position,

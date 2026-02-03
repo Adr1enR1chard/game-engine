@@ -1,32 +1,31 @@
 #pragma once
 
-#include <engine/model/Service.hpp>
-
-#include <engine/service/resource/MeshResource.hpp>
+#include <engine/service/platform/Renderer.hpp>
 
 namespace default_bundle
 {
+  using namespace engine;
 
-  class MeshFactory : public engine::Service
+  class MeshFactory : public Service
   {
   public:
-    MeshFactory(engine::MeshResource &meshResource) : m_meshResource(meshResource) {}
+    MeshFactory(Renderer &renderer) : m_renderer(renderer) {}
     ~MeshFactory() override = default;
 
-    engine::MeshRef Raw(const std::vector<VertexLayout> &vertices, const std::vector<unsigned int> &indices,
-                        glm::mat4 localModel = glm::mat4(1.0f))
+    MeshRef Raw(const std::vector<VertexLayout> &vertices, const std::vector<unsigned int> &indices,
+                glm::mat4 localModel = glm::mat4(1.0f))
     {
-      return m_meshResource.create(vertices, indices, localModel);
+      return m_renderer.allocateMesh({vertices, indices, localModel});
     }
 
-    engine::MeshRef Cube();
+    MeshRef Cube();
 
-    engine::MeshRef Sphere(float radius = 0.5f, unsigned int sectorCount = 36, unsigned int stackCount = 18);
+    MeshRef Sphere(float radius = 0.5f, unsigned int sectorCount = 36, unsigned int stackCount = 18);
 
-    engine::MeshRef Plane();
+    MeshRef Plane();
 
   private:
-    engine::MeshResource &m_meshResource;
+    Renderer &m_renderer;
   };
 
 } // namespace default_bundle

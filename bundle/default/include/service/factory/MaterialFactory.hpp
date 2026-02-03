@@ -6,52 +6,64 @@
 
 namespace default_bundle
 {
+    using namespace engine;
 
-    struct PBRMaterialParameters
+    struct Material
     {
-        glm::vec3 baseColor = glm::vec3(1.0f);
-        float metallic = 1.0f;
-        float roughness = 1.0f;
-        float ao = 1.0f;
-        bool useMetallicRoughnessMap = false;
-        engine::TextureRef baseColorMap = 0;
-        engine::TextureRef normalMap = 0;
-        engine::TextureRef metallicMap = 0;
-        engine::TextureRef roughnessMap = 0;
-        engine::TextureRef aoMap = 0;
+        ShaderRef shaderRef;
+        UniformCollection uniforms;
+
+        bool isValid() const
+        {
+            return shaderRef != 0;
+        }
     };
 
-    struct PhongMaterialParameters
-    {
-        glm::vec3 ambient = glm::vec3(0.1f);
-        glm::vec3 diffuse = glm::vec3(1.0f);
-        glm::vec3 specular = glm::vec3(1.0f);
-        float shininess = 32.0f;
-        engine::TextureRef diffuseMap = 0;
-        engine::TextureRef specularMap = 0;
-        engine::TextureRef normalMap = 0;
-    };
-
-    struct SkyboxMaterialParameters
-    {
-        engine::TextureRef colorMap = 0;
-    };
-
-    class MaterialFactory : public engine::Service
+    class MaterialFactory : public Service
     {
     public:
-        MaterialFactory(engine::MaterialResource &materialResource, ShaderFactory &shaderFactory)
-            : m_materialResource(materialResource), m_shaderFactory(shaderFactory)
+        MaterialFactory(Renderer &renderer, ShaderFactory &shaderFactory)
+            : m_renderer(renderer), m_shaderFactory(shaderFactory)
         {
         }
 
-        engine::MaterialRef PBRMaterial(const PBRMaterialParameters &options = {});
-        engine::MaterialRef PhongMaterial(const PhongMaterialParameters &options = {});
-        engine::MaterialRef SkyboxMaterial(const SkyboxMaterialParameters &options = {});
-        engine::MaterialRef CustomMaterial(engine::ShaderRef shaderRef, const engine::UniformCollection &defaultUniforms = {});
+        struct PBRMaterialParameters
+        {
+            glm::vec3 baseColor = glm::vec3(1.0f);
+            float metallic = 1.0f;
+            float roughness = 1.0f;
+            float ao = 1.0f;
+            bool useMetallicRoughnessMap = false;
+            TextureRef baseColorMap = 0;
+            TextureRef normalMap = 0;
+            TextureRef metallicMap = 0;
+            TextureRef roughnessMap = 0;
+            TextureRef aoMap = 0;
+        };
+
+        struct PhongMaterialParameters
+        {
+            glm::vec3 ambient = glm::vec3(0.1f);
+            glm::vec3 diffuse = glm::vec3(1.0f);
+            glm::vec3 specular = glm::vec3(1.0f);
+            float shininess = 32.0f;
+            TextureRef diffuseMap = 0;
+            TextureRef specularMap = 0;
+            TextureRef normalMap = 0;
+        };
+
+        struct SkyboxMaterialParameters
+        {
+            TextureRef colorMap = 0;
+        };
+
+        Material PBRMaterial(const PBRMaterialParameters &options = {});
+        Material PhongMaterial(const PhongMaterialParameters &options = {});
+        Material SkyboxMaterial(const SkyboxMaterialParameters &options = {});
+        Material CustomMaterial(ShaderRef shaderRef, const UniformCollection &defaultUniforms = {});
 
     private:
-        engine::MaterialResource &m_materialResource;
+        Renderer &m_renderer;
         ShaderFactory &m_shaderFactory;
     };
 

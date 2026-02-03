@@ -16,7 +16,7 @@ namespace default_bundle
     void update(float deltaTime) override;
 
   private:
-    void setMaterialLights(engine::MaterialRef materialRef,
+    void setMaterialLights(Material &material,
                            const CTransform *cameraTransform,
                            const CDirectionalLight *dirLight,
                            const std::vector<std::tuple<engine::Entity, CPointLight *, CTransform *>> &pointLights);

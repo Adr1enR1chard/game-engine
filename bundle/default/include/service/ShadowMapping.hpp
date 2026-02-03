@@ -2,6 +2,7 @@
 
 #include <engine/model/Service.hpp>
 #include <engine/service/resource/TextureResource.hpp>
+#include <engine/service/resource/ShaderResource.hpp>
 #include <service/factory/ShaderFactory.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

@@ -19,33 +19,16 @@ namespace engine
 
     using ModelRef = unsigned int;
 
+    using FramebufferRef = unsigned int;
+
     enum TextureType
     {
         Texture2D,
         CubeMap,
+        DepthMap
     };
 
-    class Uniform
-    {
-    public:
-        struct DirectionalLight
-        {
-            glm::vec3 direction;
-            glm::vec3 color = glm::vec3(1.0f);
-            float ambient = 0.1f;
-            float intensity = 1.0f;
-        };
-
-        struct PointLight
-        {
-            glm::vec3 position;
-            glm::vec3 color = glm::vec3(1.0f);
-            float intensity = 1.0f;
-        };
-    };
-
-    using UniformValue = std::variant<int, float, glm::vec2, glm::vec3, glm::vec4, glm::mat4, Uniform::DirectionalLight,
-                                      Uniform::PointLight, TextureRef>;
+    using UniformValue = std::variant<int, float, glm::vec2, glm::vec3, glm::vec4, glm::mat4, TextureRef>;
 
     using UniformCollection = std::unordered_map<std::string, UniformValue>;
 

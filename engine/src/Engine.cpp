@@ -14,6 +14,7 @@ namespace engine
         m_services.add<MeshResource>();
         m_services.add<MaterialResource>();
         m_services.add<ModelResource>();
+        m_services.add<Renderer>();
 
         m_window = m_services.get<Window>();
         m_input = m_services.get<Input>();

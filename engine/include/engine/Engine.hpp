@@ -26,6 +26,7 @@
 // Platform Services
 #include <engine/service/platform/Window.hpp>
 #include <engine/service/platform/Input.hpp>
+#include <engine/service/platform/Renderer.hpp>
 
 namespace engine
 {

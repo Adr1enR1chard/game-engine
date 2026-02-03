@@ -67,7 +67,7 @@ namespace default_bundle
 
     MeshRef MeshFactory::Cube()
     {
-        return m_meshResource.create(kCubeVertices, kCubeIndices);
+        return m_renderer.allocateMesh({kCubeVertices, kCubeIndices, glm::mat4(1.0f)});
     }
 
     MeshRef MeshFactory::Sphere(float radius, unsigned int sectorCount, unsigned int stackCount)
@@ -126,7 +126,7 @@ namespace default_bundle
                 }
             }
         }
-        return m_meshResource.create(vertices, indices);
+        return m_renderer.allocateMesh({vertices, indices, glm::mat4(1.0f)});
     }
 
     MeshRef MeshFactory::Plane()
@@ -148,6 +148,6 @@ namespace default_bundle
             3,
         };
 
-        return m_meshResource.create(vertices, indices);
+        return m_renderer.allocateMesh({vertices, indices, glm::mat4(1.0f)});
     }
 } // namespace default_bundle

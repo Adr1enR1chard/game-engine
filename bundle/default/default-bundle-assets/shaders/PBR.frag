@@ -73,7 +73,8 @@ float ShadowCalculation(vec4 fragPosLightSpace) {
         }
     }
     shadow /= 9.0;
-    return shadow;
+    // return shadow;
+    return 0.0;
 }
 
 vec3 fresnelSchlick(float cosTheta, vec3 F0) {

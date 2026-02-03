@@ -15,7 +15,7 @@ namespace default_bundle
         bool loaded = TextureLoader::LoadTexture(imagePath.c_str(), texture);
         if (loaded)
         {
-            TextureRef textureRef = m_textureResource.texture2D({
+            TextureRef textureRef = m_renderer.allocateTexture2D({
                 .width = texture.width,
                 .height = texture.height,
                 .channels = texture.channels,
@@ -30,8 +30,7 @@ namespace default_bundle
 
     TextureRef TextureFactory::CubeMap(const std::vector<std::string> &faces)
     {
-
-        std::vector<TextureAttributes> textures;
+        std::vector<Renderer::TextureAttributes> textures;
         for (const auto &face : faces)
         {
             std::vector<unsigned char> data;
@@ -51,7 +50,7 @@ namespace default_bundle
             });
         }
 
-        TextureRef textureRef = m_textureResource.cubeMap(textures);
+        TextureRef textureRef = m_renderer.allocateCubeMap(textures);
 
         return textureRef;
     }
