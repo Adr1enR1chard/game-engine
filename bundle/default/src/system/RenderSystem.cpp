@@ -37,13 +37,8 @@ namespace default_bundle
     {
         auto shadowMapping = services().get<ShadowMapping>();
         shadowMapping->initializeDepthBuffer();
-        m_debugShadowMapShader = services().get<ShaderFactory>()->CustomShader("__ShadowMapVisualization",
-                                                                               "default-bundle-assets/shaders/shadow_mapping/debug/shadow_map_visualization.vert",
-                                                                               "default-bundle-assets/shaders/shadow_mapping/debug/shadow_map_visualization.frag", {});
-        m_debugScreenQuadMesh = services().get<MeshFactory>()->Raw(kQuadVertices, kQuadIndices);
-        m_debugShadowMapUniforms["uFarPlane"] = shadowMapping->getFarPlane();
-        m_debugShadowMapUniforms["uNearPlane"] = shadowMapping->getNearPlane();
-        m_debugShadowMapUniforms["uShadowMap"] = FramebufferUniform{shadowMapping->getDepthBuffer()};
+
+        initializeDebugShadowMapVisualization(shadowMapping, services().get<ShaderFactory>(), services().get<MeshFactory>());
     }
 
     void RenderSystem::render(float /*deltaTime*/)
@@ -83,7 +78,7 @@ namespace default_bundle
             renderer->setFramebuffer(shadowMapping->getDepthBuffer());
             renderer->clear(glm::vec4(1.0f), false, true, false);
 
-            /// ------- Render Meshes for Shadow Mapping -------
+            /// ------- Render Meshes for Depth -------
             for (const auto &[entity, meshRenderer, transform] : world().fetch<CMeshRenderer, CTransformCache>())
             {
                 auto &meshRef = meshRenderer->meshRef;
@@ -100,9 +95,10 @@ namespace default_bundle
                         renderer->drawMesh(modelRef, shadowMapping->getDepthShader(), depthUniforms); });
             }
 
+            renderer->resetFramebuffer();
+
             int windowWidth, windowHeight;
             services().get<Window>()->getSize(windowWidth, windowHeight);
-            renderer->resetFramebuffer();
             renderer->setViewport(0, 0, windowWidth, windowHeight);
         }
 
@@ -115,13 +111,6 @@ namespace default_bundle
         {
             if (auto [_, skyboxCache] = world().fetchFrom<CSkyboxCache>(envEntity); skyboxCache != nullptr && environment->skyboxMaterial.isValid())
             {
-                // auto shaderRef = materialResource->getShaderRef(environment->skyboxMaterial);
-                // auto *uniforms = materialResource->getUniforms(environment->skyboxMaterial);
-
-                // shaderResource->bind(shaderRef, glm::mat4(glm::mat3(viewMatrix)), projMatrix, glm::mat4(1.0f));
-                // shaderResource->applyUniforms(shaderRef, uniforms, *textureResource);
-
-                // meshResource->draw(skyboxCache->meshRef);
                 environment->skyboxMaterial.uniforms["view"] = glm::mat4(glm::mat3(viewMatrix));
                 environment->skyboxMaterial.uniforms["projection"] = projMatrix;
                 renderer->drawMesh(skyboxCache->meshRef, environment->skyboxMaterial.shaderRef, environment->skyboxMaterial.uniforms);
@@ -135,68 +124,56 @@ namespace default_bundle
         /// ------- Render Meshes -------
         for (const auto &[entity, meshRenderer, transform] : world().fetch<CMeshRenderer, CTransformCache>())
         {
-            // auto meshRef = meshRenderer->meshRef;
-            // auto materialRef = meshRenderer->materialRef;
 
-            // auto *uniforms = materialResource->getUniforms(materialRef);
-            // auto shaderRef = materialResource->getShaderRef(materialRef);
-
-            // // materialResource->setUniform(materialRef, "uShadowMap", shadowMapping->getDepthMap());
-            // // materialResource->setUniform(materialRef, "uDirLightSpaceMatrix", shadowMapping->getLightSpaceMatrix());
-            // // materialResource->setUniform(materialRef, "uBias", shadowMapping->getBias());
-
-            // shaderResource->bind(shaderRef, viewMatrix, projMatrix,
-            //                      transform->modelMatrix * meshResource->getLocalModel(meshRef));
-            // shaderResource->applyUniforms(shaderRef, uniforms, *textureResource);
-
-            // meshResource->draw(meshRef);
-
-            meshRenderer->material.uniforms["view"] = viewMatrix;
-            meshRenderer->material.uniforms["projection"] = projMatrix;
-            meshRenderer->material.uniforms["model"] = transform->modelMatrix * renderer->getLocalModel(meshRenderer->meshRef);
-            meshRenderer->material.uniforms["uDirLightSpaceMatrix"] = lightSpaceMatrix;
-            meshRenderer->material.uniforms["uShadowMap"] = FramebufferUniform{shadowMapping->getDepthBuffer()};
-            meshRenderer->material.uniforms["uBias"] = shadowMapping->getBias();
+            setFinalRenderingUniforms(meshRenderer->material.uniforms,
+                                      transform->modelMatrix * renderer->getLocalModel(meshRenderer->meshRef),
+                                      viewMatrix,
+                                      projMatrix,
+                                      lightSpaceMatrix,
+                                      shadowMapping->getDepthBuffer(),
+                                      shadowMapping->getBias());
             renderer->drawMesh(meshRenderer->meshRef, meshRenderer->material.shaderRef, meshRenderer->material.uniforms);
         }
 
         /// ------- Render Models -------
         for (const auto &[entity, modelRenderer, transform] : world().fetch<CModelRenderer, CTransformCache>())
         {
-            // auto &modelRef = modelRenderer->modelRef;
-
-            // modelResource->forEach(modelRef, [&](MeshRef meshRef, MaterialRef materialRef, size_t index)
-            //                        {
-            // if (modelRenderer->materialOverrides.size() > index) {
-            //     materialRef = modelRenderer->materialOverrides[index];
-            // }
-
-            // materialResource->setUniform(materialRef, "uShadowMap", shadowMapping->getDepthMap());
-            // materialResource->setUniform(materialRef, "uDirLightSpaceMatrix", shadowMapping->getLightSpaceMatrix());
-            // materialResource->setUniform(materialRef, "uBias", shadowMapping->getBias());
-
-            // auto* uniforms  = materialResource->getUniforms(materialRef);
-            // auto  shaderRef = materialResource->getShaderRef(materialRef);
-
-            // shaderResource->bind(shaderRef, viewMatrix, projMatrix,
-            //                      transform->modelMatrix * meshResource->getLocalModel(meshRef));
-            // shaderResource->applyUniforms(shaderRef, uniforms, *textureResource);
-
-            // meshResource->draw(meshRef); });
             modelRenderer->model.forEach([&](MeshRef meshRef, Material &material, size_t index)
                                          {
                 if (modelRenderer->materialOverrides.size() > index) {
                     material = modelRenderer->materialOverrides[index];
                 }
 
-                material.uniforms["view"] = viewMatrix;
-                material.uniforms["projection"] = projMatrix;
-                material.uniforms["model"] = transform->modelMatrix * renderer->getLocalModel(meshRef);
-                material.uniforms["uDirLightSpaceMatrix"] = lightSpaceMatrix;
-                material.uniforms["uShadowMap"] = FramebufferUniform{shadowMapping->getDepthBuffer()};
-                material.uniforms["uBias"] = shadowMapping->getBias();
+                setFinalRenderingUniforms(material.uniforms,
+                                transform->modelMatrix * renderer->getLocalModel(meshRef),
+                                viewMatrix,
+                                projMatrix,
+                                lightSpaceMatrix,
+                                shadowMapping->getDepthBuffer(),
+                                shadowMapping->getBias());
                 renderer->drawMesh(meshRef, material.shaderRef, material.uniforms); });
         }
+    }
+
+    void RenderSystem::setFinalRenderingUniforms(UniformCollection &uniforms, const glm::mat4 &modelMatrix, const glm::mat4 &viewMatrix, const glm::mat4 &projMatrix, const glm::mat4 &lightSpaceMatrix, FramebufferRef shadowMap, float bias)
+    {
+        uniforms["model"] = modelMatrix;
+        uniforms["view"] = viewMatrix;
+        uniforms["projection"] = projMatrix;
+        uniforms["uDirLightSpaceMatrix"] = lightSpaceMatrix;
+        uniforms["uShadowMap"] = FramebufferUniform{shadowMap};
+        uniforms["uBias"] = bias;
+    }
+
+    void RenderSystem::initializeDebugShadowMapVisualization(ShadowMapping *shadowMapping, ShaderFactory *shaderFactory, MeshFactory *meshFactory)
+    {
+        m_debugShadowMapShader = shaderFactory->CustomShader("__ShadowMapVisualization",
+                                                             "default-bundle-assets/shaders/shadow_mapping/debug/shadow_map_visualization.vert",
+                                                             "default-bundle-assets/shaders/shadow_mapping/debug/shadow_map_visualization.frag", {});
+        m_debugScreenQuadMesh = meshFactory->Raw(kQuadVertices, kQuadIndices);
+        m_debugShadowMapUniforms["uFarPlane"] = shadowMapping->getFarPlane();
+        m_debugShadowMapUniforms["uNearPlane"] = shadowMapping->getNearPlane();
+        m_debugShadowMapUniforms["uShadowMap"] = FramebufferUniform{shadowMapping->getDepthBuffer()};
     }
 
 } // namespace default_bundle
