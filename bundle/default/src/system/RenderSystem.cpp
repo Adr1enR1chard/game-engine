@@ -36,13 +36,14 @@ namespace default_bundle
     void RenderSystem::start()
     {
         auto shadowMapping = services().get<ShadowMapping>();
+        shadowMapping->initializeDepthBuffer();
         m_debugShadowMapShader = services().get<ShaderFactory>()->CustomShader("__ShadowMapVisualization",
                                                                                "default-bundle-assets/shaders/shadow_mapping/debug/shadow_map_visualization.vert",
                                                                                "default-bundle-assets/shaders/shadow_mapping/debug/shadow_map_visualization.frag", {});
-        m_debugScreenQuadMesh = services().get<MeshResource>()->create(kQuadVertices, kQuadIndices);
+        m_debugScreenQuadMesh = services().get<MeshFactory>()->Raw(kQuadVertices, kQuadIndices);
         m_debugShadowMapUniforms["uFarPlane"] = shadowMapping->getFarPlane();
         m_debugShadowMapUniforms["uNearPlane"] = shadowMapping->getNearPlane();
-        m_debugShadowMapUniforms["uShadowMap"] = shadowMapping->createDepthMap();
+        m_debugShadowMapUniforms["uShadowMap"] = FramebufferUniform{shadowMapping->getDepthBuffer()};
     }
 
     void RenderSystem::render(float /*deltaTime*/)
@@ -65,46 +66,48 @@ namespace default_bundle
         glm::mat4 projMatrix = cameraCache->projectionMatrix;
 
         /// ------- Shadow Mapping -------
-        // auto shadowMapping = services().get<ShadowMapping>();
-        // if (shadowMapping->getDepthMap() != 0)
-        // {
-        //     auto [_, dirLight] = world().fetchAt<CDirectionalLight>(0);
-        //     if (!dirLight)
-        //         return;
+        auto shadowMapping = services().get<ShadowMapping>();
+        glm::mat4 lightSpaceMatrix = glm::mat4(1.0f);
+        if (shadowMapping->getDepthBuffer() != 0)
+        {
+            auto [_, dirLight] = world().fetchAt<CDirectionalLight>(0);
+            if (!dirLight)
+                return;
 
-        //     shadowMapping->prepareForRender(shaderResource, dirLight->direction, camTransform->position + camTransform->forward() * 10.0f);
-        //     ShaderRef depthShader = shadowMapping->getDepthShader();
-        //     /// ------- Render Meshes for Shadow Mapping -------
-        //     for (const auto &[entity, meshRenderer, transform] : world().fetch<CMeshRenderer, CTransformCache>())
-        //     {
-        //         auto meshRef = meshRenderer->meshRef;
+            lightSpaceMatrix = shadowMapping->getLightSpaceMatrix(dirLight->direction, camTransform->position + camTransform->forward() * 10.0f);
 
-        //         shaderResource->bind(depthShader, glm::mat4(1.0f), glm::mat4(1.0f),
-        //                              transform->modelMatrix *
-        //                                  meshResource->getLocalModel(meshRef));
+            UniformCollection depthUniforms;
+            depthUniforms["uLightSpaceMatrix"] = lightSpaceMatrix;
 
-        //         meshResource->draw(meshRef);
-        //     }
+            renderer->setViewport(0, 0, shadowMapping->m_width, shadowMapping->m_height);
+            renderer->setFramebuffer(shadowMapping->getDepthBuffer());
+            renderer->clear(glm::vec4(1.0f), false, true, false);
 
-        //     /// ------- Render Models for Depth -------
-        //     for (const auto &[entity, modelRenderer, transform] : world().fetch<CModelRenderer, CTransformCache>())
-        //     {
-        //         auto &modelRef = modelRenderer->modelRef;
+            /// ------- Render Meshes for Shadow Mapping -------
+            for (const auto &[entity, meshRenderer, transform] : world().fetch<CMeshRenderer, CTransformCache>())
+            {
+                auto &meshRef = meshRenderer->meshRef;
+                depthUniforms["uModel"] = transform->modelMatrix * renderer->getLocalModel(meshRef);
+                renderer->drawMesh(meshRef, shadowMapping->getDepthShader(), depthUniforms);
+            }
 
-        //         modelResource->forEach(modelRef, [&](MeshRef meshRef, MaterialRef /*materialRef*/, size_t /*index*/)
-        //                                {
-        //                 shaderResource->bind(depthShader, glm::mat4(1.0f), glm::mat4(1.0f),
-        //                                         transform->modelMatrix * meshResource->getLocalModel(meshRef));
-        //                 meshResource->draw(meshRef); });
-        //     }
+            /// ------- Render Models for Depth -------
+            for (const auto &[entity, modelRenderer, transform] : world().fetch<CModelRenderer, CTransformCache>())
+            {
+                modelRenderer->model.forEach([&](MeshRef modelRef, Material & /*materialRef*/, size_t /*index*/)
+                                             {
+                        depthUniforms["uModel"] = transform->modelMatrix * renderer->getLocalModel(modelRef);
+                        renderer->drawMesh(modelRef, shadowMapping->getDepthShader(), depthUniforms); });
+            }
 
-        //     shadowMapping->restoreAfterRender();
-        // }
+            int windowWidth, windowHeight;
+            services().get<Window>()->getSize(windowWidth, windowHeight);
+            renderer->resetFramebuffer();
+            renderer->setViewport(0, 0, windowWidth, windowHeight);
+        }
 
         /// ---- Debug shadow map visualization ----
-        // shaderResource->bind(m_debugShadowMapShader, glm::mat4(1.0f), glm::mat4(1.0f), glm::mat4(1.0f));
-        // shaderResource->applyUniforms(m_debugShadowMapShader, &m_debugShadowMapUniforms, *textureResource);
-        // meshResource->draw(m_debugScreenQuadMesh);
+        // renderer->drawMesh(m_debugScreenQuadMesh, m_debugShadowMapShader, m_debugShadowMapUniforms);
         // return;
 
         /// ------- Render Environment -------
@@ -151,6 +154,9 @@ namespace default_bundle
             meshRenderer->material.uniforms["view"] = viewMatrix;
             meshRenderer->material.uniforms["projection"] = projMatrix;
             meshRenderer->material.uniforms["model"] = transform->modelMatrix * renderer->getLocalModel(meshRenderer->meshRef);
+            meshRenderer->material.uniforms["uDirLightSpaceMatrix"] = lightSpaceMatrix;
+            meshRenderer->material.uniforms["uShadowMap"] = FramebufferUniform{shadowMapping->getDepthBuffer()};
+            meshRenderer->material.uniforms["uBias"] = shadowMapping->getBias();
             renderer->drawMesh(meshRenderer->meshRef, meshRenderer->material.shaderRef, meshRenderer->material.uniforms);
         }
 
@@ -186,6 +192,9 @@ namespace default_bundle
                 material.uniforms["view"] = viewMatrix;
                 material.uniforms["projection"] = projMatrix;
                 material.uniforms["model"] = transform->modelMatrix * renderer->getLocalModel(meshRef);
+                material.uniforms["uDirLightSpaceMatrix"] = lightSpaceMatrix;
+                material.uniforms["uShadowMap"] = FramebufferUniform{shadowMapping->getDepthBuffer()};
+                material.uniforms["uBias"] = shadowMapping->getBias();
                 renderer->drawMesh(meshRef, material.shaderRef, material.uniforms); });
         }
     }

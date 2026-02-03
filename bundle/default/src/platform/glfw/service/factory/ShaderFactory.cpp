@@ -49,11 +49,11 @@ namespace default_bundle
                                 {"material.roughness", 1.0f},
                                 {"material.ao", 1.0f},
                                 {"material.useMetallicRoughnessMap", false},
-                                {"material.baseColorMap", m_textureFactory.WhiteTexture2D()},
-                                {"material.normalMap", m_textureFactory.NormalTexture2D()},
-                                {"material.metallicMap", m_textureFactory.BlackTexture2D()},
-                                {"material.roughnessMap", m_textureFactory.WhiteTexture2D()},
-                                {"material.aoMap", m_textureFactory.WhiteTexture2D()},
+                                {"material.baseColorMap", TextureUniform{m_textureFactory.WhiteTexture2D(), Texture2D}},
+                                {"material.normalMap", TextureUniform{m_textureFactory.NormalTexture2D(), Texture2D}},
+                                {"material.metallicMap", TextureUniform{m_textureFactory.BlackTexture2D(), Texture2D}},
+                                {"material.roughnessMap", TextureUniform{m_textureFactory.WhiteTexture2D(), Texture2D}},
+                                {"material.aoMap", TextureUniform{m_textureFactory.WhiteTexture2D(), Texture2D}},
                             });
     }
 
@@ -70,9 +70,9 @@ namespace default_bundle
                                 {"material.diffuse", glm::vec3(1.0f, 1.0f, 1.0f)},
                                 {"material.specular", glm::vec3(1.0f, 1.0f, 1.0f)},
                                 {"material.shininess", 32.0f},
-                                {"material.diffuseMap", m_textureFactory.WhiteTexture2D()},
-                                {"material.specularMap", m_textureFactory.WhiteTexture2D()},
-                                {"material.normalMap", m_textureFactory.NormalTexture2D()},
+                                {"material.diffuseMap", TextureUniform{m_textureFactory.WhiteTexture2D(), Texture2D}},
+                                {"material.specularMap", TextureUniform{m_textureFactory.WhiteTexture2D(), Texture2D}},
+                                {"material.normalMap", TextureUniform{m_textureFactory.NormalTexture2D(), Texture2D}},
                             });
     }
 
@@ -87,9 +87,10 @@ namespace default_bundle
             name, "default-bundle-assets/shaders/Skybox.vert", "default-bundle-assets/shaders/Skybox.frag",
             {
                 {"material.colorMap",
-                 m_textureFactory.CubeMap({"default-bundle-assets/textures/skybox/right.jpg", "default-bundle-assets/textures/skybox/left.jpg",
-                                           "default-bundle-assets/textures/skybox/top.jpg", "default-bundle-assets/textures/skybox/bottom.jpg",
-                                           "default-bundle-assets/textures/skybox/front.jpg", "default-bundle-assets/textures/skybox/back.jpg"})},
+                 TextureUniform{m_textureFactory.CubeMap({"default-bundle-assets/textures/skybox/right.jpg", "default-bundle-assets/textures/skybox/left.jpg",
+                                                          "default-bundle-assets/textures/skybox/top.jpg", "default-bundle-assets/textures/skybox/bottom.jpg",
+                                                          "default-bundle-assets/textures/skybox/front.jpg", "default-bundle-assets/textures/skybox/back.jpg"}),
+                                CubeMap}},
             },
             {
                 .enableBackfaceCulling = false,

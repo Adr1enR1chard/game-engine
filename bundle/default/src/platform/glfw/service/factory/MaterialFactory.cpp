@@ -20,15 +20,15 @@ namespace default_bundle
         };
 
         if (options.baseColorMap != 0)
-            uniforms["material.baseColorMap"] = options.baseColorMap;
+            uniforms["material.baseColorMap"] = TextureUniform{options.baseColorMap, Texture2D};
         if (options.normalMap != 0)
-            uniforms["material.normalMap"] = options.normalMap;
+            uniforms["material.normalMap"] = TextureUniform{options.normalMap, Texture2D};
         if (options.metallicMap != 0)
-            uniforms["material.metallicMap"] = options.metallicMap;
+            uniforms["material.metallicMap"] = TextureUniform{options.metallicMap, Texture2D};
         if (options.roughnessMap != 0)
-            uniforms["material.roughnessMap"] = options.roughnessMap;
+            uniforms["material.roughnessMap"] = TextureUniform{options.roughnessMap, Texture2D};
         if (options.aoMap != 0)
-            uniforms["material.aoMap"] = options.aoMap;
+            uniforms["material.aoMap"] = TextureUniform{options.aoMap, Texture2D};
         return CustomMaterial(pbrShaderRef, uniforms);
     };
 
@@ -44,11 +44,11 @@ namespace default_bundle
         };
 
         if (options.diffuseMap != 0)
-            uniforms["material.diffuseMap"] = options.diffuseMap;
+            uniforms["material.diffuseMap"] = TextureUniform{options.diffuseMap, Texture2D};
         if (options.specularMap != 0)
-            uniforms["material.specularMap"] = options.specularMap;
+            uniforms["material.specularMap"] = TextureUniform{options.specularMap, Texture2D};
         if (options.normalMap != 0)
-            uniforms["material.normalMap"] = options.normalMap;
+            uniforms["material.normalMap"] = TextureUniform{options.normalMap, Texture2D};
         return CustomMaterial(phongShaderRef, uniforms);
     }
 
@@ -58,7 +58,7 @@ namespace default_bundle
 
         UniformCollection uniforms;
         if (options.colorMap != 0)
-            uniforms["material.colorMap"] = options.colorMap;
+            uniforms["material.colorMap"] = TextureUniform{options.colorMap, CubeMap};
 
         return CustomMaterial(skyboxShaderRef, uniforms);
     }

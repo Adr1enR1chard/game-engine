@@ -28,7 +28,18 @@ namespace engine
         DepthMap
     };
 
-    using UniformValue = std::variant<int, float, glm::vec2, glm::vec3, glm::vec4, glm::mat4, TextureRef>;
+    struct TextureUniform
+    {
+        TextureRef textureRef;
+        TextureType type;
+    };
+
+    struct FramebufferUniform
+    {
+        FramebufferRef framebufferRef;
+    };
+
+    using UniformValue = std::variant<int, float, glm::vec2, glm::vec3, glm::vec4, glm::mat4, TextureUniform, FramebufferUniform>;
 
     using UniformCollection = std::unordered_map<std::string, UniformValue>;
 

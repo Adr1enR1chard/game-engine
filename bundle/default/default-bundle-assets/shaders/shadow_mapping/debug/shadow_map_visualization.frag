@@ -14,5 +14,5 @@ float linearize_depth(float d, float zNear, float zFar) {
 void main() {
     float depth = texture(uShadowMap, TexCoord).r;
     float linearDepth = linearize_depth(depth, uNearPlane, uFarPlane) / uFarPlane;
-    FragColor = vec4(vec3(depth), 1.0);
+    FragColor = vec4(depth);
 }

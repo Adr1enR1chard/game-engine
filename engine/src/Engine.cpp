@@ -9,11 +9,6 @@ namespace engine
     {
         m_services.add<Window>();
         m_services.add<Input>();
-        m_services.add<TextureResource>();
-        m_services.add<ShaderResource>();
-        m_services.add<MeshResource>();
-        m_services.add<MaterialResource>();
-        m_services.add<ModelResource>();
         m_services.add<Renderer>();
 
         m_window = m_services.get<Window>();

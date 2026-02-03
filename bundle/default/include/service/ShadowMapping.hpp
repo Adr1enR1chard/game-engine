@@ -1,8 +1,7 @@
 #pragma once
 
 #include <engine/model/Service.hpp>
-#include <engine/service/resource/TextureResource.hpp>
-#include <engine/service/resource/ShaderResource.hpp>
+#include <engine/service/platform/Renderer.hpp>
 #include <service/factory/ShaderFactory.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -17,7 +16,7 @@ namespace default_bundle
     class ShadowMapping : public Service
     {
     public:
-        ShadowMapping(TextureResource &textureResource, ShaderFactory &shaderFactory);
+        ShadowMapping(Renderer &renderer, ShaderFactory &shaderFactory);
         ~ShadowMapping() override;
 
         void setShadowMapDimensions(unsigned int width, unsigned int height);
@@ -37,17 +36,16 @@ namespace default_bundle
         float getNearPlane() const { return m_nearPlane; }
         float getFarPlane() const { return m_farPlane; }
 
-        TextureRef createDepthMap();
-        TextureRef getDepthMap() const;
+        FramebufferRef initializeDepthBuffer();
+        FramebufferRef createDepthBuffer();
+        FramebufferRef getDepthBuffer() const;
         ShaderRef getDepthShader() const { return m_depthShader; }
 
-        glm::mat4 getLightSpaceMatrix() const { return m_lightProjectionMatrix * m_lightViewMatrix; }
-
-        void prepareForRender(ShaderResource *shaderResource, glm::vec3 lightDir, glm::vec3 target);
+        glm::mat4 getLightSpaceMatrix(glm::vec3 lightDir, glm::vec3 target) const;
         void restoreAfterRender();
 
     private:
-        TextureResource &m_textureResource;
+        Renderer &m_renderer;
         ShaderFactory &m_shaderFactory;
 
         unsigned int m_width = 1024;
@@ -56,16 +54,9 @@ namespace default_bundle
         float m_nearPlane = -100.0f;
         float m_farPlane = 100.0f;
 
-        TextureRef m_depthMap;
+        FramebufferRef m_depthFramebuffer = 0;
         glm::mat4 m_lightProjectionMatrix;
         glm::mat4 m_lightViewMatrix;
-
-        struct FramebufferImpl;
-        struct FramebufferDeleter
-        {
-            void operator()(FramebufferImpl *framebufferImpl);
-        };
-        std::unique_ptr<FramebufferImpl, FramebufferDeleter> m_framebuffer;
 
         ShaderRef m_depthShader;
 

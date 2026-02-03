@@ -17,7 +17,7 @@ namespace engine
     {
         if (textureData)
         {
-            // glDeleteTextures(1, &textureData->textureID);
+            glDeleteTextures(1, &textureData->textureID);
             delete textureData;
         }
     }
@@ -34,9 +34,9 @@ namespace engine
     {
         if (meshData)
         {
-            // glDeleteVertexArrays(1, &meshData->vao);
-            // glDeleteBuffers(1, &meshData->vbo);
-            // glDeleteBuffers(1, &meshData->ebo);
+            glDeleteVertexArrays(1, &meshData->vao);
+            glDeleteBuffers(1, &meshData->vbo);
+            glDeleteBuffers(1, &meshData->ebo);
             delete meshData;
         }
     }
@@ -51,7 +51,7 @@ namespace engine
     {
         if (shaderData)
         {
-            // glDeleteProgram(shaderData->programID);
+            glDeleteProgram(shaderData->programID);
             delete shaderData;
         }
     }
@@ -59,22 +59,17 @@ namespace engine
     struct Renderer::FramebufferData
     {
         GLuint fbo = 0;
-        GLuint colorAttachment = 0;
-        GLuint depthAttachment = 0;
+        GLuint textureAttachment = 0;
     };
     void Renderer::FramebufferDataDeleter::operator()(FramebufferData *framebufferData)
     {
         if (framebufferData)
         {
-            // glDeleteFramebuffers(1, &framebufferData->fbo);
-            // if (framebufferData->colorAttachment)
-            // {
-            //     glDeleteTextures(1, &framebufferData->colorAttachment);
-            // }
-            // if (framebufferData->depthAttachment)
-            // {
-            //     glDeleteTextures(1, &framebufferData->depthAttachment);
-            // }
+            glDeleteFramebuffers(1, &framebufferData->fbo);
+            if (framebufferData->textureAttachment)
+            {
+                glDeleteTextures(1, &framebufferData->textureAttachment);
+            }
             delete framebufferData;
         }
     }
@@ -268,38 +263,41 @@ namespace engine
         return newShaderRef;
     }
 
-    FramebufferRef Renderer::allocateFramebuffer(unsigned int width, unsigned int height, bool withColorAttachment, bool withDepthAttachment)
+    FramebufferRef Renderer::allocateDepthFramebuffer(unsigned int width, unsigned int height, bool withBorder)
     {
         FramebufferRef newFramebufferRef = m_framebuffersId.alloc();
         auto framebufferData = std::unique_ptr<FramebufferData, FramebufferDataDeleter>(new FramebufferData());
 
         glGenFramebuffers(1, &framebufferData->fbo);
         glBindFramebuffer(GL_FRAMEBUFFER, framebufferData->fbo);
+        glGenTextures(1, &framebufferData->textureAttachment);
+        glBindTexture(GL_TEXTURE_2D, framebufferData->textureAttachment);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        if (withColorAttachment)
+        if (withBorder)
         {
-            glGenTextures(1, &framebufferData->colorAttachment);
-            glBindTexture(GL_TEXTURE_2D, framebufferData->colorAttachment);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferData->colorAttachment, 0);
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
         }
+        else
+        {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        }
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, framebufferData->textureAttachment, 0);
 
-        if (withDepthAttachment)
-        {
-            glGenTextures(1, &framebufferData->depthAttachment);
-            glBindTexture(GL_TEXTURE_2D, framebufferData->depthAttachment);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, framebufferData->depthAttachment, 0);
-        }
+        glDrawBuffer(GL_NONE);
+        glReadBuffer(GL_NONE);
 
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         {
             Log::Print("Failed to create framebuffer.", LogLevel::Error);
         }
+
+        glBindTexture(GL_TEXTURE_2D, 0);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         m_framebuffers[newFramebufferRef] = std::move(framebufferData);
@@ -390,13 +388,60 @@ namespace engine
                        LogLevel::Warning);
             return;
         }
-
         glUseProgram(shaderIt->second->programID);
         applyUniforms(shaderIt->second, uniforms);
         applyShaderParameters(shaderIt->second);
         glBindVertexArray(meshIt->second->vao);
         glDrawElements(GL_TRIANGLES, meshIt->second->indexCount, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
+    }
+
+    void Renderer::setViewport(unsigned int x, unsigned int y, unsigned int width, unsigned int height)
+    {
+        glViewport(x, y, width, height);
+    }
+
+    void Renderer::setFramebuffer(FramebufferRef framebuffer)
+    {
+        if (framebuffer != 0)
+        {
+            auto framebufferIt = m_framebuffers.find(framebuffer);
+            if (framebufferIt == m_framebuffers.end())
+            {
+                Log::Print("Framebuffer not found for framebufferRef " + std::to_string(framebuffer) + " out of " + std::to_string(m_framebuffers.size()),
+                           LogLevel::Warning);
+                return;
+            }
+            glBindFramebuffer(GL_FRAMEBUFFER, framebufferIt->second->fbo);
+        }
+        else
+        {
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
+    }
+
+    void Renderer::resetFramebuffer()
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
+    void Renderer::clear(const glm::vec4 &color, bool clearColor, bool clearDepth, bool clearStencil)
+    {
+        GLbitfield mask = 0;
+        if (clearColor)
+        {
+            glClearColor(color.r, color.g, color.b, color.a);
+            mask |= GL_COLOR_BUFFER_BIT;
+        }
+        if (clearDepth)
+        {
+            mask |= GL_DEPTH_BUFFER_BIT;
+        }
+        if (clearStencil)
+        {
+            mask |= GL_STENCIL_BUFFER_BIT;
+        }
+        glClear(mask);
     }
 
     void Renderer::applyUniforms(const std::unique_ptr<ShaderData, ShaderDataDeleter> &shaderData, const UniformCollection &uniforms)
@@ -452,18 +497,37 @@ namespace engine
                     {
                         glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(v));
                     }
-                    else if constexpr (std::is_same_v<T, TextureRef>)
+                    else if constexpr (std::is_same_v<T, TextureUniform>)
                     {
+                        if (m_textures.find(v.textureRef) == m_textures.end())
+                        {
+                            Log::Print("Texture not found for textureRef " + std::to_string(v.textureRef) + " out of " + std::to_string(m_textures.size()),
+                                       LogLevel::Warning);
+                            return;
+                        }
                         glActiveTexture(GL_TEXTURE0 + textureUnit);
-                        switch (m_textures[v]->type)
+                        switch (v.type)
                         {
                         case Texture2D:
-                            glBindTexture(GL_TEXTURE_2D, m_textures[v]->textureID);
+                            glBindTexture(GL_TEXTURE_2D, m_textures[v.textureRef]->textureID);
                             break;
                         case CubeMap:
-                            glBindTexture(GL_TEXTURE_CUBE_MAP, m_textures[v]->textureID);
+                            glBindTexture(GL_TEXTURE_CUBE_MAP, m_textures[v.textureRef]->textureID);
                             break;
                         }
+                        glUniform1i(location, textureUnit);
+                        textureUnit++;
+                    }
+                    else if constexpr (std::is_same_v<T, FramebufferUniform>)
+                    {
+                        if (m_framebuffers.find(v.framebufferRef) == m_framebuffers.end())
+                        {
+                            Log::Print("Framebuffer not found for framebufferRef " + std::to_string(v.framebufferRef) + " out of " + std::to_string(m_framebuffers.size()),
+                                       LogLevel::Warning);
+                            return;
+                        }
+                        glActiveTexture(GL_TEXTURE0 + textureUnit);
+                        glBindTexture(GL_TEXTURE_2D, m_framebuffers[v.framebufferRef]->textureAttachment);
                         glUniform1i(location, textureUnit);
                         textureUnit++;
                     }

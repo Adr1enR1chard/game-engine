@@ -6,7 +6,6 @@
 #include <service/factory/MeshFactory.hpp>
 #include <service/factory/ShaderFactory.hpp>
 #include <service/factory/TextureFactory.hpp>
-#include <engine/service/resource/ModelResource.hpp>
 
 namespace default_bundle
 {

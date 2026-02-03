@@ -2,7 +2,6 @@
 
 #include <service/factory/ShaderFactory.hpp>
 #include <service/factory/TextureFactory.hpp>
-#include <engine/service/resource/MaterialResource.hpp>
 
 namespace default_bundle
 {

@@ -58,7 +58,7 @@ namespace engine
         TextureRef allocateCubeMap(const std::vector<TextureAttributes> &faces);
         MeshRef allocateMesh(const MeshAttributes &mesh);
         ShaderRef allocateShader(const ShaderAttributes &shader);
-        FramebufferRef allocateFramebuffer(unsigned int width, unsigned int height, bool withColorAttachment, bool withDepthAttachment);
+        FramebufferRef allocateDepthFramebuffer(unsigned int width, unsigned int height, bool withBorder = false);
 
         void freeTexture(TextureRef texture);
         void freeMesh(MeshRef mesh);
@@ -66,9 +66,13 @@ namespace engine
         void freeFramebuffer(FramebufferRef framebuffer);
 
         ShaderRef getShaderByName(const std::string &name) const;
-
         glm::mat4 getLocalModel(MeshRef mesh) const;
+
         void drawMesh(MeshRef mesh, ShaderRef shader, const UniformCollection &uniforms);
+        void setViewport(unsigned int x, unsigned int y, unsigned int width, unsigned int height);
+        void setFramebuffer(FramebufferRef framebuffer);
+        void resetFramebuffer();
+        void clear(const glm::vec4 &color, bool clearColor = true, bool clearDepth = true, bool clearStencil = false);
 
     private:
 #pragma region Data Structures

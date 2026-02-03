@@ -16,13 +16,6 @@
 #include <engine/utils/types.hpp>
 #include "threading/ThreadQueue.hpp"
 
-// Resources
-#include <engine/service/resource/TextureResource.hpp>
-#include <engine/service/resource/ShaderResource.hpp>
-#include <engine/service/resource/MeshResource.hpp>
-#include <engine/service/resource/MaterialResource.hpp>
-#include <engine/service/resource/ModelResource.hpp>
-
 // Platform Services
 #include <engine/service/platform/Window.hpp>
 #include <engine/service/platform/Input.hpp>

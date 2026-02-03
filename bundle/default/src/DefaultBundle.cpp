@@ -17,7 +17,7 @@ namespace default_bundle
         services.add<ModelFactory>(*(services.get<MaterialFactory>()), *(services.get<ShaderFactory>()),
                                    *(services.get<TextureFactory>()), *(services.get<MeshFactory>()));
 
-        services.add<ShadowMapping>(*(services.get<TextureResource>()), *(services.get<ShaderFactory>()));
+        services.add<ShadowMapping>(*(services.get<Renderer>()), *(services.get<ShaderFactory>()));
     }
     void DefaultBundle::uninstall(SystemRegistry &systems, ServiceRegistry &services) const
     {
@@ -25,9 +25,8 @@ namespace default_bundle
         services.remove<MaterialFactory>();
         services.remove<TextureFactory>();
         services.remove<MeshFactory>();
-        services.remove<ModelResource>();
-        services.remove<ShaderFactory>();
         services.remove<ModelFactory>();
+        services.remove<ShaderFactory>();
     }
 
 } // namespace default_bundle

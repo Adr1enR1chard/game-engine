@@ -9,90 +9,59 @@ namespace default_bundle
 
     using namespace engine;
 
-    ShadowMapping::ShadowMapping(TextureResource &textureResource, ShaderFactory &shaderFactory)
-        : m_textureResource(textureResource), m_shaderFactory(shaderFactory), m_width(4096), m_height(4096), m_depthMap(0)
+    ShadowMapping::ShadowMapping(Renderer &renderer, ShaderFactory &shaderFactory)
+        : m_renderer(renderer), m_shaderFactory(shaderFactory), m_width(1024), m_height(1024), m_depthFramebuffer(0)
     {
         float extent = 20.0f;
         m_lightProjectionMatrix = glm::ortho(-extent, extent, -extent, extent, m_nearPlane, m_farPlane);
     }
     ShadowMapping::~ShadowMapping() = default;
 
-    struct ShadowMapping::FramebufferImpl
-    {
-        unsigned int fbo;
-    };
-
-    void ShadowMapping::FramebufferDeleter::operator()(FramebufferImpl *framebufferImpl)
-    {
-        if (framebufferImpl)
-        {
-            glDeleteFramebuffers(1, &framebufferImpl->fbo);
-            delete framebufferImpl;
-        }
-    }
-
-    TextureRef ShadowMapping::createDepthMap()
+    FramebufferRef ShadowMapping::initializeDepthBuffer()
     {
         m_depthShader = m_shaderFactory.CustomShader("__ShadowMappingDepthShader",
                                                      "default-bundle-assets/shaders/shadow_mapping/depth.vert",
-                                                     "default-bundle-assets/shaders/shadow_mapping/depth.frag", {});
-
-        unsigned int fbo;
-        glGenFramebuffers(1, &fbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-        // Create depth map texture and attach it to the framebuffer
-        m_depthMap = m_textureResource.depthMap(m_width, m_height);
-
-        glDrawBuffer(GL_NONE);
-        glReadBuffer(GL_NONE);
-
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        {
-            Log::Print("Failed to create framebuffer for shadow mapping.", LogLevel::Error);
-        }
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-        m_framebuffer = std::unique_ptr<FramebufferImpl, FramebufferDeleter>(new FramebufferImpl{fbo});
-
-        return m_depthMap;
+                                                     "default-bundle-assets/shaders/shadow_mapping/depth.frag",
+                                                     {},
+                                                     {
+                                                         .enableBackfaceCulling = false,
+                                                         .enableDepthTest = true,
+                                                         .enableDepthWrite = true,
+                                                     });
+        m_depthFramebuffer = createDepthBuffer();
+        return m_depthFramebuffer;
     }
 
-    TextureRef ShadowMapping::getDepthMap() const
+    FramebufferRef ShadowMapping::createDepthBuffer()
     {
-        return m_depthMap;
+        return m_renderer.allocateDepthFramebuffer(m_width, m_height, true);
     }
 
-    void ShadowMapping::prepareForRender(ShaderResource *shaderResource, glm::vec3 lightDir, glm::vec3 target)
+    FramebufferRef ShadowMapping::getDepthBuffer() const
     {
-        shaderResource->bind(m_depthShader, glm::mat4(1.0f), glm::mat4(1.0f), glm::mat4(1.0f));
-
-        glGetIntegerv(GL_VIEWPORT, m_viewportBackup);
-        glViewport(0, 0, m_width, m_height); // Assuming a fixed size for simplicity
-        glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer->fbo);
-        glClear(GL_DEPTH_BUFFER_BIT);
-
-        m_lightViewMatrix = glm::lookAt(target - lightDir * 5.0f, target, glm::vec3(0.0f, 1.0f, 0.0f));
-
-        shaderResource->setUniform(m_depthShader, "uLightSpaceMatrix", getLightSpaceMatrix());
+        return m_depthFramebuffer;
     }
 
-    void ShadowMapping::restoreAfterRender()
+    glm::mat4 ShadowMapping::getLightSpaceMatrix(glm::vec3 lightDir, glm::vec3 target) const
     {
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(m_viewportBackup[0], m_viewportBackup[1], m_viewportBackup[2], m_viewportBackup[3]);
+        return m_lightProjectionMatrix * glm::lookAt(target - lightDir * 5.0f, target, glm::vec3(0.0f, 1.0f, 0.0f));
     }
+
+    // void ShadowMapping::restoreAfterRender()
+    // {
+    //     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //     glViewport(m_viewportBackup[0], m_viewportBackup[1], m_viewportBackup[2], m_viewportBackup[3]);
+    // }
 
     void ShadowMapping::setShadowMapDimensions(unsigned int width, unsigned int height)
     {
         m_width = width;
         m_height = height;
 
-        if (m_depthMap != 0)
+        if (m_depthFramebuffer != 0)
         {
-            m_textureResource.remove(m_depthMap);
-            m_framebuffer.reset();
-            createDepthMap();
+            m_renderer.freeFramebuffer(m_depthFramebuffer);
+            m_depthFramebuffer = createDepthBuffer();
         }
     }
 
