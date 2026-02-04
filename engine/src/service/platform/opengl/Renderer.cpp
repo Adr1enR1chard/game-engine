@@ -349,6 +349,7 @@ namespace engine
 
 #pragma endregion
 
+#pragma region Rendering
     ShaderRef Renderer::getShaderByName(const std::string &name) const
     {
         auto it = m_nameToShaderRef.find(name);
@@ -395,10 +396,27 @@ namespace engine
         glDrawElements(GL_TRIANGLES, meshIt->second->indexCount, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
     }
+#pragma endregion
 
-    void Renderer::setViewport(unsigned int x, unsigned int y, unsigned int width, unsigned int height)
+#pragma region State Management
+    void Renderer::setViewport(unsigned int x, unsigned int y, unsigned int width, unsigned int height, int *previousWidth, int *previousHeight)
     {
+        if (previousWidth != nullptr && previousHeight != nullptr)
+        {
+            int currentWidth, currentHeight;
+            getViewportSize(currentWidth, currentHeight);
+            *previousWidth = currentWidth;
+            *previousHeight = currentHeight;
+        }
         glViewport(x, y, width, height);
+    }
+
+    void Renderer::getViewportSize(int &width, int &height) const
+    {
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
+        width = viewport[2];
+        height = viewport[3];
     }
 
     void Renderer::setFramebuffer(FramebufferRef framebuffer)
@@ -444,6 +462,20 @@ namespace engine
         glClear(mask);
     }
 
+    void Renderer::enableMultisampling(bool enable)
+    {
+        if (enable)
+        {
+            glEnable(GL_MULTISAMPLE);
+        }
+        else
+        {
+            glDisable(GL_MULTISAMPLE);
+        }
+    }
+#pragma endregion
+
+#pragma region Helpers
     void Renderer::applyUniforms(const std::unique_ptr<ShaderData, ShaderDataDeleter> &shaderData, const UniformCollection &uniforms)
     {
         GLint currentProgram = 0;
@@ -596,5 +628,5 @@ namespace engine
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
     }
-
+#pragma endregion
 } // namespace engine

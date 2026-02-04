@@ -14,6 +14,7 @@ namespace default_bundle
   {
   public:
     void start() override;
+    void preRender(float deltaTime) override;
     void render(float deltaTime) override;
 
   private:
@@ -21,7 +22,7 @@ namespace default_bundle
 
     bool m_cameraNotFoundLogged = false;
 
-    void initializeDebugShadowMapVisualization(class ShadowMapping *shadowMapping, class ShaderFactory *shaderFactory, class MeshFactory *meshFactory);
+    void initializeShadowMapVisualizer(class ShadowMapping *shadowMapping, class ShaderFactory *shaderFactory, class MeshFactory *meshFactory);
     ShaderRef m_debugShadowMapShader = 0;
     MeshRef m_debugScreenQuadMesh = 0;
     UniformCollection m_debugShadowMapUniforms;

@@ -31,7 +31,7 @@ public:
         m_environmentEntity = world().createEntity(CEnvironment{
             .skyboxMaterial = services().get<MaterialFactory>()->CustomMaterial(skyboxShader)});
 
-        services().get<ShadowMapping>()->setShadowMapDimensions(2048, 2048);
+        services().get<ShadowMapping>()->setShadowMapDimensions(4096, 4096);
         services().get<ShadowMapping>()->setLightProjection(-1000.0f, 1000.0f, 100.0f);
 
         world().createEntity(CDirectionalLight{

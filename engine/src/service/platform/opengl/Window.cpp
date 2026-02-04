@@ -79,9 +79,8 @@ namespace engine
         if (glfwRawMouseMotionSupported())
             glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
-        glfwSwapInterval(1); // Enable vsync
-        glEnable(GL_MULTISAMPLE);
-        glEnable(GL_DEPTH_TEST);
+        // Enable vsync
+        glfwSwapInterval(1);
     }
 
     void Window::setSize(int width, int height)
@@ -121,12 +120,6 @@ namespace engine
     void Window::pollEvents()
     {
         glfwPollEvents();
-    }
-
-    void Window::clear()
-    {
-        glClearColor(m_clearColor.r, m_clearColor.g, m_clearColor.b, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
     void Window::getSize(int &width, int &height) const

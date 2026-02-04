@@ -4,7 +4,7 @@
 
 #include <component/CCamera.hpp>
 #include <component/cache/CCameraCache.hpp>
-#include <engine/service/platform/Window.hpp>
+#include <engine/service/platform/Renderer.hpp>
 
 namespace default_bundle
 {
@@ -25,7 +25,7 @@ namespace default_bundle
             }
 
             int width, height;
-            services().get<Window>()->getSize(width, height);
+            services().get<Renderer>()->getViewportSize(width, height);
             if (height == 0 || width == 0)
                 return;
 

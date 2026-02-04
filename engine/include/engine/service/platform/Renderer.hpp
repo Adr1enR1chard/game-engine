@@ -69,10 +69,12 @@ namespace engine
         glm::mat4 getLocalModel(MeshRef mesh) const;
 
         void drawMesh(MeshRef mesh, ShaderRef shader, const UniformCollection &uniforms);
-        void setViewport(unsigned int x, unsigned int y, unsigned int width, unsigned int height);
+        void setViewport(unsigned int x, unsigned int y, unsigned int width, unsigned int height, int *previousWidth = nullptr, int *previousHeight = nullptr);
+        void getViewportSize(int &width, int &height) const;
         void setFramebuffer(FramebufferRef framebuffer);
         void resetFramebuffer();
         void clear(const glm::vec4 &color, bool clearColor = true, bool clearDepth = true, bool clearStencil = false);
+        void enableMultisampling(bool enable);
 
     private:
 #pragma region Data Structures

@@ -101,7 +101,6 @@ namespace engine
                 m_window->pollEvents();
                 m_systems.preUpdate(deltaTime);
                 m_systems.update(deltaTime);
-                m_window->clear();
                 m_systems.preRender(deltaTime);
                 m_systems.render(deltaTime);
                 m_window->swapBuffers();

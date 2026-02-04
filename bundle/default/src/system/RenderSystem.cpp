@@ -37,8 +37,16 @@ namespace default_bundle
     {
         auto shadowMapping = services().get<ShadowMapping>();
         shadowMapping->initializeDepthBuffer();
+        initializeShadowMapVisualizer(shadowMapping, services().get<ShaderFactory>(), services().get<MeshFactory>());
 
-        initializeDebugShadowMapVisualization(shadowMapping, services().get<ShaderFactory>(), services().get<MeshFactory>());
+        auto renderer = services().get<Renderer>();
+        renderer->enableMultisampling(true);
+    }
+
+    void RenderSystem::preRender(float /*deltaTime*/)
+    {
+        Renderer *renderer = services().get<Renderer>();
+        renderer->clear(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f), true, true, false);
     }
 
     void RenderSystem::render(float /*deltaTime*/)
@@ -74,7 +82,8 @@ namespace default_bundle
             UniformCollection depthUniforms;
             depthUniforms["uLightSpaceMatrix"] = lightSpaceMatrix;
 
-            renderer->setViewport(0, 0, shadowMapping->m_width, shadowMapping->m_height);
+            int previousWidth, previousHeight;
+            renderer->setViewport(0, 0, shadowMapping->m_width, shadowMapping->m_height, &previousWidth, &previousHeight);
             renderer->setFramebuffer(shadowMapping->getDepthBuffer());
             renderer->clear(glm::vec4(1.0f), false, true, false);
 
@@ -96,10 +105,7 @@ namespace default_bundle
             }
 
             renderer->resetFramebuffer();
-
-            int windowWidth, windowHeight;
-            services().get<Window>()->getSize(windowWidth, windowHeight);
-            renderer->setViewport(0, 0, windowWidth, windowHeight);
+            renderer->setViewport(0, 0, previousWidth, previousHeight);
         }
 
         /// ---- Debug shadow map visualization ----
@@ -165,7 +171,7 @@ namespace default_bundle
         uniforms["uBias"] = bias;
     }
 
-    void RenderSystem::initializeDebugShadowMapVisualization(ShadowMapping *shadowMapping, ShaderFactory *shaderFactory, MeshFactory *meshFactory)
+    void RenderSystem::initializeShadowMapVisualizer(ShadowMapping *shadowMapping, ShaderFactory *shaderFactory, MeshFactory *meshFactory)
     {
         m_debugShadowMapShader = shaderFactory->CustomShader("__ShadowMapVisualization",
                                                              "default-bundle-assets/shaders/shadow_mapping/debug/shadow_map_visualization.vert",
