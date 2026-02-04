@@ -37,14 +37,16 @@ namespace engine
             return *m_instance;
         }
 
-        static Engine &InitializeEmbedded()
+        static Engine &InitializeEmbedded(World *&outWorld, SystemRegistry *&outSystems, ServiceRegistry *&outServices)
         {
             if (!m_instance)
             {
                 m_instance.reset(new Engine());
             }
 
-            m_instance->addServices<Renderer>();
+            outWorld = &m_instance->m_world;
+            outSystems = &m_instance->m_systems;
+            outServices = &m_instance->m_services;
 
             return *m_instance;
         }
@@ -200,21 +202,6 @@ namespace engine
         {
             m_services.remove<Ts...>();
             return *this;
-        }
-
-        World &world()
-        {
-            return m_world;
-        }
-
-        SystemRegistry &systems()
-        {
-            return m_systems;
-        }
-
-        ServiceRegistry &services()
-        {
-            return m_services;
         }
 
     private:

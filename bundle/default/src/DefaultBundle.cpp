@@ -9,10 +9,10 @@ namespace default_bundle
     {
         systems.add<TransformSystem, CameraSystem, RenderSystem, LightSystem, EnvironmentSystem>();
 
-        if (!services.get<Renderer>() || !services.get<Window>())
+        if (!services.get<Renderer>())
         {
-            Log::Print("DefaultBundle requires Renderer and Window services to be installed.", LogLevel::Critical);
-            throw std::runtime_error("DefaultBundle requires Renderer and Window services to be installed.");
+            Log::Print("DefaultBundle requires Renderer service to be installed.", LogLevel::Critical);
+            throw std::runtime_error("DefaultBundle requires Renderer service to be installed.");
             return;
         }
 

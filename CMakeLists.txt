@@ -145,6 +145,7 @@ add_library(engine_editor
 target_include_directories(engine_editor PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/tools/editor/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/tools/editor/src
 )
 target_link_libraries(engine_editor PUBLIC
     engine_core
@@ -269,6 +270,15 @@ add_asset_pipeline(
     ALIAS        default_bundle
     SOURCE_DIR   "${DEFAULT_BUNDLE_ASSETS_SRC}"
     RUNTIME_DIR  "$<TARGET_FILE_DIR:SpaceGame>/default-bundle-assets"
+    COMPILER     "${ASSET_COMPILER_EXE}"
+    EXTENSIONS   ${EXTENSIONS}
+)
+
+add_asset_pipeline(
+    TARGET       Editor
+    ALIAS        default_bundle
+    SOURCE_DIR   "${DEFAULT_BUNDLE_ASSETS_SRC}"
+    RUNTIME_DIR  "$<TARGET_FILE_DIR:Editor>/default-bundle-assets"
     COMPILER     "${ASSET_COMPILER_EXE}"
     EXTENSIONS   ${EXTENSIONS}
 )

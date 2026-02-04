@@ -51,8 +51,6 @@ namespace engine
             (m_systems.erase<T>(), ...);
         }
 
-    private:
-        friend class Engine;
         void setContext(World &world, ServiceRegistry &services)
         {
             m_systems.map([&](System &sys)
