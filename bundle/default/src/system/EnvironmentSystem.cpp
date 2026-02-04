@@ -4,7 +4,7 @@
 #include <component/cache/CSkyboxCache.hpp>
 #include <engine/utils/Log.hpp>
 #include <service/factory/MeshFactory.hpp>
-#include <engine/service/platform/Window.hpp>
+#include <engine/bundle/standalone/service/Window.hpp>
 
 namespace default_bundle
 {
@@ -25,7 +25,8 @@ namespace default_bundle
 
         if (m_lastClearColor != m_environment->backgroundColor)
         {
-            services().get<Window>()->clearColor(m_environment->backgroundColor);
+            // TODO: replace with renderer
+            // services().get<Window>()->clearColor(m_environment->backgroundColor);
             m_lastClearColor = m_environment->backgroundColor;
         }
     }

@@ -9,6 +9,13 @@ namespace default_bundle
     {
         systems.add<TransformSystem, CameraSystem, RenderSystem, LightSystem, EnvironmentSystem>();
 
+        if (!services.get<Renderer>() || !services.get<Window>())
+        {
+            Log::Print("DefaultBundle requires Renderer and Window services to be installed.", LogLevel::Critical);
+            throw std::runtime_error("DefaultBundle requires Renderer and Window services to be installed.");
+            return;
+        }
+
         services.add<TextureFactory>(*(services.get<Renderer>()));
         services.add<MeshFactory>(*(services.get<Renderer>()));
         services.add<ShaderFactory>(*(services.get<Renderer>()), *(services.get<TextureFactory>()));

@@ -15,8 +15,8 @@
 #include <component/cache/CSkyboxCache.hpp>
 #include <component/cache/CTransformCache.hpp>
 
-#include <engine/service/platform/Window.hpp>
-#include <engine/service/platform/Renderer.hpp>
+#include <engine/bundle/standalone/service/Window.hpp>
+#include <engine/bundle/standalone/service/Renderer.hpp>
 
 const std::vector<VertexLayout> kQuadVertices = {
     // positions        // texCoords
@@ -41,12 +41,6 @@ namespace default_bundle
 
         auto renderer = services().get<Renderer>();
         renderer->enableMultisampling(true);
-    }
-
-    void RenderSystem::preRender(float /*deltaTime*/)
-    {
-        Renderer *renderer = services().get<Renderer>();
-        renderer->clear(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f), true, true, false);
     }
 
     void RenderSystem::render(float /*deltaTime*/)
@@ -85,7 +79,7 @@ namespace default_bundle
             int previousWidth, previousHeight;
             renderer->setViewport(0, 0, shadowMapping->m_width, shadowMapping->m_height, &previousWidth, &previousHeight);
             renderer->setFramebuffer(shadowMapping->getDepthBuffer());
-            renderer->clear(glm::vec4(1.0f), false, true, false);
+            renderer->clear(false, true, false);
 
             /// ------- Render Meshes for Depth -------
             for (const auto &[entity, meshRenderer, transform] : world().fetch<CMeshRenderer, CTransformCache>())
@@ -123,7 +117,8 @@ namespace default_bundle
             }
             else
             {
-                services().get<Window>()->clearColor(environment->backgroundColor);
+                // TODO: replace with renderer
+                // services().get<Window>()->clearColor(environment->backgroundColor);
             }
         }
 

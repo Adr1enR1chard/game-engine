@@ -102,9 +102,10 @@ target_include_directories(engine_core PUBLIC
      ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/engine/include
 )
-target_compile_definitions(engine_core PUBLIC GLFW_INCLUDE_NONE)
 target_link_libraries(engine_core
 PUBLIC
+    glfw
+    OpenGL::GL
     assets_format
 )
 enable_strict_warnings(engine_core)
@@ -117,6 +118,41 @@ target_include_directories(engine_vendor PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 enable_strict_warnings(engine_vendor)
+
+#Library: ImGui
+file(GLOB_RECURSE IMGUI_SOURCES
+    tools/editor/include/imgui/*.cpp
+)
+add_library(imgui
+    ${IMGUI_SOURCES}
+)
+target_include_directories(imgui PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/tools/editor/include/imgui
+)
+target_link_libraries(imgui 
+PUBLIC 
+    glfw
+    OpenGL::GL
+)
+
+#Library : Editor
+file(GLOB_RECURSE EDITOR_SOURCES
+    tools/editor/src/*.cpp
+)
+add_library(engine_editor
+    ${EDITOR_SOURCES}
+)
+target_include_directories(engine_editor PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/tools/editor/include
+)
+target_link_libraries(engine_editor PUBLIC
+    engine_core
+    engine_vendor
+    imgui
+    default_bundle
+    default_bundle_glfw
+)
 
 ###########################
 ## Executables
@@ -177,6 +213,14 @@ set_target_properties(SpaceGame PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY_RELEASE "${EXAMPLES_OUTPUT_DIR}/SpaceGame"
     RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${EXAMPLES_OUTPUT_DIR}/SpaceGame"
     RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${EXAMPLES_OUTPUT_DIR}/SpaceGame"
+)
+
+# Executable: Editor
+add_executable(Editor
+    tools/editor/src/main.cpp
+)
+target_link_libraries(Editor PUBLIC
+    engine_editor
 )
 
 ###########################

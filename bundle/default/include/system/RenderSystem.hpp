@@ -14,7 +14,6 @@ namespace default_bundle
   {
   public:
     void start() override;
-    void preRender(float deltaTime) override;
     void render(float deltaTime) override;
 
   private:

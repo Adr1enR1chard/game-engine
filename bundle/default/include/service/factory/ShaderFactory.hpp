@@ -1,7 +1,7 @@
 #pragma once
 
 #include <engine/model/Service.hpp>
-#include <engine/service/platform/Renderer.hpp>
+#include <engine/bundle/standalone/service/Renderer.hpp>
 
 #include <service/factory/TextureFactory.hpp>
 

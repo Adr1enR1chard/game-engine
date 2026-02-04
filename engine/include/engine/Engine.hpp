@@ -16,10 +16,7 @@
 #include <engine/utils/types.hpp>
 #include "threading/ThreadQueue.hpp"
 
-// Platform Services
-#include <engine/service/platform/Window.hpp>
-#include <engine/service/platform/Input.hpp>
-#include <engine/service/platform/Renderer.hpp>
+#include <engine/bundle/standalone/StandaloneBundle.hpp>
 
 namespace engine
 {
@@ -28,12 +25,27 @@ namespace engine
     {
 
     public:
-        static Engine &Init()
+        static Engine &InitiliazeStandalone()
         {
             if (!m_instance)
             {
                 m_instance.reset(new Engine());
             }
+
+            m_instance->addBundle<StandaloneBundle>();
+
+            return *m_instance;
+        }
+
+        static Engine &InitializeEmbedded()
+        {
+            if (!m_instance)
+            {
+                m_instance.reset(new Engine());
+            }
+
+            m_instance->addServices<Renderer>();
+
             return *m_instance;
         }
 
@@ -55,7 +67,7 @@ namespace engine
         }
 
     private:
-        Engine();
+        Engine() : m_running(false) {}
 
         static std::unique_ptr<Engine> m_instance;
 
@@ -65,16 +77,20 @@ namespace engine
 
         void run(unsigned int width, unsigned int height, const char *title, bool fullscreen = false)
         {
-            m_window->setResolution(width, height);
-            m_window->setTitle(title);
-            m_window->setFullscreen(fullscreen);
+            auto *window = m_services.get<Window>();
+            auto *input = m_services.get<Input>();
 
-            run();
-        }
+            if (!window || !input)
+            {
+                Log::Print("Engine must be initialized with StandaloneBundle before running. Use Engine::InitiliazeStandalone().", LogLevel::Critical);
+                throw std::runtime_error("Engine must be initialized with StandaloneBundle before running.");
+                return;
+            }
 
-        void run()
-        {
-            m_window->create();
+            window->setResolution(width, height);
+            window->setTitle(title);
+            window->setFullscreen(fullscreen);
+            window->create();
 
             m_systems.setContext(m_world, m_services);
             m_systems.init();
@@ -97,13 +113,15 @@ namespace engine
                 deltaTime = static_cast<float>(delta.count());
 
                 // --- Engine loop ---
-                m_input->clear();
-                m_window->pollEvents();
+                input->clear();
+                window->pollEvents();
                 m_systems.preUpdate(deltaTime);
                 m_systems.update(deltaTime);
+                auto *renderer = m_services.get<Renderer>();
+                renderer->clear(true, true, false);
                 m_systems.preRender(deltaTime);
                 m_systems.render(deltaTime);
-                m_window->swapBuffers();
+                window->swapBuffers();
 
                 m_mainThreadQueue.executeAll();
             }
@@ -184,6 +202,21 @@ namespace engine
             return *this;
         }
 
+        World &world()
+        {
+            return m_world;
+        }
+
+        SystemRegistry &systems()
+        {
+            return m_systems;
+        }
+
+        ServiceRegistry &services()
+        {
+            return m_services;
+        }
+
     private:
         bool m_running = false;
         World m_world;
@@ -191,8 +224,6 @@ namespace engine
         ServiceRegistry m_services;
         std::vector<std::unique_ptr<Bundle>> m_bundles;
         ThreadQueue m_mainThreadQueue;
-        Window *m_window = nullptr;
-        Input *m_input = nullptr;
     };
 
 } // namespace engine

@@ -9,7 +9,7 @@ using namespace default_bundle;
 
 int main()
 {
-    Engine::Init()
+    Engine::InitiliazeStandalone()
         .addBundle<DefaultBundle>()
         .addSystems<OrbitCameraSystem, SpaceEnvironmentSystem, SpaceshipControlSystem>()
         .run(1920, 1080, "Space Game", true);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <engine/service/platform/Renderer.hpp>
+#include <engine/bundle/standalone/service/Renderer.hpp>
 
 namespace default_bundle
 {

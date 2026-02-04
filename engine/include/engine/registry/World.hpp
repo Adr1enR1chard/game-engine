@@ -70,6 +70,14 @@ namespace engine
         template <typename... Cs>
         bool hasComponents(Entity entity) const;
 
+        void forEachEntity(const std::function<void(Entity)> &func) const
+        {
+            for (const Entity &entity : m_entities)
+            {
+                func(entity);
+            }
+        }
+
     private:
         Entity allocateEntity();
         template <typename T>
