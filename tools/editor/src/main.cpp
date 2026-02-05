@@ -97,7 +97,7 @@ int main()
         glfwGetFramebufferSize(window, &display_w, &display_h);
 
         // ----- Your ImGui UI -----
-        EditorUI::Render(*world, *systems, *services->get<engine::Renderer>(), display_w, display_h, deltaTime);
+        EditorUI::Render(*world, *systems, *services, display_w, display_h, deltaTime);
         // -------------------------
 
         // // Render

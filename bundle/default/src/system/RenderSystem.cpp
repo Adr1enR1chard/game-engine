@@ -41,6 +41,8 @@ namespace default_bundle
 
         auto renderer = services().get<Renderer>();
         renderer->enableMultisampling(true);
+
+        m_whiteTexture = services().get<TextureFactory>()->WhiteTexture2D();
     }
 
     void RenderSystem::render(float /*deltaTime*/)
@@ -165,7 +167,10 @@ namespace default_bundle
         uniforms["view"] = viewMatrix;
         uniforms["projection"] = projMatrix;
         uniforms["uDirLightSpaceMatrix"] = lightSpaceMatrix;
-        uniforms["uShadowMap"] = FramebufferUniform{shadowMap};
+        if (shadowMap != 0)
+            uniforms["uShadowMap"] = FramebufferUniform{shadowMap};
+        else
+            uniforms["uShadowMap"] = TextureUniform{m_whiteTexture, TextureType::Texture2D};
         uniforms["uBias"] = bias;
     }
 

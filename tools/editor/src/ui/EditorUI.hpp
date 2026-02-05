@@ -16,7 +16,7 @@ namespace engine_editor
     class EditorUI
     {
     public:
-        static void Render(World &world, SystemRegistry &systems, engine::Renderer &renderer, int windowWidth, int windowHeight, float deltaTime);
+        static void Render(World &world, SystemRegistry &systems, ServiceRegistry &services, int windowWidth, int windowHeight, float deltaTime);
 
     private:
         static bool m_firstFrame;

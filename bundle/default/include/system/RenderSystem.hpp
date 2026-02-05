@@ -25,6 +25,7 @@ namespace default_bundle
     ShaderRef m_debugShadowMapShader = 0;
     MeshRef m_debugScreenQuadMesh = 0;
     UniformCollection m_debugShadowMapUniforms;
+    TextureRef m_whiteTexture = 0;
   };
 
 } // namespace default_bundle

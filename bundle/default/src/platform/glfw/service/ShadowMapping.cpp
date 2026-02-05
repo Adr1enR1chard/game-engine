@@ -39,6 +39,8 @@ namespace default_bundle
 
     FramebufferRef ShadowMapping::getDepthBuffer() const
     {
+        if (!m_enabled)
+            return 0;
         return m_depthFramebuffer;
     }
 
