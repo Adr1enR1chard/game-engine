@@ -58,6 +58,8 @@ namespace default_bundle
         }
 
         Renderer *renderer = services().get<Renderer>();
+        int width, height;
+        renderer->getViewportSize(width, height);
 
         glm::mat4 viewMatrix = camTransformCache->viewMatrix;
         glm::mat4 projMatrix = cameraCache->projectionMatrix;
@@ -65,7 +67,7 @@ namespace default_bundle
         /// ------- Shadow Mapping -------
         auto shadowMapping = services().get<ShadowMapping>();
         glm::mat4 lightSpaceMatrix = glm::mat4(1.0f);
-        if (shadowMapping->getDepthBuffer() != 0)
+        if (shadowMapping->enabled() && shadowMapping->getDepthBuffer() != 0)
         {
             auto [_, dirLight] = world().fetchAt<CDirectionalLight>(0);
             if (!dirLight)
@@ -98,7 +100,8 @@ namespace default_bundle
                         renderer->drawMesh(modelRef, shadowMapping->getDepthShader(), depthUniforms); });
             }
 
-            renderer->resetFramebuffer();
+            // renderer->resetFramebuffer();
+            renderer->revertToPreviousFramebuffer();
             renderer->setViewport(0, 0, previousWidth, previousHeight);
         }
 

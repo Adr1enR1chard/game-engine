@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 #include <glm/glm.hpp>
+#include <stack>
 
 namespace engine
 {
@@ -73,8 +74,12 @@ namespace engine
         void getViewportSize(int &width, int &height) const;
         void setScissorRect(unsigned int x, unsigned int y, unsigned int width, unsigned int height);
         void resetScissorRect();
+
         void setFramebuffer(FramebufferRef framebuffer);
         void resetFramebuffer();
+        void revertToPreviousFramebuffer();
+
+    public:
         void clear(bool clearColor = true, bool clearDepth = true, bool clearStencil = false);
         void enableMultisampling(bool enable);
         void setClearColor(const glm::vec4 &color);
@@ -119,5 +124,6 @@ namespace engine
         void applyShaderParameters(const std::unique_ptr<ShaderData, ShaderDataDeleter> &shaderData);
 
         float m_clearColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+        std::stack<std::unique_ptr<FramebufferData, FramebufferDataDeleter>> m_framebufferStack;
     };
 }

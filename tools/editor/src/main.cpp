@@ -10,6 +10,7 @@
 
 #include "rendering/Renderer.hpp"
 #include <DefaultBundle.hpp>
+#include "systems/DefaultWorld.hpp"
 
 using namespace engine_editor;
 using namespace default_bundle;
@@ -60,14 +61,12 @@ int main()
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    engine_editor::Renderer::Initialize(1280 * main_scale, 800 * main_scale);
-
     World *world;
     SystemRegistry *systems;
     ServiceRegistry *services;
-    engine::Engine::InitializeEmbedded(world, systems, services).addServices<engine::Renderer>().addBundle<default_bundle::DefaultBundle>();
-    world->createEntity(CCamera{}, CTransform{});
-    world->createEntity(CEnvironment{.skyboxMaterial = services->get<MaterialFactory>()->SkyboxMaterial()}, CTransform{});
+    engine::Engine::InitializeEmbedded(world, systems, services).addServices<engine::Renderer>().addBundle<default_bundle::DefaultBundle>().addSystems<DefaultWorld>();
+
+    services->get<default_bundle::ShadowMapping>()->setEnabled(false); // Bug with shadow mapping in editor, disable for now
 
     systems->setContext(*world, *services);
     systems->init();
@@ -77,6 +76,7 @@ int main()
 
     float deltaTime = 0.0f;
 
+    systems->start();
     while (!glfwWindowShouldClose(window))
     {
 
@@ -97,16 +97,14 @@ int main()
         glfwGetFramebufferSize(window, &display_w, &display_h);
 
         // ----- Your ImGui UI -----
-        systems->preUpdate(deltaTime);
-        systems->update(deltaTime);
-        EditorUI::Render(*world, *systems, display_w, display_h);
+        EditorUI::Render(*world, *systems, *services->get<engine::Renderer>(), display_w, display_h, deltaTime);
         // -------------------------
 
         // // Render
         ImGui::Render();
         glViewport(0, 0, display_w, display_h);
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);

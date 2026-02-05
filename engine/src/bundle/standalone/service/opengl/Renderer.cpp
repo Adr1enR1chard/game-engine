@@ -269,6 +269,7 @@ namespace engine
         auto framebufferData = std::unique_ptr<FramebufferData, FramebufferDataDeleter>(new FramebufferData());
 
         glGenFramebuffers(1, &framebufferData->fbo);
+
         glBindFramebuffer(GL_FRAMEBUFFER, framebufferData->fbo);
         glGenTextures(1, &framebufferData->textureAttachment);
         glBindTexture(GL_TEXTURE_2D, framebufferData->textureAttachment);
@@ -299,6 +300,12 @@ namespace engine
 
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        auto err = glGetError();
+        if (err != GL_NO_ERROR)
+        {
+            Log::Print("OpenGL error creating depth framebuffer: 0x" + std::to_string(err), LogLevel::Error);
+        }
 
         m_framebuffers[newFramebufferRef] = std::move(framebufferData);
         return newFramebufferRef;
@@ -403,10 +410,7 @@ namespace engine
     {
         if (previousWidth != nullptr && previousHeight != nullptr)
         {
-            int currentWidth, currentHeight;
-            getViewportSize(currentWidth, currentHeight);
-            *previousWidth = currentWidth;
-            *previousHeight = currentHeight;
+            getViewportSize(*previousWidth, *previousHeight);
         }
         glViewport(x, y, width, height);
     }
@@ -432,26 +436,75 @@ namespace engine
 
     void Renderer::setFramebuffer(FramebufferRef framebuffer)
     {
+        // Retrieve the current framebuffer
+        GLint currentFramebuffer = 0;
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFramebuffer);
+
+        auto currentFramebufferData = std::unique_ptr<FramebufferData, FramebufferDataDeleter>(new FramebufferData({static_cast<GLuint>(currentFramebuffer), 0}));
+        m_framebufferStack.push(std::move(currentFramebufferData));
+
         if (framebuffer != 0)
         {
             auto framebufferIt = m_framebuffers.find(framebuffer);
             if (framebufferIt == m_framebuffers.end())
             {
-                Log::Print("Framebuffer not found for framebufferRef " + std::to_string(framebuffer) + " out of " + std::to_string(m_framebuffers.size()),
+                Log::Print("Renderer::setFramebuffer - Framebuffer not found for framebufferRef " + std::to_string(framebuffer) + " out of " + std::to_string(m_framebuffers.size()),
                            LogLevel::Warning);
                 return;
             }
             glBindFramebuffer(GL_FRAMEBUFFER, framebufferIt->second->fbo);
+            // checlk for gl error
+            auto err = glGetError();
+            if (err != GL_NO_ERROR)
+            {
+                Log::Print("OpenGL error binding framebuffer in Renderer::setFramebuffer: 0x" + std::to_string(err) + " for " + std::to_string(framebufferIt->second->fbo), LogLevel::Error);
+            }
         }
         else
         {
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            revertToPreviousFramebuffer();
         }
     }
 
     void Renderer::resetFramebuffer()
     {
+        while (!m_framebufferStack.empty())
+        {
+            m_framebufferStack.pop();
+        }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        auto err = glGetError();
+        if (err != GL_NO_ERROR)
+        {
+            Log::Print("OpenGL error resetting framebuffer in Renderer::resetFramebuffer: 0x" + std::to_string(err), LogLevel::Error);
+        }
+    }
+
+    void Renderer::revertToPreviousFramebuffer()
+    {
+        if (m_framebufferStack.empty())
+        {
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            Log::Print("Framebuffer stack is empty in Renderer::revertToPreviousFramebuffer, binding default framebuffer (0)", LogLevel::Warning);
+            auto err = glGetError();
+            if (err != GL_NO_ERROR)
+            {
+                Log::Print("OpenGL error binding default framebuffer in Renderer::revertToPreviousFramebuffer: 0x" + std::to_string(err), LogLevel::Error);
+            }
+            return;
+        }
+
+        auto previousFramebuffer = std::move(m_framebufferStack.top());
+        glBindFramebuffer(GL_FRAMEBUFFER, previousFramebuffer->fbo);
+
+        auto err = glGetError();
+        if (err != GL_NO_ERROR)
+        {
+            Log::Print("OpenGL error binding previous framebuffer in Renderer::revertToPreviousFramebuffer: 0x" + std::to_string(err) + " for " + std::to_string(previousFramebuffer->fbo), LogLevel::Error);
+        }
+
+        m_framebufferStack.pop();
     }
 
     void Renderer::clear(bool clearColor, bool clearDepth, bool clearStencil)
@@ -574,7 +627,7 @@ namespace engine
                     {
                         if (m_framebuffers.find(v.framebufferRef) == m_framebuffers.end())
                         {
-                            Log::Print("Framebuffer not found for framebufferRef " + std::to_string(v.framebufferRef) + " out of " + std::to_string(m_framebuffers.size()),
+                            Log::Print("Renderer::ApplyUniforms - Framebuffer not found for framebufferRef " + std::to_string(v.framebufferRef) + " out of " + std::to_string(m_framebuffers.size()),
                                        LogLevel::Warning);
                             return;
                         }

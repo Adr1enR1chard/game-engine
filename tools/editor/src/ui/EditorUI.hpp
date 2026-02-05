@@ -6,6 +6,7 @@
 #include <engine/registry/World.hpp>
 #include <engine/registry/SystemRegistry.hpp>
 #include <engine/model/Entity.hpp>
+#include <engine/bundle/standalone/service/Renderer.hpp>
 
 using namespace engine;
 
@@ -15,7 +16,7 @@ namespace engine_editor
     class EditorUI
     {
     public:
-        static void Render(World &world, SystemRegistry &systems, int windowWidth, int windowHeight);
+        static void Render(World &world, SystemRegistry &systems, engine::Renderer &renderer, int windowWidth, int windowHeight, float deltaTime);
 
     private:
         static bool m_firstFrame;

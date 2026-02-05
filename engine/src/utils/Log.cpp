@@ -56,6 +56,7 @@ namespace engine
                       << "): " << RESET_COLOR;
         }
         std::cout << message << std::endl;
+        fflush(stdout);
     }
 
     std::mutex Log::m_mutex;

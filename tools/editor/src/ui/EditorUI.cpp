@@ -1,14 +1,17 @@
 #include "EditorUI.hpp"
 #include <string>
 
+#include <component/CCamera.hpp>
 #include <engine/registry/World.hpp>
+
+#include <stdio.h>
 
 namespace engine_editor
 {
     Entity EditorUI::m_selectedEntity = 0;
     bool EditorUI::m_firstFrame = true;
 
-    void EditorUI::Render(World &world, SystemRegistry &systems, int windowWidth, int windowHeight)
+    void EditorUI::Render(World &world, SystemRegistry &systems, engine::Renderer &renderer, int windowWidth, int windowHeight, float deltaTime)
     {
         // ----------------------------------
         // Render scene into framebuffer
@@ -51,8 +54,6 @@ namespace engine_editor
             });
 
         ImGui::EndChild();
-        systems.preRender(0.0f);
-        systems.render(0.0f);
         ImGui::NextColumn();
 
         // ----------------
@@ -67,13 +68,22 @@ namespace engine_editor
 
         ImVec2 viewportSize = ImGui::GetContentRegionAvail();
 
-        Renderer::Render();
-        Renderer::End();
-
         if (viewportSize.x > 0 && viewportSize.y > 0)
         {
+            if (viewportSize.x != ViewportRenderer::GetFramebufferWidth() || viewportSize.y != ViewportRenderer::GetFramebufferHeight())
+            {
+                ViewportRenderer::Resize((int)viewportSize.x, (int)viewportSize.y);
+            }
+
+            ViewportRenderer::Begin();
+            systems.preUpdate(deltaTime);
+            systems.update(deltaTime);
+            systems.preRender(deltaTime);
+            systems.render(deltaTime);
+            ViewportRenderer::End();
+
             ImGui::Image(
-                (ImTextureID)Renderer::GetFramebufferTexture(),
+                (ImTextureID)ViewportRenderer::GetFramebufferTexture(),
                 viewportSize,
                 ImVec2(0, 1), // flip Y
                 ImVec2(1, 0));

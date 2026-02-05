@@ -30,6 +30,12 @@ namespace default_bundle
             m_lightProjectionMatrix = glm::ortho(-extent, extent, -extent, extent, m_nearPlane, m_farPlane);
         }
 
+        bool enabled() const { return m_enabled; }
+        void setEnabled(bool enabled)
+        {
+            m_enabled = enabled;
+        }
+
     private:
         friend class RenderSystem;
 
@@ -42,7 +48,6 @@ namespace default_bundle
         ShaderRef getDepthShader() const { return m_depthShader; }
 
         glm::mat4 getLightSpaceMatrix(glm::vec3 lightDir, glm::vec3 target) const;
-        void restoreAfterRender();
 
     private:
         Renderer &m_renderer;
@@ -61,6 +66,7 @@ namespace default_bundle
         ShaderRef m_depthShader;
 
         int m_viewportBackup[4];
+        bool m_enabled = true;
     };
 
 } // namespace default_bundle
