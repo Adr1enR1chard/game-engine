@@ -69,28 +69,10 @@ namespace engine
                           { system.start(); });
         }
 
-        void preUpdate(float deltaTime)
-        {
-            m_systems.map([&](System &system)
-                          { system.preUpdate(deltaTime); });
-        }
-
         void update(float deltaTime)
         {
             m_systems.map([&](System &system)
                           { system.update(deltaTime); });
-        }
-
-        void preRender(float deltaTime)
-        {
-            m_systems.map([&](System &system)
-                          { system.preRender(deltaTime); });
-        }
-
-        void render(float deltaTime)
-        {
-            m_systems.map([&](System &system)
-                          { system.render(deltaTime); });
         }
 
     private:

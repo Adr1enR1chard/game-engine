@@ -103,10 +103,7 @@ namespace engine_editor
                 (int)viewportSize.y);
 
             ViewportRenderer::Begin();
-            systems.preUpdate(deltaTime);
             systems.update(deltaTime);
-            systems.preRender(deltaTime);
-            systems.render(deltaTime);
             ViewportRenderer::End();
 
             ImGui::Image(

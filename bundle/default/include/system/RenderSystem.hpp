@@ -14,7 +14,7 @@ namespace default_bundle
   {
   public:
     void start() override;
-    void render(float deltaTime) override;
+    void update(float deltaTime) override;
 
   private:
     void setFinalRenderingUniforms(UniformCollection &uniforms, const glm::mat4 &modelMatrix, const glm::mat4 &viewMatrix, const glm::mat4 &projMatrix, const glm::mat4 &lightSpaceMatrix, FramebufferRef shadowMap, float bias);

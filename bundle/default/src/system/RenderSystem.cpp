@@ -45,7 +45,7 @@ namespace default_bundle
         m_whiteTexture = services().get<TextureFactory>()->WhiteTexture2D();
     }
 
-    void RenderSystem::render(float /*deltaTime*/)
+    void RenderSystem::update(float /*deltaTime*/)
     {
         const auto &[cameraEntity, cameraCache, camTransformCache, camTransform] = world().fetchAt<CCameraCache, CTransformCache, CTransform>(0);
 
