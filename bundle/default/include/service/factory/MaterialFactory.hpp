@@ -7,7 +7,7 @@ namespace default_bundle
 {
     using namespace engine;
 
-    struct Material
+    struct MaterialHandle
     {
         ShaderRef shaderRef;
         UniformCollection uniforms;
@@ -15,6 +15,91 @@ namespace default_bundle
         bool isValid() const
         {
             return shaderRef != 0;
+        }
+
+        operator bool() const
+        {
+            return isValid();
+        }
+
+        int *getInt(const std::string &name)
+        {
+            auto it = uniforms.find(name);
+            if (it != uniforms.end())
+            {
+                return std::get_if<int>(&(it->second));
+            }
+            return nullptr;
+        }
+
+        glm::vec3 *getVec3(const std::string &name)
+        {
+            auto it = uniforms.find(name);
+            if (it != uniforms.end())
+            {
+                return std::get_if<glm::vec3>(&(it->second));
+            }
+            return nullptr;
+        }
+
+        glm::mat4 *getMat4(const std::string &name)
+        {
+            auto it = uniforms.find(name);
+            if (it != uniforms.end())
+            {
+                return std::get_if<glm::mat4>(&(it->second));
+            }
+            return nullptr;
+        }
+
+        glm::vec2 *getVec2(const std::string &name)
+        {
+            auto it = uniforms.find(name);
+            if (it != uniforms.end())
+            {
+                return std::get_if<glm::vec2>(&(it->second));
+            }
+            return nullptr;
+        }
+
+        glm::vec4 *getVec4(const std::string &name)
+        {
+            auto it = uniforms.find(name);
+            if (it != uniforms.end())
+            {
+                return std::get_if<glm::vec4>(&(it->second));
+            }
+            return nullptr;
+        }
+
+        float *getFloat(const std::string &name)
+        {
+            auto it = uniforms.find(name);
+            if (it != uniforms.end())
+            {
+                return std::get_if<float>(&(it->second));
+            }
+            return nullptr;
+        }
+
+        TextureUniform *getTexture(const std::string &name)
+        {
+            auto it = uniforms.find(name);
+            if (it != uniforms.end())
+            {
+                return std::get_if<TextureUniform>(&(it->second));
+            }
+            return nullptr;
+        }
+
+        FramebufferUniform *getFramebuffer(const std::string &name)
+        {
+            auto it = uniforms.find(name);
+            if (it != uniforms.end())
+            {
+                return std::get_if<FramebufferUniform>(&(it->second));
+            }
+            return nullptr;
         }
     };
 
@@ -56,10 +141,10 @@ namespace default_bundle
             TextureRef colorMap = 0;
         };
 
-        Material PBRMaterial(const PBRMaterialParameters &options = {});
-        Material PhongMaterial(const PhongMaterialParameters &options = {});
-        Material SkyboxMaterial(const SkyboxMaterialParameters &options = {});
-        Material CustomMaterial(ShaderRef shaderRef, const UniformCollection &defaultUniforms = {});
+        MaterialHandle PBRMaterial(const PBRMaterialParameters &options = {});
+        MaterialHandle PhongMaterial(const PhongMaterialParameters &options = {});
+        MaterialHandle SkyboxMaterial(const SkyboxMaterialParameters &options = {});
+        MaterialHandle CustomMaterial(ShaderRef shaderRef, const UniformCollection &defaultUniforms = {});
 
     private:
         Renderer &m_renderer;

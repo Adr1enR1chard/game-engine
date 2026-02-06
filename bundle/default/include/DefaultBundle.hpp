@@ -1,6 +1,6 @@
 #pragma once
 
-#include <engine/Engine.hpp>
+#include <engine/model/Bundle.hpp>
 
 // --- Services ---
 #include <service/factory/ShaderFactory.hpp>
@@ -28,11 +28,13 @@
 namespace default_bundle
 {
 
-  class DefaultBundle : public engine::Bundle
+  using namespace engine;
+
+  class DefaultBundle : public Bundle
   {
   public:
-    void install(engine::SystemRegistry &systems, engine::ServiceRegistry &services) const override;
-    void uninstall(engine::SystemRegistry &systems, engine::ServiceRegistry &services) const override;
+    void install(Engine &engine) const override;
+    void uninstall(Engine &engine) const override;
   };
 
 } // namespace default_bundle

@@ -1,21 +1,18 @@
 #include <engine/bundle/standalone/StandaloneBundle.hpp>
 
-#include <engine/registry/SystemRegistry.hpp>
-#include <engine/registry/ServiceRegistry.hpp>
+#include <engine/Engine.hpp>
 
 namespace engine
 {
-    void StandaloneBundle::install(SystemRegistry & /**/, ServiceRegistry &services) const
+    void StandaloneBundle::install(Engine &engine) const
     {
-        services.add<Window>();
-        services.add<Input>();
-        services.add<Renderer>();
+        engine.addService<Window>();
+        engine.addService<Input>();
+        engine.addService<Renderer>();
     }
 
-    void StandaloneBundle::uninstall(SystemRegistry & /**/, ServiceRegistry &services) const
+    void StandaloneBundle::uninstall(Engine &engine) const
     {
-        services.remove<Renderer>();
-        services.remove<Input>();
-        services.remove<Window>();
+        engine.removeServices<Renderer, Window, Input>();
     }
 }

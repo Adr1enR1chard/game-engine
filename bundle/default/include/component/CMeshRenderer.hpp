@@ -12,13 +12,13 @@ namespace default_bundle
     struct CMeshRenderer
     {
         engine::MeshRef meshRef;
-        Material material;
+        MaterialHandle material;
     };
 
     struct CModelRenderer
     {
         Model model;
-        std::vector<Material> materialOverrides;
+        std::vector<MaterialHandle> materialOverrides;
     };
 
 } // namespace default_bundle

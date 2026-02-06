@@ -4,6 +4,7 @@
 #include "GLFW/glfw3.h"
 
 #include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "ui/EditorUI.hpp"
@@ -11,6 +12,12 @@
 #include "rendering/Renderer.hpp"
 #include <DefaultBundle.hpp>
 #include "systems/DefaultWorld.hpp"
+
+#include <ui/EntityPanel.hpp>
+#include <ui/ViewportPanel.hpp>
+#include <ui/InspectorPanel.hpp>
+
+#include <chrono>
 
 using namespace engine_editor;
 using namespace default_bundle;
@@ -47,6 +54,7 @@ int main()
     (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     // Enable Docking
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -64,12 +72,12 @@ int main()
     World *world;
     SystemRegistry *systems;
     ServiceRegistry *services;
-    engine::Engine::InitializeEmbedded(world, systems, services).addServices<engine::Renderer>().addBundle<default_bundle::DefaultBundle>().addSystems<DefaultWorld>();
+    engine::Engine::InitializeEmbedded(world, systems, services)
+        .addServices<engine::Renderer>()
+        .addBundle<default_bundle::DefaultBundle>()
+        .addSystems<DefaultWorld>();
 
     services->get<default_bundle::ShadowMapping>()->setEnabled(false); // Bug with shadow mapping in editor, disable for now
-
-    systems->setContext(*world, *services);
-    systems->init();
 
     using clock = std::chrono::steady_clock;
     auto lastFrame = clock::now();
@@ -77,6 +85,14 @@ int main()
     float deltaTime = 0.0f;
 
     systems->start();
+
+    EntityPanel entityPanel(*world);
+    ViewportPanel viewportPanel;
+    InspectorPanel inspectorPanel(*world, *services);
+
+    bool firstFrame = true;
+    ImGuiID dockspaceID = 0;
+
     while (!glfwWindowShouldClose(window))
     {
 
@@ -88,6 +104,12 @@ int main()
 
         glfwPollEvents();
 
+        ImVec2 viewportSize = viewportPanel.getViewportSize();
+        ViewportRenderer::Resize(viewportSize.x, viewportSize.y);
+        ViewportRenderer::Begin();
+        systems->update(deltaTime);
+        ViewportRenderer::End();
+
         // Start ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -96,8 +118,52 @@ int main()
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
 
+        // ----- Create Dockspace -----
+        ImGuiViewport *viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(viewport->WorkPos);
+        ImGui::SetNextWindowSize(viewport->WorkSize);
+        ImGui::SetNextWindowViewport(viewport->ID);
+
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
+                                        ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+                                        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
+                                        ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground;
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
+        ImGui::Begin("DockSpace", nullptr, window_flags);
+        ImGui::PopStyleVar(3);
+
+        dockspaceID = ImGui::GetID("MainDockspace");
+        ImGui::DockSpace(dockspaceID, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
+
+        // Setup initial docking layout on first frame
+        if (firstFrame)
+        {
+            firstFrame = false;
+            ImGui::DockBuilderRemoveNode(dockspaceID);
+            ImGui::DockBuilderAddNode(dockspaceID, ImGuiDockNodeFlags_DockSpace);
+            ImGui::DockBuilderSetNodeSize(dockspaceID, viewport->WorkSize);
+
+            ImGuiID dock_main_id = dockspaceID;
+            ImGuiID dock_left_id = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.2f, nullptr, &dock_main_id);
+            ImGuiID dock_right_id = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.25f, nullptr, &dock_main_id);
+
+            ImGui::DockBuilderDockWindow("Viewport", dock_main_id);
+            ImGui::DockBuilderDockWindow("Entities", dock_left_id);
+            ImGui::DockBuilderDockWindow("Inspector", dock_right_id);
+
+            ImGui::DockBuilderFinish(dockspaceID);
+        }
+
+        ImGui::End();
+
         // ----- Your ImGui UI -----
-        EditorUI::Render(*world, *systems, *services, display_w, display_h, deltaTime);
+        entityPanel.draw();
+        viewportPanel.draw(ViewportRenderer::GetFramebufferTexture());
+        inspectorPanel.draw(entityPanel.getSelectedEntity());
         // -------------------------
 
         // // Render

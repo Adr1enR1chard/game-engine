@@ -1,4 +1,5 @@
 #include <DefaultBundle.hpp>
+#include <engine/Engine.hpp>
 
 #include <systems/Camera.hpp>
 #include <systems/Environment.hpp>

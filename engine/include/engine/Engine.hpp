@@ -48,7 +48,7 @@ namespace engine
         Engine &addBundle()
         {
             std::unique_ptr<Bundle> bundle = std::make_unique<B>();
-            bundle->install(m_systems, m_services);
+            bundle->install(*this);
 
             m_bundles.push_back(std::move(bundle));
 
@@ -67,7 +67,7 @@ namespace engine
 
             if (it != m_bundles.end())
             {
-                (*it)->uninstall(m_systems, m_services);
+                (*it)->uninstall(*this);
                 m_bundles.erase(it);
             }
 
@@ -80,7 +80,7 @@ namespace engine
         template <SystemType... Ts>
         Engine &addSystems()
         {
-            m_systems.add<Ts...>();
+            m_systems.add<Ts...>(m_world, m_services);
 
             return *this;
         }
@@ -104,6 +104,19 @@ namespace engine
         {
             m_services.add<Ts...>();
             return *this;
+        }
+
+        template <ServiceType T, typename... Args>
+        Engine &addService(Args &&...args)
+        {
+            m_services.add<T>(std::forward<Args>(args)...);
+            return *this;
+        }
+
+        template <ServiceType T>
+        T *getService()
+        {
+            return m_services.get<T>();
         }
 
         /**

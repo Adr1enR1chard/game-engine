@@ -27,12 +27,12 @@ namespace default_bundle
         Renderer *renderer = services().get<Renderer>();
         for (const auto &[eModelRenderer, cModelRenderer] : world().fetch<CModelRenderer>())
         {
-            cModelRenderer->model.forEach([&](MeshRef /*meshRef*/, Material &material, size_t /*index*/)
+            cModelRenderer->model.forEach([&](MeshRef /*meshRef*/, MaterialHandle &material, size_t /*index*/)
                                           { setMaterialLights(material, cCameraTransform, cDirLight, pointLights); });
         }
     }
 
-    void LightSystem::setMaterialLights(Material &material,
+    void LightSystem::setMaterialLights(MaterialHandle &material,
                                         const CTransform *cameraTransform,
                                         const CDirectionalLight *dirLight,
                                         const std::vector<std::tuple<Entity, CPointLight *, CTransform *>> &pointLights)

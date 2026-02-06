@@ -96,7 +96,7 @@ namespace default_bundle
             /// ------- Render Models for Depth -------
             for (const auto &[entity, modelRenderer, transform] : world().fetch<CModelRenderer, CTransformCache>())
             {
-                modelRenderer->model.forEach([&](MeshRef modelRef, Material & /*materialRef*/, size_t /*index*/)
+                modelRenderer->model.forEach([&](MeshRef modelRef, MaterialHandle & /*materialRef*/, size_t /*index*/)
                                              {
                         depthUniforms["uModel"] = transform->modelMatrix * renderer->getLocalModel(modelRef);
                         renderer->drawMesh(modelRef, shadowMapping->getDepthShader(), depthUniforms); });
@@ -144,7 +144,7 @@ namespace default_bundle
         /// ------- Render Models -------
         for (const auto &[entity, modelRenderer, transform] : world().fetch<CModelRenderer, CTransformCache>())
         {
-            modelRenderer->model.forEach([&](MeshRef meshRef, Material &material, size_t index)
+            modelRenderer->model.forEach([&](MeshRef meshRef, MaterialHandle &material, size_t index)
                                          {
                 if (modelRenderer->materialOverrides.size() > index) {
                     material = modelRenderer->materialOverrides[index];

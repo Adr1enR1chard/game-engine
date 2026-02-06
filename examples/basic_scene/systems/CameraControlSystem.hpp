@@ -1,5 +1,6 @@
 #pragma once
 #include <DefaultBundle.hpp>
+#include <engine/bundle/standalone/StandaloneBundle.hpp>
 
 using namespace engine;
 using namespace default_bundle;

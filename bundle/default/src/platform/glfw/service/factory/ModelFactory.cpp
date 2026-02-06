@@ -22,7 +22,7 @@ namespace default_bundle
         }
 
         std::vector<MeshRef> meshRefs;
-        std::vector<Material> materials;
+        std::vector<MaterialHandle> materials;
         std::filesystem::path modelDir =
             std::filesystem::current_path() / std::filesystem::path(modelPath).parent_path();
         for (size_t i = 0; i < meshes.size(); i++)

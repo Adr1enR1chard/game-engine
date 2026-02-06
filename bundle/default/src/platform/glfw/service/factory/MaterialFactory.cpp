@@ -7,7 +7,7 @@ namespace default_bundle
 
     using namespace engine;
 
-    Material MaterialFactory::PBRMaterial(const PBRMaterialParameters &options)
+    MaterialHandle MaterialFactory::PBRMaterial(const PBRMaterialParameters &options)
     {
         ShaderRef pbrShaderRef = m_shaderFactory.PBRShader("__PBRShader");
 
@@ -32,7 +32,7 @@ namespace default_bundle
         return CustomMaterial(pbrShaderRef, uniforms);
     };
 
-    Material MaterialFactory::PhongMaterial(const PhongMaterialParameters &options)
+    MaterialHandle MaterialFactory::PhongMaterial(const PhongMaterialParameters &options)
     {
         ShaderRef phongShaderRef = m_shaderFactory.PhongShader("__PhongShader");
 
@@ -52,7 +52,7 @@ namespace default_bundle
         return CustomMaterial(phongShaderRef, uniforms);
     }
 
-    Material MaterialFactory::SkyboxMaterial(const SkyboxMaterialParameters &options)
+    MaterialHandle MaterialFactory::SkyboxMaterial(const SkyboxMaterialParameters &options)
     {
         ShaderRef skyboxShaderRef = m_shaderFactory.SkyboxShader("__SkyboxShader");
 
@@ -63,7 +63,7 @@ namespace default_bundle
         return CustomMaterial(skyboxShaderRef, uniforms);
     }
 
-    Material MaterialFactory::CustomMaterial(ShaderRef shaderRef, const UniformCollection &uniforms)
+    MaterialHandle MaterialFactory::CustomMaterial(ShaderRef shaderRef, const UniformCollection &uniforms)
     {
         return {shaderRef, uniforms};
     }

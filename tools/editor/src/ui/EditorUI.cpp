@@ -47,73 +47,13 @@ namespace engine_editor
         // ----------------
         // Entity List
         // ----------------
-        ImGui::TextUnformatted("Entities");
-        ImGui::Separator();
 
-        ImGui::BeginChild(
-            "Entities",
-            ImVec2(0, 0),
-            true);
-
-        world.forEachEntity([&](Entity e)
-                            {
-                        std::string name = "Entity " + std::to_string(e);
-
-                        if (ImGui::Selectable(name.c_str(), e == m_selectedEntity))
-                        {
-                            m_selectedEntity = e;
-                        } });
-
-        if (ImGui::Button("Add Entity", ImVec2(-1, 0)))
-        {
-            world.createEntity(
-                CMeshRenderer{
-                    .meshRef = services.get<MeshFactory>()->Cube(),
-                    .material = services.get<MaterialFactory>()->PBRMaterial(),
-                },
-                CTransform{
-                    .position = glm::vec3(0.0f),
-                    .rotation = glm::vec3(0.0f),
-                    .scale = glm::vec3(1.0f),
-                });
-        }
-
-        ImGui::EndChild();
         ImGui::EndChild();
 
         // =================================================
         // (Viewport)
         // =================================================
         ImGui::SameLine();
-
-        ImGui::BeginChild(
-            "Viewport",
-            ImVec2(-rightPanelWidth - ImGui::GetStyle().ItemSpacing.x, 0),
-            true,
-            ImGuiWindowFlags_NoScrollbar |
-                ImGuiWindowFlags_NoScrollWithMouse);
-
-        ImVec2 viewportSize = ImGui::GetContentRegionAvail();
-
-        if (viewportSize.x > 0.0f && viewportSize.y > 0.0f)
-        {
-            // TODO: Only do this on resize
-            ViewportRenderer::Resize(
-                (int)viewportSize.x,
-                (int)viewportSize.y);
-
-            ViewportRenderer::Begin();
-            systems.update(deltaTime);
-            ViewportRenderer::End();
-
-            ImGui::Image(
-                (ImTextureID)ViewportRenderer::GetFramebufferTexture(),
-                viewportSize,
-                ImVec2(0, 1),
-                ImVec2(1, 0));
-        }
-
-        ImGui::EndChild();
 
         // ----------------
         // Component Inspector

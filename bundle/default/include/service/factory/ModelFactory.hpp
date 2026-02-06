@@ -15,9 +15,9 @@ namespace default_bundle
   struct Model
   {
     std::vector<MeshRef> meshRefs;
-    std::vector<Material> materials;
+    std::vector<MaterialHandle> materials;
 
-    void forEach(const std::function<void(MeshRef, Material &, size_t)> &func)
+    void forEach(const std::function<void(MeshRef, MaterialHandle &, size_t)> &func)
     {
       for (size_t i = 0; i < meshRefs.size(); ++i)
       {

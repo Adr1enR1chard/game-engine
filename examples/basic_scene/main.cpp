@@ -1,4 +1,5 @@
 #include <DefaultBundle.hpp>
+#include <engine/Engine.hpp>
 #include <systems/CameraControlSystem.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/rotate_vector.hpp>

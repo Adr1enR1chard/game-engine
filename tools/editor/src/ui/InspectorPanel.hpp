@@ -1,0 +1,35 @@
+#pragma once
+
+#include <engine/registry/World.hpp>
+#include <engine/registry/ServiceRegistry.hpp>
+#include <string>
+
+using namespace engine;
+
+class InspectorPanel
+{
+public:
+    InspectorPanel(World &world, ServiceRegistry &services) : world(world), services(services) {}
+    ~InspectorPanel() = default;
+
+    void draw(Entity selectedEntity);
+
+private:
+    World &world;
+    ServiceRegistry &services;
+    char m_nameBuffer[256] = "";
+    Entity m_lastSelectedEntity = 0;
+
+    // Component-specific drawing methods
+    void drawTransformComponent(Entity entity);
+    void drawCameraComponent(Entity entity);
+    void drawDirectionalLightComponent(Entity entity);
+    void drawPointLightComponent(Entity entity);
+    void drawMeshRendererComponent(Entity entity);
+    void drawModelRendererComponent(Entity entity);
+    void drawEnvironmentComponent(Entity entity);
+
+    // Helper methods
+    void drawVec3Control(const char *label, glm::vec3 &values, float resetValue = 0.0f, float columnWidth = 100.0f);
+    void drawFloatControl(const char *label, float &value, float speed = 0.1f, float min = 0.0f, float max = 0.0f);
+};

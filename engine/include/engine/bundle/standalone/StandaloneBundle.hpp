@@ -11,7 +11,7 @@ namespace engine
     class StandaloneBundle : public Bundle
     {
     public:
-        void install(SystemRegistry &systems, ServiceRegistry &services) const override;
-        void uninstall(SystemRegistry &systems, ServiceRegistry &services) const override;
+        void install(Engine &engine) const override;
+        void uninstall(Engine &engine) const override;
     };
 }

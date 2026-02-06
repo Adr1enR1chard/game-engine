@@ -67,18 +67,14 @@ namespace engine
         window->setFullscreen(fullscreen);
         window->create();
 
-        m_systems.setContext(m_world, m_services);
-        m_systems.init();
-
         m_running = true;
 
         using clock = std::chrono::steady_clock;
         auto lastFrame = clock::now();
 
-        m_systems.start();
-
         float deltaTime = 0.0f;
 
+        m_systems.start();
         while (m_running)
         {
             auto frameStart = clock::now();

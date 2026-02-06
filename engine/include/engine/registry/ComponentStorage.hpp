@@ -49,6 +49,25 @@ namespace engine
             return nullptr;
         }
 
+        void remove(Entity entity)
+        {
+            auto it = m_entityToIndex.find(entity);
+            if (it != m_entityToIndex.end())
+            {
+                size_t index = it->second;
+                m_componentsList.erase(m_componentsList.begin() + index);
+                m_entities.erase(std::remove(m_entities.begin(), m_entities.end(), entity), m_entities.end());
+                m_entityToIndex.erase(it);
+
+                // Update indices for entities after the removed one
+                for (size_t i = index; i < m_componentsList.size(); ++i)
+                {
+                    Entity e = m_entities[i];
+                    m_entityToIndex[e] = i;
+                }
+            }
+        }
+
         const std::vector<Entity> &getEntities() const
         {
             return m_entities;

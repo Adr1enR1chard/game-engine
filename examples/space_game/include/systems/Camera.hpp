@@ -1,6 +1,7 @@
 #pragma once
 
 #include <DefaultBundle.hpp>
+#include <engine/bundle/standalone/StandaloneBundle.hpp>
 #include <components/Spaceship.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <components/OrbitCamera.hpp>

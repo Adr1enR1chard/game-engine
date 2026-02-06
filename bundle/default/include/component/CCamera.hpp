@@ -4,7 +4,6 @@
 
 namespace default_bundle
 {
-
     struct CCamera
     {
         float fov = 45.0f;

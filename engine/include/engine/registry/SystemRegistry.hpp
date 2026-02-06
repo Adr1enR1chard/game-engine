@@ -29,17 +29,18 @@ namespace engine
          * Add systems to the registry.
          */
         template <SystemType... T>
-        void add()
+        void add(World &world, ServiceRegistry &services)
         {
             (m_systems.emplace<T>(), ...);
-            (..., Log::Print("Added system: " + std::string(typeid(T).name()), LogLevel::Info));
+            (m_systems.get<T>()->setContext(world, services), ...);
         }
 
         template <SystemType T, typename... Args>
-        void add(Args &&...args)
+        void add(Args &&...args, World &world, ServiceRegistry &services)
         {
             m_systems.emplace<T>(std::forward<Args>(args)...);
-            Log::Print("Added system: " + std::string(typeid(T).name()), LogLevel::Info);
+            T sys = m_systems.get<T>();
+            sys->setContext(world, services);
         }
 
         /**
@@ -49,18 +50,6 @@ namespace engine
         void remove()
         {
             (m_systems.erase<T>(), ...);
-        }
-
-        void setContext(World &world, ServiceRegistry &services)
-        {
-            m_systems.map([&](System &sys)
-                          { sys.setContext(world, services); });
-        }
-
-        void init()
-        {
-            m_systems.map([&](System &system)
-                          { system.init(); });
         }
 
         void start()

@@ -18,24 +18,24 @@ namespace engine
             if (it != m_systemTypeToIndex.end())
             {
                 size_t index = it->second;
-                m_systems[index] = std::make_unique<T>(std::forward<Args>(args)...);
+                m_systems[index] = std::make_shared<T>(std::forward<Args>(args)...);
             }
             else
             {
-                m_systems.push_back(std::make_unique<T>(std::forward<Args>(args)...));
+                m_systems.push_back(std::make_shared<T>(std::forward<Args>(args)...));
                 size_t index = m_systems.size() - 1;
                 m_systemTypeToIndex[std::type_index(typeid(T))] = index;
             }
         }
 
         template <SystemType T>
-        T &get()
+        std::shared_ptr<T> get()
         {
             auto it = m_systemTypeToIndex.find(std::type_index(typeid(T)));
             if (it != m_systemTypeToIndex.end())
             {
                 size_t index = it->second;
-                return static_cast<T &>(*m_systems[index]);
+                return std::static_pointer_cast<T>(m_systems[index]);
             }
             return nullptr;
         }
@@ -69,7 +69,7 @@ namespace engine
         }
 
     private:
-        std::vector<std::unique_ptr<System>> m_systems;
+        std::vector<std::shared_ptr<System>> m_systems;
         std::unordered_map<std::type_index, size_t> m_systemTypeToIndex;
     };
 
