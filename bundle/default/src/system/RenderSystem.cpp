@@ -16,7 +16,7 @@
 #include <component/cache/CTransformCache.hpp>
 
 #include <engine/bundle/standalone/service/Window.hpp>
-#include <engine/bundle/standalone/service/Renderer.hpp>
+#include <engine/bundle/core/service/Renderer.hpp>
 
 const std::vector<VertexLayout> kQuadVertices = {
     // positions        // texCoords

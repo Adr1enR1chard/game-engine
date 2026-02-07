@@ -6,13 +6,13 @@
 
 namespace engine
 {
-
   class Bundle
   {
   public:
     virtual ~Bundle() = default;
     virtual void install(class Engine &engine) const = 0;
     virtual void uninstall(class Engine &engine) const = 0;
+    virtual std::vector<std::type_index> getRequiredBundles() const = 0;
   };
 
   template <typename T>

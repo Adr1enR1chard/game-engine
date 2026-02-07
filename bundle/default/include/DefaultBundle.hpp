@@ -25,6 +25,8 @@
 #include <component/CPointLight.hpp>
 #include <component/CTransform.hpp>
 
+#include <engine/bundle/core/CoreBundle.hpp>
+
 namespace default_bundle
 {
 
@@ -35,6 +37,11 @@ namespace default_bundle
   public:
     void install(Engine &engine) const override;
     void uninstall(Engine &engine) const override;
+
+    std::vector<std::type_index> getRequiredBundles() const override
+    {
+      return {std::type_index(typeid(CoreBundle))};
+    }
   };
 
 } // namespace default_bundle

@@ -4,7 +4,7 @@
 
 #include <component/CCamera.hpp>
 #include <component/cache/CCameraCache.hpp>
-#include <engine/bundle/standalone/service/Renderer.hpp>
+#include <engine/bundle/core/service/Renderer.hpp>
 
 namespace default_bundle
 {

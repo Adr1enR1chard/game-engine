@@ -1,7 +1,7 @@
 #pragma once
 
 #include <engine/model/Service.hpp>
-#include <engine/bundle/standalone/service/Renderer.hpp>
+#include <engine/bundle/core/service/Renderer.hpp>
 #include <engine/utils/RenderTypes.hpp>
 
 namespace default_bundle

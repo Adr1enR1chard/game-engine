@@ -2,12 +2,12 @@
 
 #include <engine/model/Bundle.hpp>
 
-#include <engine/bundle/standalone/service/Input.hpp>
-#include <engine/bundle/standalone/service/Window.hpp>
+// --- Services ---
+#include "service/Renderer.hpp"
 
 namespace engine
 {
-    class StandaloneBundle : public Bundle
+    class CoreBundle : public Bundle
     {
     public:
         void install(Engine &engine) const override;

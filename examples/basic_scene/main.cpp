@@ -96,7 +96,7 @@ private:
 
 int main()
 {
-    Engine::InitiliazeStandalone().addBundle<DefaultBundle>().addSystems<CameraControlSystem, MySystem>().run(1280, 720, "Basic Scene", false);
+    Engine::InitializeStandalone().addBundle<DefaultBundle>().addSystems<CameraControlSystem, MySystem>().run(1280, 720, "Basic Scene", false);
 
     return 0;
 }

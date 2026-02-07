@@ -6,7 +6,7 @@
 #include <engine/registry/World.hpp>
 #include <engine/registry/SystemRegistry.hpp>
 #include <engine/model/Entity.hpp>
-#include <engine/bundle/standalone/service/Renderer.hpp>
+#include <engine/bundle/core/service/Renderer.hpp>
 
 using namespace engine;
 

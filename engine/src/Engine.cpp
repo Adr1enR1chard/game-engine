@@ -1,4 +1,6 @@
 #include <engine/Engine.hpp>
+#include <engine/bundle/core/CoreBundle.hpp>
+#include <engine/bundle/standalone/StandaloneBundle.hpp>
 
 namespace engine
 {
@@ -7,14 +9,14 @@ namespace engine
 
     Engine::Engine() : m_running(false) {}
 
-    Engine &Engine::InitiliazeStandalone()
+    Engine &Engine::InitializeStandalone()
     {
         if (!m_instance)
         {
             m_instance.reset(new Engine());
         }
 
-        m_instance->addBundle<StandaloneBundle>();
+        m_instance->addBundle<CoreBundle>().addBundle<StandaloneBundle>();
 
         return *m_instance;
     }
@@ -25,7 +27,7 @@ namespace engine
         {
             m_instance.reset(new Engine());
         }
-
+        m_instance->addBundle<CoreBundle>();
         outWorld = &m_instance->m_world;
         outSystems = &m_instance->m_systems;
         outServices = &m_instance->m_services;
@@ -57,7 +59,7 @@ namespace engine
 
         if (!window || !input)
         {
-            Log::Print("Engine must be initialized with StandaloneBundle before running. Use Engine::InitiliazeStandalone().", LogLevel::Critical);
+            Log::Print("Engine must be initialized with StandaloneBundle before running. Use Engine::InitializeStandalone().", LogLevel::Critical);
             throw std::runtime_error("Engine must be initialized with StandaloneBundle before running.");
             return;
         }

@@ -25,7 +25,7 @@ namespace engine
     {
 
     public:
-        static Engine &InitiliazeStandalone();
+        static Engine &InitializeStandalone();
         static Engine &InitializeEmbedded(World *&outWorld, SystemRegistry *&outSystems, ServiceRegistry *&outServices);
         static void Shutdown();
         static void ExecuteOnMainThread(const std::function<void()> &task);
@@ -48,6 +48,23 @@ namespace engine
         Engine &addBundle()
         {
             std::unique_ptr<Bundle> bundle = std::make_unique<B>();
+            for (const std::type_index &requiredBundleType : bundle->getRequiredBundles())
+            {
+                bool found = false;
+                for (const auto &existingBundle : m_bundles)
+                {
+                    if (std::type_index(typeid(*existingBundle)) == requiredBundleType)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    Log::Print("Bundle " + std::string(typeid(B).name()) + " requires bundle " + std::string(requiredBundleType.name()) + " to be installed.", LogLevel::Critical);
+                    throw std::runtime_error("Bundle dependency not met.");
+                }
+            }
             bundle->install(*this);
 
             m_bundles.push_back(std::move(bundle));

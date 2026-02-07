@@ -8,11 +8,10 @@ namespace engine
     {
         engine.addService<Window>();
         engine.addService<Input>();
-        engine.addService<Renderer>();
     }
 
     void StandaloneBundle::uninstall(Engine &engine) const
     {
-        engine.removeServices<Renderer, Window, Input>();
+        engine.removeServices<Window, Input>();
     }
 }
