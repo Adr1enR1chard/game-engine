@@ -160,6 +160,7 @@ target_link_libraries(engine_editor PUBLIC
 ###########################
 
 set(EXAMPLES_OUTPUT_DIR ${CMAKE_BINARY_DIR}/examples)
+set(TOOLS_OUTPUT_DIR ${CMAKE_BINARY_DIR}/tools)
 
 # Executable: BasicScene
 add_executable(BasicScene
@@ -223,6 +224,13 @@ add_executable(Editor
 target_link_libraries(Editor PUBLIC
     engine_editor
 )
+set_target_properties(Editor PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${TOOLS_OUTPUT_DIR}/Editor"
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${TOOLS_OUTPUT_DIR}/Editor"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${TOOLS_OUTPUT_DIR}/Editor"
+    RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${TOOLS_OUTPUT_DIR}/Editor"
+    RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${TOOLS_OUTPUT_DIR}/Editor"
+)
 
 ###########################
 ## Commands and Targets
@@ -231,7 +239,6 @@ target_link_libraries(Editor PUBLIC
 # Command: Assets compilation
 set(ASSET_COMPILER_EXE "$<TARGET_FILE:assets_compiler>")
 set(DEFAULT_BUNDLE_ASSETS_SRC "${CMAKE_SOURCE_DIR}/bundle/default/default-bundle-assets")
-set(DEFAULT_BUNDLE_ASSETS_RUNTIME "$<TARGET_FILE_DIR:BasicScene>/default-bundle-assets")
 set(EXTENSIONS jpg png bmp tga gif  obj fbx gltf vert frag)
 
 list(APPEND CMAKE_MODULE_PATH
@@ -252,7 +259,7 @@ add_asset_pipeline(
     TARGET       BasicScene
     ALIAS        default_bundle
     SOURCE_DIR   "${DEFAULT_BUNDLE_ASSETS_SRC}"
-    RUNTIME_DIR  "${DEFAULT_BUNDLE_ASSETS_RUNTIME}"
+    RUNTIME_DIR  "$<TARGET_FILE_DIR:BasicScene>/default-bundle-assets"
     COMPILER     "${ASSET_COMPILER_EXE}"
     EXTENSIONS   ${EXTENSIONS}
 )

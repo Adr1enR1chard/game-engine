@@ -22,6 +22,16 @@ namespace default_bundle
             return isValid();
         }
 
+        bool *getBool(const std::string &name)
+        {
+            auto it = uniforms.find(name);
+            if (it != uniforms.end())
+            {
+                return std::get_if<bool>(&(it->second));
+            }
+            return nullptr;
+        }
+
         int *getInt(const std::string &name)
         {
             auto it = uniforms.find(name);

@@ -271,6 +271,15 @@ void InspectorPanel::drawPointLightComponent(Entity entity)
     ImGui::PopID();
 }
 
+const std::vector<std::string> k_materialTypes = {
+    "PBR Material",
+    "Unlit Material"};
+
+const std::vector<std::string> k_meshTypes = {
+    "Cube",
+    "Sphere",
+    "Plane"};
+
 void InspectorPanel::drawMeshRendererComponent(Entity entity)
 {
     if (!world.hasComponents<CMeshRenderer>(entity))
@@ -300,21 +309,77 @@ void InspectorPanel::drawMeshRendererComponent(Entity entity)
         ImGui::Text("Mesh");
         ImGui::SameLine(100.0f);
         ImGui::Text("%d", renderer->meshRef);
+        ImGui::SameLine();
+        if (ImGui::Button("Change Mesh"))
+        {
+            ImGui::OpenPopup("MeshSelectionPopup");
+        }
+
+        if (ImGui::BeginPopup("MeshSelectionPopup"))
+        {
+            ImGui::SeparatorText("Select Mesh");
+            for (const auto &name : k_meshTypes)
+            {
+                if (ImGui::MenuItem(name.c_str()))
+                {
+                    services.get<Renderer>()->freeMesh(renderer->meshRef);
+                    if (name == "Cube")
+                        renderer->meshRef = services.get<MeshFactory>()->Cube();
+                    else if (name == "Sphere")
+                        renderer->meshRef = services.get<MeshFactory>()->Sphere();
+                    else if (name == "Plane")
+                        renderer->meshRef = services.get<MeshFactory>()->Plane();
+                }
+            }
+            ImGui::EndPopup();
+        }
 
         // Material properties
         ImGui::SeparatorText("Material properties");
         ImGui::Spacing();
 
-        ImGui::Text("Color");
         ImGui::SameLine(100.0f);
         ImGui::SetNextItemWidth(-1);
-        MaterialFactory::PBRMaterialParameters matParams;
-        // ImGui::ColorEdit4("##MaterialColor", glm::value_ptr(renderer->material.color));
 
         drawVec3Control("Base Color", *renderer->material.getVec3("material.baseColor"), 1.0f, 100.0f, 0.0f, 1.0f);
         drawFloatControl("Metallic", *renderer->material.getFloat("material.metallic"), 0.01f, 0.0f, 1.0f);
         drawFloatControl("Roughness", *renderer->material.getFloat("material.roughness"), 0.01f, 0.0f, 1.0f);
         drawFloatControl("AO", *renderer->material.getFloat("material.ao"), 0.01f, 0.0f, 1.0f);
+        drawLoadResourcePopup("Base Color Texture",
+                              [this, renderer](const std::string &path)
+                              {
+                                  setMaterialTexture(renderer, "material.baseColorMap", path);
+                              });
+
+        bool *useMetallicRoughnessMap = renderer->material.getBool("material.useMetallicRoughnessMap");
+        ImGui::Checkbox("Use Metallic-Roughness Texture", useMetallicRoughnessMap);
+
+        if (*useMetallicRoughnessMap)
+        {
+            drawLoadResourcePopup("Metallic-Roughness Texture",
+                                  [this, renderer](const std::string &path)
+                                  {
+                                      setMaterialTexture(renderer, "material.metallicRoughnessMap", path);
+                                  });
+        }
+        else
+        {
+            drawLoadResourcePopup("Metallic Texture",
+                                  [this, renderer](const std::string &path)
+                                  {
+                                      setMaterialTexture(renderer, "material.metallicMap", path);
+                                  });
+            drawLoadResourcePopup("Roughness Texture",
+                                  [this, renderer](const std::string &path)
+                                  {
+                                      setMaterialTexture(renderer, "material.roughnessMap", path);
+                                  });
+        }
+        drawLoadResourcePopup("AO Texture",
+                              [this, renderer](const std::string &path)
+                              {
+                                  setMaterialTexture(renderer, "material.aoMap", path);
+                              });
 
         ImGui::Unindent();
         ImGui::Spacing();
@@ -383,6 +448,24 @@ void InspectorPanel::drawEnvironmentComponent(Entity entity)
     }
 
     ImGui::PopID();
+}
+
+void InspectorPanel::setMaterialTexture(CMeshRenderer *renderer, const std::string &uniformName, const std::string &path)
+{
+    TextureRef newTexture = services.get<TextureFactory>()->Texture2D(path);
+    if (newTexture)
+    {
+        auto *texUniform = renderer->material.getTexture(uniformName);
+        if (texUniform)
+        {
+            services.get<Renderer>()->freeTexture(texUniform->textureRef);
+            texUniform->textureRef = newTexture;
+        }
+        else
+        {
+            renderer->material.uniforms[uniformName] = TextureUniform{newTexture, TextureType::Texture2D};
+        }
+    }
 }
 
 void InspectorPanel::drawVec3Control(const char *label, glm::vec3 &values, float resetValue, float columnWidth, float min, float max)
@@ -461,4 +544,61 @@ void InspectorPanel::drawFloatControl(const char *label, float &value, float spe
         ImGui::DragFloat(("##" + std::string(label)).c_str(), &value, speed, min, max);
     else
         ImGui::DragFloat(("##" + std::string(label)).c_str(), &value, speed);
+}
+
+void InspectorPanel::drawLoadResourcePopup(const char *label, std::function<void(const std::string &)> onLoad)
+{
+    if (ImGui::Button(label))
+    {
+        ImGui::OpenPopup((std::string(label) + "Popup").c_str());
+    }
+
+    ImGui::SetNextWindowSize(ImVec2(500, 150), ImGuiCond_Appearing);
+    if (ImGui::BeginPopupModal((std::string(label) + "Popup").c_str(), nullptr, ImGuiWindowFlags_NoResize))
+    {
+        ImGui::Spacing();
+        ImGui::SeparatorText("Load Resource");
+        ImGui::Spacing();
+
+        ImGui::Text("Resource path:");
+        ImGui::Spacing();
+
+        ImGui::SetNextItemWidth(-1);
+        if (ImGui::InputText("##ResourcePath", m_pathBuffer, sizeof(m_pathBuffer), ImGuiInputTextFlags_EnterReturnsTrue))
+        {
+            onLoad(std::string(m_pathBuffer));
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+
+        float buttonWidth = 100.0f;
+        float spacing = ImGui::GetStyle().ItemSpacing.x;
+        float totalWidth = (buttonWidth * 2) + spacing;
+        float indent = (ImGui::GetContentRegionAvail().x - totalWidth) * 0.5f;
+
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
+
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.6f, 0.2f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.7f, 0.3f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.15f, 0.5f, 0.15f, 1.0f));
+        if (ImGui::Button("Load", ImVec2(buttonWidth, 0)))
+        {
+            Log::Print("Loading resource: " + std::string(m_pathBuffer), LogLevel::Info);
+            onLoad(std::string(m_pathBuffer));
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::PopStyleColor(3);
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Cancel", ImVec2(buttonWidth, 0)))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
+    }
 }

@@ -319,7 +319,7 @@ namespace engine
         auto it = m_textures.find(texture);
         if (it != m_textures.end())
         {
-            m_textures.erase(it);
+            m_textures.erase(texture);
             m_texturesId.free(texture);
         }
     }
@@ -329,7 +329,7 @@ namespace engine
         auto it = m_meshes.find(mesh);
         if (it != m_meshes.end())
         {
-            m_meshes.erase(it);
+            m_meshes.erase(mesh);
             m_meshesId.free(mesh);
         }
     }
@@ -339,7 +339,7 @@ namespace engine
         auto it = m_shaders.find(shader);
         if (it != m_shaders.end())
         {
-            m_shaders.erase(it);
+            m_shaders.erase(shader);
             m_shadersId.free(shader);
         }
     }
@@ -349,7 +349,7 @@ namespace engine
         auto it = m_framebuffers.find(framebuffer);
         if (it != m_framebuffers.end())
         {
-            m_framebuffers.erase(it);
+            m_framebuffers.erase(framebuffer);
             m_framebuffersId.free(framebuffer);
         }
     }

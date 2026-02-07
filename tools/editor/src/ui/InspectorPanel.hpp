@@ -3,8 +3,14 @@
 #include <engine/registry/World.hpp>
 #include <engine/registry/ServiceRegistry.hpp>
 #include <string>
+#include <functional>
 
 using namespace engine;
+
+namespace default_bundle
+{
+    struct CMeshRenderer;
+}
 
 class InspectorPanel
 {
@@ -18,6 +24,7 @@ private:
     World &world;
     ServiceRegistry &services;
     char m_nameBuffer[256] = "";
+    char m_pathBuffer[256] = "";
     Entity m_lastSelectedEntity = 0;
 
     // Component-specific drawing methods
@@ -29,7 +36,10 @@ private:
     void drawModelRendererComponent(Entity entity);
     void drawEnvironmentComponent(Entity entity);
 
+    void setMaterialTexture(default_bundle::CMeshRenderer *renderer, const std::string &uniformName, const std::string &path);
+
     // Helper methods
     void drawVec3Control(const char *label, glm::vec3 &values, float resetValue = 0.0f, float columnWidth = 100.0f, float min = 0.0f, float max = 0.0f);
     void drawFloatControl(const char *label, float &value, float speed = 0.1f, float min = 0.0f, float max = 0.0f);
+    void drawLoadResourcePopup(const char *label, std::function<void(const std::string &)> onLoad);
 };
