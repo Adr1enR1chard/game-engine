@@ -9,15 +9,15 @@
 namespace default_bundle
 {
 
-    struct CMeshRenderer
+    struct CMesh
     {
         engine::MeshRef meshRef;
         MaterialHandle material;
     };
 
-    struct CModelRenderer
+    struct CModel
     {
-        Model model;
+        ModelHandle model;
         std::vector<MaterialHandle> materialOverrides;
     };
 

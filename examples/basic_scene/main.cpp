@@ -17,7 +17,7 @@ public:
         world().createEntity(CEnvironment{.skyboxMaterial = services().get<MaterialFactory>()->SkyboxMaterial({})});
 
         m_metalSphere = world().createEntity(
-            CMeshRenderer{
+            CMesh{
                 .meshRef = services().get<MeshFactory>()->Sphere(),
                 .material = services().get<MaterialFactory>()->PBRMaterial({
                     .ao = 0.1f,
@@ -34,7 +34,7 @@ public:
             CTransform{glm::vec3(-1.0f, 0.0f, 0.0f)});
 
         m_groundSphere = world().createEntity(
-            CMeshRenderer{
+            CMesh{
                 .meshRef = services().get<MeshFactory>()->Sphere(),
                 .material = services().get<MaterialFactory>()->PBRMaterial({
                     .metallic = 0.0f,
@@ -51,13 +51,13 @@ public:
             CTransform{glm::vec3(1.0f, 0.0f, 0.0f)});
 
         m_sword = world().createEntity(
-            CModelRenderer{
+            CModel{
                 .model = services().get<ModelFactory>()->LoadModel("assets/models/sword/scene.gltf"),
             },
             CTransform{glm::vec3(0.0f, 0.0f, 0.0f), glm::quat(glm::vec3(0.0f, glm::radians(40.0f), 0.0f)), glm::vec3(1.0f)});
 
         world().createEntity(
-            CMeshRenderer({
+            CMesh({
                 .meshRef = services().get<MeshFactory>()->Plane(),
                 .material = services().get<MaterialFactory>()->PBRMaterial({.metallic = 0.0f,
                                                                             .roughness = 1.0f,

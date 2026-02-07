@@ -69,8 +69,8 @@ void InspectorPanel::draw(Entity selectedEntity)
     drawCameraComponent(selectedEntity);
     drawDirectionalLightComponent(selectedEntity);
     drawPointLightComponent(selectedEntity);
-    drawMeshRendererComponent(selectedEntity);
-    drawModelRendererComponent(selectedEntity);
+    drawMeshComponent(selectedEntity);
+    drawModelComponent(selectedEntity);
     drawEnvironmentComponent(selectedEntity);
 
     ImGui::PopStyleVar();
@@ -110,8 +110,8 @@ void InspectorPanel::draw(Entity selectedEntity)
         }
         if (ImGui::MenuItem("Mesh Renderer"))
         {
-            if (!world.hasComponents<CMeshRenderer>(selectedEntity))
-                world.addComponents(selectedEntity, CMeshRenderer{});
+            if (!world.hasComponents<CMesh>(selectedEntity))
+                world.addComponents(selectedEntity, CMesh{});
         }
         if (ImGui::MenuItem("Environment"))
         {
@@ -280,19 +280,19 @@ const std::vector<std::string> k_meshTypes = {
     "Sphere",
     "Plane"};
 
-void InspectorPanel::drawMeshRendererComponent(Entity entity)
+void InspectorPanel::drawMeshComponent(Entity entity)
 {
-    if (!world.hasComponents<CMeshRenderer>(entity))
+    if (!world.hasComponents<CMesh>(entity))
         return;
 
-    auto [e, renderer] = world.fetchFrom<CMeshRenderer>(entity);
-    if (!renderer->meshRef)
+    auto [e, mesh] = world.fetchFrom<CMesh>(entity);
+    if (!mesh->meshRef)
     {
-        renderer->meshRef = services.get<MeshFactory>()->Cube();
+        mesh->meshRef = services.get<MeshFactory>()->Cube();
     }
-    if (!renderer->material.isValid())
+    if (!mesh->material.isValid())
     {
-        renderer->material = services.get<MaterialFactory>()->PBRMaterial({});
+        mesh->material = services.get<MaterialFactory>()->PBRMaterial({});
     }
 
     ImGui::PushID("MeshRenderer");
@@ -308,7 +308,7 @@ void InspectorPanel::drawMeshRendererComponent(Entity entity)
 
         ImGui::Text("Mesh");
         ImGui::SameLine(100.0f);
-        ImGui::Text("%d", renderer->meshRef);
+        ImGui::Text("%d", mesh->meshRef);
         ImGui::SameLine();
         if (ImGui::Button("Change Mesh"))
         {
@@ -322,13 +322,13 @@ void InspectorPanel::drawMeshRendererComponent(Entity entity)
             {
                 if (ImGui::MenuItem(name.c_str()))
                 {
-                    services.get<Renderer>()->freeMesh(renderer->meshRef);
+                    services.get<Renderer>()->freeMesh(mesh->meshRef);
                     if (name == "Cube")
-                        renderer->meshRef = services.get<MeshFactory>()->Cube();
+                        mesh->meshRef = services.get<MeshFactory>()->Cube();
                     else if (name == "Sphere")
-                        renderer->meshRef = services.get<MeshFactory>()->Sphere();
+                        mesh->meshRef = services.get<MeshFactory>()->Sphere();
                     else if (name == "Plane")
-                        renderer->meshRef = services.get<MeshFactory>()->Plane();
+                        mesh->meshRef = services.get<MeshFactory>()->Plane();
                 }
             }
             ImGui::EndPopup();
@@ -341,44 +341,44 @@ void InspectorPanel::drawMeshRendererComponent(Entity entity)
         ImGui::SameLine(100.0f);
         ImGui::SetNextItemWidth(-1);
 
-        drawVec3Control("Base Color", *renderer->material.getVec3("material.baseColor"), 1.0f, 100.0f, 0.0f, 1.0f);
-        drawFloatControl("Metallic", *renderer->material.getFloat("material.metallic"), 0.01f, 0.0f, 1.0f);
-        drawFloatControl("Roughness", *renderer->material.getFloat("material.roughness"), 0.01f, 0.0f, 1.0f);
-        drawFloatControl("AO", *renderer->material.getFloat("material.ao"), 0.01f, 0.0f, 1.0f);
+        drawVec3Control("Base Color", *mesh->material.getVec3("material.baseColor"), 1.0f, 100.0f, 0.0f, 1.0f);
+        drawFloatControl("Metallic", *mesh->material.getFloat("material.metallic"), 0.01f, 0.0f, 1.0f);
+        drawFloatControl("Roughness", *mesh->material.getFloat("material.roughness"), 0.01f, 0.0f, 1.0f);
+        drawFloatControl("AO", *mesh->material.getFloat("material.ao"), 0.01f, 0.0f, 1.0f);
         drawLoadResourcePopup("Base Color Texture",
-                              [this, renderer](const std::string &path)
+                              [this, mesh](const std::string &path)
                               {
-                                  setMaterialTexture(renderer, "material.baseColorMap", path);
+                                  setMaterialTexture(mesh, "material.baseColorMap", path);
                               });
 
-        bool *useMetallicRoughnessMap = renderer->material.getBool("material.useMetallicRoughnessMap");
+        bool *useMetallicRoughnessMap = mesh->material.getBool("material.useMetallicRoughnessMap");
         ImGui::Checkbox("Use Metallic-Roughness Texture", useMetallicRoughnessMap);
 
         if (*useMetallicRoughnessMap)
         {
             drawLoadResourcePopup("Metallic-Roughness Texture",
-                                  [this, renderer](const std::string &path)
+                                  [this, mesh](const std::string &path)
                                   {
-                                      setMaterialTexture(renderer, "material.metallicRoughnessMap", path);
+                                      setMaterialTexture(mesh, "material.metallicRoughnessMap", path);
                                   });
         }
         else
         {
             drawLoadResourcePopup("Metallic Texture",
-                                  [this, renderer](const std::string &path)
+                                  [this, mesh](const std::string &path)
                                   {
-                                      setMaterialTexture(renderer, "material.metallicMap", path);
+                                      setMaterialTexture(mesh, "material.metallicMap", path);
                                   });
             drawLoadResourcePopup("Roughness Texture",
-                                  [this, renderer](const std::string &path)
+                                  [this, mesh](const std::string &path)
                                   {
-                                      setMaterialTexture(renderer, "material.roughnessMap", path);
+                                      setMaterialTexture(mesh, "material.roughnessMap", path);
                                   });
         }
         drawLoadResourcePopup("AO Texture",
-                              [this, renderer](const std::string &path)
+                              [this, mesh](const std::string &path)
                               {
-                                  setMaterialTexture(renderer, "material.aoMap", path);
+                                  setMaterialTexture(mesh, "material.aoMap", path);
                               });
 
         ImGui::Unindent();
@@ -388,12 +388,12 @@ void InspectorPanel::drawMeshRendererComponent(Entity entity)
     ImGui::PopID();
 }
 
-void InspectorPanel::drawModelRendererComponent(Entity entity)
+void InspectorPanel::drawModelComponent(Entity entity)
 {
-    if (!world.hasComponents<CModelRenderer>(entity))
+    if (!world.hasComponents<CModel>(entity))
         return;
 
-    auto [e, renderer] = world.fetchFrom<CModelRenderer>(entity);
+    auto [e, renderer] = world.fetchFrom<CModel>(entity);
 
     ImGui::PushID("ModelRenderer");
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
@@ -450,12 +450,12 @@ void InspectorPanel::drawEnvironmentComponent(Entity entity)
     ImGui::PopID();
 }
 
-void InspectorPanel::setMaterialTexture(CMeshRenderer *renderer, const std::string &uniformName, const std::string &path)
+void InspectorPanel::setMaterialTexture(CMesh *mesh, const std::string &uniformName, const std::string &path)
 {
     TextureRef newTexture = services.get<TextureFactory>()->Texture2D(path);
     if (newTexture)
     {
-        auto *texUniform = renderer->material.getTexture(uniformName);
+        auto *texUniform = mesh->material.getTexture(uniformName);
         if (texUniform)
         {
             services.get<Renderer>()->freeTexture(texUniform->textureRef);
@@ -463,7 +463,7 @@ void InspectorPanel::setMaterialTexture(CMeshRenderer *renderer, const std::stri
         }
         else
         {
-            renderer->material.uniforms[uniformName] = TextureUniform{newTexture, TextureType::Texture2D};
+            mesh->material.uniforms[uniformName] = TextureUniform{newTexture, TextureType::Texture2D};
         }
     }
 }

@@ -12,7 +12,7 @@ namespace default_bundle
 
   using namespace engine;
 
-  struct Model
+  struct ModelHandle
   {
     std::vector<MeshRef> meshRefs;
     std::vector<MaterialHandle> materials;
@@ -37,7 +37,7 @@ namespace default_bundle
     }
     ~ModelFactory() override = default;
 
-    Model LoadModel(const char *modelPath);
+    ModelHandle LoadModel(const char *modelPath);
 
   private:
     MaterialFactory &m_materialFactory;

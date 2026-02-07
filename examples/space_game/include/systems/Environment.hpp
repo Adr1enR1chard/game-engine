@@ -41,7 +41,7 @@ public:
             .intensity = 10.0f,
         });
 
-        Model planetModel = services().get<ModelFactory>()->LoadModel("assets/models/planet/planet.gltf");
+        ModelHandle planetModel = services().get<ModelFactory>()->LoadModel("assets/models/planet/planet.gltf");
         // Spawn multiple random planets
         for (int i = 0; i < 50; ++i)
         {
@@ -50,7 +50,7 @@ public:
             glm::vec3 scale = glm::vec3(scaleValue);
 
             world().createEntity(
-                CModelRenderer{
+                CModel{
                     .model = planetModel,
                 },
                 CTransform{

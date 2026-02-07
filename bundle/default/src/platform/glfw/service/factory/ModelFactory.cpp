@@ -10,7 +10,7 @@ namespace default_bundle
 {
     using namespace engine;
 
-    Model ModelFactory::LoadModel(const char *modelPath)
+    ModelHandle ModelFactory::LoadModel(const char *modelPath)
     {
         std::vector<MeshData> meshes;
         std::vector<MaterialDescriptor> materialsDesc;

@@ -8,7 +8,7 @@
 
 #include <component/CCamera.hpp>
 #include <component/CEnvironment.hpp>
-#include <component/CMeshRenderer.hpp>
+#include <component/CMesh.hpp>
 #include <component/CDirectionalLight.hpp>
 #include <component/CTransform.hpp>
 #include <component/cache/CCameraCache.hpp>
@@ -86,7 +86,7 @@ namespace default_bundle
             renderer->clear(false, true, false);
 
             /// ------- Render Meshes for Depth -------
-            for (const auto &[entity, meshRenderer, transform] : world().fetch<CMeshRenderer, CTransformCache>())
+            for (const auto &[entity, meshRenderer, transform] : world().fetch<CMesh, CTransformCache>())
             {
                 auto &meshRef = meshRenderer->meshRef;
                 depthUniforms["uModel"] = transform->modelMatrix * renderer->getLocalModel(meshRef);
@@ -94,7 +94,7 @@ namespace default_bundle
             }
 
             /// ------- Render Models for Depth -------
-            for (const auto &[entity, modelRenderer, transform] : world().fetch<CModelRenderer, CTransformCache>())
+            for (const auto &[entity, modelRenderer, transform] : world().fetch<CModel, CTransformCache>())
             {
                 modelRenderer->model.forEach([&](MeshRef modelRef, MaterialHandle & /*materialRef*/, size_t /*index*/)
                                              {
@@ -128,7 +128,7 @@ namespace default_bundle
         }
 
         /// ------- Render Meshes -------
-        for (const auto &[entity, meshRenderer, transform] : world().fetch<CMeshRenderer, CTransformCache>())
+        for (const auto &[entity, meshRenderer, transform] : world().fetch<CMesh, CTransformCache>())
         {
 
             setFinalRenderingUniforms(meshRenderer->material.uniforms,
@@ -142,7 +142,7 @@ namespace default_bundle
         }
 
         /// ------- Render Models -------
-        for (const auto &[entity, modelRenderer, transform] : world().fetch<CModelRenderer, CTransformCache>())
+        for (const auto &[entity, modelRenderer, transform] : world().fetch<CModel, CTransformCache>())
         {
             modelRenderer->model.forEach([&](MeshRef meshRef, MaterialHandle &material, size_t index)
                                          {

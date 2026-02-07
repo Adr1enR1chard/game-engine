@@ -18,14 +18,14 @@ namespace default_bundle
         const auto &pointLights = world().fetch<CPointLight, CTransform>();
 
         // Mesh renderers
-        for (const auto &[eMeshRenderer, cMeshRenderer] : world().fetch<CMeshRenderer>())
+        for (const auto &[eMeshRenderer, cMeshRenderer] : world().fetch<CMesh>())
         {
             setMaterialLights(cMeshRenderer->material, cCameraTransform, cDirLight, pointLights);
         }
 
         // Model renderers
         Renderer *renderer = services().get<Renderer>();
-        for (const auto &[eModelRenderer, cModelRenderer] : world().fetch<CModelRenderer>())
+        for (const auto &[eModelRenderer, cModelRenderer] : world().fetch<CModel>())
         {
             cModelRenderer->model.forEach([&](MeshRef /*meshRef*/, MaterialHandle &material, size_t /*index*/)
                                           { setMaterialLights(material, cCameraTransform, cDirLight, pointLights); });

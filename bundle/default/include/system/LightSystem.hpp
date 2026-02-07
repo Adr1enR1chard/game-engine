@@ -2,7 +2,7 @@
 
 #include <component/CCamera.hpp>
 #include <component/CDirectionalLight.hpp>
-#include <component/CMeshRenderer.hpp>
+#include <component/CMesh.hpp>
 #include <component/CPointLight.hpp>
 #include <component/CTransform.hpp>
 #include <engine/model/System.hpp>

@@ -16,7 +16,7 @@ public:
     void start() override
     {
         m_spaceshipEntity = world().createEntity(
-            CModelRenderer{
+            CModel{
                 .model = services().get<ModelFactory>()->LoadModel("assets/models/spaceship/spaceship.gltf"),
             },
             CTransform{
