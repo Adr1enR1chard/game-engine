@@ -53,41 +53,36 @@ file(GLOB_RECURSE DEFAULT_BUNDLE_SYSTEMS
     bundle/default/src/system/*.cpp
 )
 
-add_library(default_bundle
+add_library(rasterization_bundle
     ${DEFAULT_BUNDLE_SYSTEMS}
-    bundle/default/src/DefaultBundle.cpp
+    bundle/default/src/RasterizationBundle.cpp
 )
-target_include_directories(default_bundle PUBLIC
+target_include_directories(rasterization_bundle PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/engine/include
     ${CMAKE_CURRENT_SOURCE_DIR}/bundle/default/include
 )
-target_link_libraries(default_bundle PUBLIC
+target_link_libraries(rasterization_bundle PUBLIC
     assets_format
 )
 
 # Library: GLFW platform
-add_library(default_bundle_glfw
-    bundle/default/src/platform/glfw/service/factory/MaterialFactory.cpp
-    bundle/default/src/platform/glfw/service/factory/ShaderFactory.cpp
-    bundle/default/src/platform/glfw/service/factory/ModelFactory.cpp
-    bundle/default/src/platform/glfw/service/factory/MeshFactory.cpp
-    bundle/default/src/platform/glfw/service/factory/TextureFactory.cpp
-    bundle/default/src/platform/glfw/service/ShadowMapping.cpp
+add_library(rasterization_bundle_glfw
+    bundle/default/src/service/ShadowMapping.cpp
 )
-target_include_directories(default_bundle_glfw PUBLIC
+target_include_directories(rasterization_bundle_glfw PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/engine/include
     ${CMAKE_CURRENT_SOURCE_DIR}/bundle/default/include
 )
 
-target_link_libraries(default_bundle_glfw PUBLIC
+target_link_libraries(rasterization_bundle_glfw PUBLIC
     glfw
     OpenGL::GL
     assets_loader
 )
 if (WIN32)
-    target_link_libraries(default_bundle_glfw PUBLIC opengl32)
+    target_link_libraries(rasterization_bundle_glfw PUBLIC opengl32)
 endif()
 
 # Library: Rendering
@@ -107,6 +102,7 @@ PUBLIC
     glfw
     OpenGL::GL
     assets_format
+    assets_loader
 )
 enable_strict_warnings(engine_core)
 
@@ -151,8 +147,8 @@ target_link_libraries(engine_editor PUBLIC
     engine_core
     engine_vendor
     imgui
-    default_bundle
-    default_bundle_glfw
+    rasterization_bundle
+    rasterization_bundle_glfw
 )
 
 ###########################
@@ -172,10 +168,10 @@ target_include_directories(BasicScene PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/examples/basic_scene
 )
 target_link_libraries(BasicScene PRIVATE
-    default_bundle
+    rasterization_bundle
     engine_core
     engine_vendor
-    default_bundle_glfw
+    rasterization_bundle_glfw
 )
 enable_strict_warnings(BasicScene)
 
@@ -203,8 +199,8 @@ target_include_directories(SpaceGame PRIVATE
 
 target_link_libraries(SpaceGame
 PUBLIC
-    default_bundle
-    default_bundle_glfw
+    rasterization_bundle
+    rasterization_bundle_glfw
     engine_core
     engine_vendor
 )
@@ -257,7 +253,7 @@ add_asset_pipeline(
 
 add_asset_pipeline(
     TARGET       BasicScene
-    ALIAS        default_bundle
+    ALIAS        core_bundle
     SOURCE_DIR   "${DEFAULT_BUNDLE_ASSETS_SRC}"
     RUNTIME_DIR  "$<TARGET_FILE_DIR:BasicScene>/default-bundle-assets"
     COMPILER     "${ASSET_COMPILER_EXE}"
@@ -274,7 +270,7 @@ add_asset_pipeline(
 
 add_asset_pipeline(
     TARGET       SpaceGame
-    ALIAS        default_bundle
+    ALIAS        core_bundle
     SOURCE_DIR   "${DEFAULT_BUNDLE_ASSETS_SRC}"
     RUNTIME_DIR  "$<TARGET_FILE_DIR:SpaceGame>/default-bundle-assets"
     COMPILER     "${ASSET_COMPILER_EXE}"
@@ -283,7 +279,7 @@ add_asset_pipeline(
 
 add_asset_pipeline(
     TARGET       Editor
-    ALIAS        default_bundle
+    ALIAS        core_bundle
     SOURCE_DIR   "${DEFAULT_BUNDLE_ASSETS_SRC}"
     RUNTIME_DIR  "$<TARGET_FILE_DIR:Editor>/default-bundle-assets"
     COMPILER     "${ASSET_COMPILER_EXE}"

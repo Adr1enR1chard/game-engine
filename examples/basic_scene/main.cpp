@@ -1,11 +1,11 @@
-#include <DefaultBundle.hpp>
 #include <engine/Engine.hpp>
+#include <RasterizationBundle.hpp>
 #include <systems/CameraControlSystem.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/rotate_vector.hpp>
 
 using namespace engine;
-using namespace default_bundle;
+using namespace rasterization_bundle;
 
 class MySystem : public System
 {
@@ -96,7 +96,7 @@ private:
 
 int main()
 {
-    Engine::InitializeStandalone().addBundle<DefaultBundle>().addSystems<CameraControlSystem, MySystem>().run(1280, 720, "Basic Scene", false);
+    Engine::InitializeStandalone().addBundle<RasterizationBundle>().addSystems<CameraControlSystem, MySystem>().run(1280, 720, "Basic Scene", false);
 
     return 0;
 }

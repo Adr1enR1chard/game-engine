@@ -1,13 +1,13 @@
 #include "EditorUI.hpp"
 #include <string>
 
-#include <DefaultBundle.hpp>
+#include <RasterizationBundle.hpp>
 #include <engine/registry/World.hpp>
 
 #include <stdio.h>
 #include <glm/gtc/type_ptr.hpp>
 
-using namespace default_bundle;
+using namespace rasterization_bundle;
 
 namespace engine_editor
 {

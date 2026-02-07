@@ -7,7 +7,7 @@
 
 using namespace engine;
 
-namespace default_bundle
+namespace engine
 {
     struct CMesh;
 }
@@ -36,7 +36,7 @@ private:
     void drawModelComponent(Entity entity);
     void drawEnvironmentComponent(Entity entity);
 
-    void setMaterialTexture(default_bundle::CMesh *mesh, const std::string &uniformName, const std::string &path);
+    void setMaterialTexture(engine::CMesh *mesh, const std::string &uniformName, const std::string &path);
 
     // Helper methods
     void drawVec3Control(const char *label, glm::vec3 &values, float resetValue = 0.0f, float columnWidth = 100.0f, float min = 0.0f, float max = 0.0f);

@@ -1,13 +1,12 @@
 #pragma once
 
-#include <DefaultBundle.hpp>
-#include <engine/bundle/standalone/StandaloneBundle.hpp>
+#include <engine/bundle/core/CoreBundle.hpp>
 #include <components/Spaceship.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <components/OrbitCamera.hpp>
 
 using namespace engine;
-using namespace default_bundle;
+using namespace rasterization_bundle;
 
 class OrbitCameraSystem : public System
 {

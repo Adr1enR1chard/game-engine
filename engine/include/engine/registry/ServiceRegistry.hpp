@@ -55,6 +55,7 @@ namespace engine
             {
                 return static_cast<T *>(it->second.get());
             }
+            Log::Print("Service not found: " + std::string(typeid(T).name()), LogLevel::Warning);
             return nullptr;
         }
 

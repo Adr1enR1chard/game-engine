@@ -1,11 +1,11 @@
 #pragma once
 
-#include <DefaultBundle.hpp>
+#include <engine/bundle/core/CoreBundle.hpp>
 #include <random>
 #include <glm/gtc/random.hpp>
 
 using namespace engine;
-using namespace default_bundle;
+using namespace rasterization_bundle;
 
 class SpaceEnvironmentSystem : public System
 {

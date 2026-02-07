@@ -1,4 +1,4 @@
-#include <DefaultBundle.hpp>
+#include <RasterizationBundle.hpp>
 #include <engine/Engine.hpp>
 
 #include <systems/Camera.hpp>
@@ -6,12 +6,12 @@
 #include <systems/Spaceship.hpp>
 
 using namespace engine;
-using namespace default_bundle;
+using namespace rasterization_bundle;
 
 int main()
 {
     Engine::InitializeStandalone()
-        .addBundle<DefaultBundle>()
+        .addBundle<RasterizationBundle>()
         .addSystems<OrbitCameraSystem, SpaceEnvironmentSystem, SpaceshipControlSystem>()
         .run(1920, 1080, "Space Game", true);
 

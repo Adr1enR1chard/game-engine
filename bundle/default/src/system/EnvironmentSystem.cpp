@@ -1,12 +1,13 @@
 #include "system/EnvironmentSystem.hpp"
 
-#include <component/CEnvironment.hpp>
-#include <component/cache/CSkyboxCache.hpp>
+#include <engine/bundle/core/component/CEnvironment.hpp>
 #include <engine/utils/Log.hpp>
-#include <service/factory/MeshFactory.hpp>
+#include <engine/bundle/core/service/factory/MeshFactory.hpp>
 #include <engine/bundle/standalone/service/Window.hpp>
 
-namespace default_bundle
+#include <component/CSkyboxCache.hpp>
+
+namespace rasterization_bundle
 {
 
     using namespace engine;
@@ -38,4 +39,4 @@ namespace default_bundle
         };
     }
 
-} // namespace default_bundle
+} // namespace engine

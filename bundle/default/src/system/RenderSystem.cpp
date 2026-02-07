@@ -5,18 +5,10 @@
 #include <string>
 
 #include <service/ShadowMapping.hpp>
+#include <component/CSkyboxCache.hpp>
 
-#include <component/CCamera.hpp>
-#include <component/CEnvironment.hpp>
-#include <component/CMesh.hpp>
-#include <component/CDirectionalLight.hpp>
-#include <component/CTransform.hpp>
-#include <component/cache/CCameraCache.hpp>
-#include <component/cache/CSkyboxCache.hpp>
-#include <component/cache/CTransformCache.hpp>
-
+#include <engine/bundle/core/CoreBundle.hpp>
 #include <engine/bundle/standalone/service/Window.hpp>
-#include <engine/bundle/core/service/Renderer.hpp>
 
 const std::vector<VertexLayout> kQuadVertices = {
     // positions        // texCoords
@@ -29,7 +21,7 @@ const std::vector<unsigned int> kQuadIndices = {
     0, 1, 2,
     2, 3, 0};
 
-namespace default_bundle
+namespace rasterization_bundle
 {
     using namespace engine;
 
@@ -185,4 +177,4 @@ namespace default_bundle
         m_debugShadowMapUniforms["uShadowMap"] = FramebufferUniform{shadowMapping->getDepthBuffer()};
     }
 
-} // namespace default_bundle
+} // namespace engine

@@ -2,13 +2,13 @@
 
 #include <engine/model/Service.hpp>
 #include <engine/bundle/core/service/Renderer.hpp>
-#include <engine/bundle/core/service/factory/ShaderFactory.hpp>
+#include <service/factory/ShaderFactory.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <memory>
 #include <functional>
 
-namespace rasterization_bundle
+namespace engine
 {
 
     using namespace engine;
@@ -69,4 +69,4 @@ namespace rasterization_bundle
         bool m_enabled = true;
     };
 
-} // namespace rasterization_bundle
+} // namespace engine

@@ -1,9 +1,7 @@
 #pragma once
-#include <DefaultBundle.hpp>
-#include <engine/bundle/standalone/StandaloneBundle.hpp>
+#include <engine/bundle/core/CoreBundle.hpp>
 
 using namespace engine;
-using namespace default_bundle;
 
 class CameraControlSystem : public System
 {

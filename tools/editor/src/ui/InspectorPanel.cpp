@@ -7,9 +7,11 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-#include <DefaultBundle.hpp>
+#include <RasterizationBundle.hpp>
+#include <engine/bundle/core/CoreBundle.hpp>
 
-using namespace default_bundle;
+using namespace rasterization_bundle;
+using namespace engine;
 
 void InspectorPanel::draw(Entity selectedEntity)
 {

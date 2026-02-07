@@ -3,11 +3,17 @@
 
 #include <engine/model/System.hpp>
 #include <engine/model/Entity.hpp>
-#include <component/CEnvironment.hpp>
-#include <component/cache/CSkyboxCache.hpp>
+#include <engine/bundle/core/component/CCamera.hpp>
 #include <engine/utils/RenderTypes.hpp>
 
-namespace default_bundle
+#include <component/CSkyboxCache.hpp>
+
+namespace engine
+{
+  struct CEnvironment;
+}
+
+namespace rasterization_bundle
 {
 
   class EnvironmentSystem : public engine::System
@@ -23,7 +29,7 @@ namespace default_bundle
 
   private:
     glm::vec3 m_lastClearColor = glm::vec3(-1.0f);
-    CEnvironment *m_environment = nullptr;
+    engine::CEnvironment *m_environment = nullptr;
   };
 
-} // namespace default_bundle
+} // namespace rasterization_bundle

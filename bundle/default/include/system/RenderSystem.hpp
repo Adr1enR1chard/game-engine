@@ -5,7 +5,13 @@
 #include <engine/model/System.hpp>
 #include <engine/utils/RenderTypes.hpp>
 
-namespace default_bundle
+namespace engine
+{
+  class ShaderFactory;
+  class MeshFactory;
+}
+
+namespace rasterization_bundle
 {
 
   using namespace engine;
@@ -28,4 +34,4 @@ namespace default_bundle
     TextureRef m_whiteTexture = 0;
   };
 
-} // namespace default_bundle
+} // namespace rasterization_bundle
