@@ -30,6 +30,6 @@ private:
     void drawEnvironmentComponent(Entity entity);
 
     // Helper methods
-    void drawVec3Control(const char *label, glm::vec3 &values, float resetValue = 0.0f, float columnWidth = 100.0f);
+    void drawVec3Control(const char *label, glm::vec3 &values, float resetValue = 0.0f, float columnWidth = 100.0f, float min = 0.0f, float max = 0.0f);
     void drawFloatControl(const char *label, float &value, float speed = 0.1f, float min = 0.0f, float max = 0.0f);
 };

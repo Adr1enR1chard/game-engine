@@ -302,8 +302,7 @@ void InspectorPanel::drawMeshRendererComponent(Entity entity)
         ImGui::Text("%d", renderer->meshRef);
 
         // Material properties
-        ImGui::Separator();
-        ImGui::Text("PBR Material");
+        ImGui::SeparatorText("Material properties");
         ImGui::Spacing();
 
         ImGui::Text("Color");
@@ -312,7 +311,7 @@ void InspectorPanel::drawMeshRendererComponent(Entity entity)
         MaterialFactory::PBRMaterialParameters matParams;
         // ImGui::ColorEdit4("##MaterialColor", glm::value_ptr(renderer->material.color));
 
-        drawVec3Control("Base Color", *renderer->material.getVec3("material.baseColor"), 1.0f);
+        drawVec3Control("Base Color", *renderer->material.getVec3("material.baseColor"), 1.0f, 100.0f, 0.0f, 1.0f);
         drawFloatControl("Metallic", *renderer->material.getFloat("material.metallic"), 0.01f, 0.0f, 1.0f);
         drawFloatControl("Roughness", *renderer->material.getFloat("material.roughness"), 0.01f, 0.0f, 1.0f);
         drawFloatControl("AO", *renderer->material.getFloat("material.ao"), 0.01f, 0.0f, 1.0f);
@@ -386,7 +385,7 @@ void InspectorPanel::drawEnvironmentComponent(Entity entity)
     ImGui::PopID();
 }
 
-void InspectorPanel::drawVec3Control(const char *label, glm::vec3 &values, float resetValue, float columnWidth)
+void InspectorPanel::drawVec3Control(const char *label, glm::vec3 &values, float resetValue, float columnWidth, float min, float max)
 {
     ImGui::PushID(label);
 
@@ -443,6 +442,13 @@ void InspectorPanel::drawVec3Control(const char *label, glm::vec3 &values, float
     ImGui::PopStyleVar();
     ImGui::Columns(1);
     ImGui::PopID();
+
+    if (max > min)
+    {
+        values.x = glm::clamp(values.x, min, max);
+        values.y = glm::clamp(values.y, min, max);
+        values.z = glm::clamp(values.z, min, max);
+    }
 }
 
 void InspectorPanel::drawFloatControl(const char *label, float &value, float speed, float min, float max)

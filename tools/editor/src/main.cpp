@@ -105,10 +105,13 @@ int main()
         glfwPollEvents();
 
         ImVec2 viewportSize = viewportPanel.getViewportSize();
-        ViewportRenderer::Resize(viewportSize.x, viewportSize.y);
-        ViewportRenderer::Begin();
-        systems->update(deltaTime);
-        ViewportRenderer::End();
+        if (viewportSize.x > 0 && viewportSize.y > 0)
+        {
+            ViewportRenderer::Resize(viewportSize.x, viewportSize.y);
+            ViewportRenderer::Begin();
+            systems->update(deltaTime);
+            ViewportRenderer::End();
+        }
 
         // Start ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
