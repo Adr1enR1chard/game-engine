@@ -36,15 +36,22 @@ namespace default_rendering
             m_enabled = enabled;
         }
 
+        Sampler2D getShadowMap() const
+        {
+            if (!m_enabled)
+                return {};
+            return Sampler2D{m_depthTexture};
+        }
+
     private:
         friend class RenderSystem;
 
         float getNearPlane() const { return m_nearPlane; }
         float getFarPlane() const { return m_farPlane; }
 
-        FramebufferRef initializeDepthBuffer();
-        FramebufferRef createDepthBuffer();
+        FramebufferRef initialize();
         FramebufferRef getDepthBuffer() const;
+        void createDepthBuffer();
         ShaderRef getDepthShader() const { return m_depthShader; }
 
         glm::mat4 getLightSpaceMatrix(glm::vec3 lightDir, glm::vec3 target) const;
@@ -60,6 +67,7 @@ namespace default_rendering
         float m_farPlane = 100.0f;
 
         FramebufferRef m_depthFramebuffer = 0;
+        TextureRef m_depthTexture = 0;
         glm::mat4 m_lightProjectionMatrix;
         glm::mat4 m_lightViewMatrix;
 
@@ -69,4 +77,4 @@ namespace default_rendering
         bool m_enabled = true;
     };
 
-} // namespace rasterization_bundle
+} // namespace default_rendering

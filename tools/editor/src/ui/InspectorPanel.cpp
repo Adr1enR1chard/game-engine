@@ -457,7 +457,7 @@ void InspectorPanel::setMaterialTexture(CMesh *mesh, const std::string &uniformN
     TextureRef newTexture = services.get<TextureFactory>()->Texture2D(path);
     if (newTexture)
     {
-        auto *texUniform = mesh->material.getTexture(uniformName);
+        auto *texUniform = mesh->material.getSampler2D(uniformName);
         if (texUniform)
         {
             services.get<Renderer>()->freeTexture(texUniform->textureRef);
@@ -465,7 +465,7 @@ void InspectorPanel::setMaterialTexture(CMesh *mesh, const std::string &uniformN
         }
         else
         {
-            mesh->material.uniforms[uniformName] = TextureUniform{newTexture, TextureType::Texture2D};
+            mesh->material.uniforms[uniformName] = Sampler2D{newTexture};
         }
     }
 }

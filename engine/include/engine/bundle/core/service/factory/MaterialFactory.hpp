@@ -90,22 +90,22 @@ namespace engine
             return nullptr;
         }
 
-        TextureUniform *getTexture(const std::string &name)
+        Sampler2D *getSampler2D(const std::string &name)
         {
             auto it = uniforms.find(name);
             if (it != uniforms.end())
             {
-                return std::get_if<TextureUniform>(&(it->second));
+                return std::get_if<Sampler2D>(&(it->second));
             }
             return nullptr;
         }
 
-        FramebufferUniform *getFramebuffer(const std::string &name)
+        SamplerCube *getSamplerCube(const std::string &name)
         {
             auto it = uniforms.find(name);
             if (it != uniforms.end())
             {
-                return std::get_if<FramebufferUniform>(&(it->second));
+                return std::get_if<SamplerCube>(&(it->second));
             }
             return nullptr;
         }

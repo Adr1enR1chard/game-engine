@@ -17,7 +17,7 @@ namespace default_rendering
     }
     ShadowMapping::~ShadowMapping() = default;
 
-    FramebufferRef ShadowMapping::initializeDepthBuffer()
+    FramebufferRef ShadowMapping::initialize()
     {
         m_depthShader = m_shaderFactory.CustomShader("__ShadowMappingDepthShader",
                                                      "default-bundle-assets/shaders/shadow_mapping/depth.vert",
@@ -28,13 +28,18 @@ namespace default_rendering
                                                          .enableDepthTest = true,
                                                          .enableDepthWrite = true,
                                                      });
-        m_depthFramebuffer = createDepthBuffer();
+        createDepthBuffer();
         return m_depthFramebuffer;
     }
 
-    FramebufferRef ShadowMapping::createDepthBuffer()
+    void ShadowMapping::createDepthBuffer()
     {
-        return m_renderer.allocateDepthFramebuffer(m_width, m_height, true);
+        m_depthFramebuffer = m_renderer.allocateFramebuffer(m_width, m_height, false, true, false, false, false);
+        m_depthTexture = m_renderer.getFramebufferDepthAttachment(m_depthFramebuffer);
+
+        m_renderer.setTextureBorderColor(m_depthTexture, glm::vec4(1.0f));
+        m_renderer.setTextureWrapMode(m_depthTexture, Renderer::TextureWrapMode::ClampToBorder, Renderer::TextureWrapMode::ClampToBorder, Renderer::TextureWrapMode::ClampToBorder);
+        m_renderer.setTextureFilterMode(m_depthTexture, Renderer::TextureFilterMode::Nearest, Renderer::TextureFilterMode::Nearest);
     }
 
     FramebufferRef ShadowMapping::getDepthBuffer() const
@@ -63,7 +68,7 @@ namespace default_rendering
         if (m_depthFramebuffer != 0)
         {
             m_renderer.freeFramebuffer(m_depthFramebuffer);
-            m_depthFramebuffer = createDepthBuffer();
+            createDepthBuffer();
         }
     }
 

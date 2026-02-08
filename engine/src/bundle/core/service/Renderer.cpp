@@ -59,16 +59,26 @@ namespace engine
     struct Renderer::FramebufferData
     {
         GLuint fbo = 0;
-        GLuint textureAttachment = 0;
+        TextureRef depthAttachment = 0;
+        TextureRef colorAttachment = 0;
+        TextureRef stencilAttachment = 0;
     };
     void Renderer::FramebufferDataDeleter::operator()(FramebufferData *framebufferData)
     {
         if (framebufferData)
         {
             glDeleteFramebuffers(1, &framebufferData->fbo);
-            if (framebufferData->textureAttachment)
+            if (framebufferData->depthAttachment)
             {
-                glDeleteTextures(1, &framebufferData->textureAttachment);
+                glDeleteTextures(1, &framebufferData->depthAttachment);
+            }
+            if (framebufferData->colorAttachment)
+            {
+                glDeleteTextures(1, &framebufferData->colorAttachment);
+            }
+            if (framebufferData->stencilAttachment)
+            {
+                glDeleteTextures(1, &framebufferData->stencilAttachment);
             }
             delete framebufferData;
         }
@@ -263,48 +273,85 @@ namespace engine
         return newShaderRef;
     }
 
-    FramebufferRef Renderer::allocateDepthFramebuffer(unsigned int width, unsigned int height, bool withBorder)
+    FramebufferRef Renderer::allocateFramebuffer(unsigned int width, unsigned int height, bool withColor, bool withDepth, bool withStencil, bool drawBuffer, bool readBuffer)
     {
         FramebufferRef newFramebufferRef = m_framebuffersId.alloc();
         auto framebufferData = std::unique_ptr<FramebufferData, FramebufferDataDeleter>(new FramebufferData());
 
         glGenFramebuffers(1, &framebufferData->fbo);
-
         glBindFramebuffer(GL_FRAMEBUFFER, framebufferData->fbo);
-        glGenTextures(1, &framebufferData->textureAttachment);
-        glBindTexture(GL_TEXTURE_2D, framebufferData->textureAttachment);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        if (withBorder)
+        if (withColor)
         {
-            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-        }
-        else
-        {
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        }
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, framebufferData->textureAttachment, 0);
+            TextureRef colorAttachmentRef = m_texturesId.alloc();
+            auto colorTextureData = std::unique_ptr<TextureData, TextureDataDeleter>(new TextureData());
+            colorTextureData->type = Texture2D;
 
-        glDrawBuffer(GL_NONE);
-        glReadBuffer(GL_NONE);
+            glGenTextures(1, &colorTextureData->textureID);
+            glBindTexture(GL_TEXTURE_2D, colorTextureData->textureID);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTextureData->textureID, 0);
+
+            m_textures[colorAttachmentRef] = std::move(colorTextureData);
+            framebufferData->colorAttachment = colorAttachmentRef;
+        }
+
+        if (withDepth)
+        {
+            TextureRef depthAttachmentRef = m_texturesId.alloc();
+            auto depthTextureData = std::unique_ptr<TextureData, TextureDataDeleter>(new TextureData());
+            depthTextureData->type = Texture2D;
+
+            glGenTextures(1, &depthTextureData->textureID);
+            glBindTexture(GL_TEXTURE_2D, depthTextureData->textureID);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTextureData->textureID, 0);
+
+            m_textures[depthAttachmentRef] = std::move(depthTextureData);
+            framebufferData->depthAttachment = depthAttachmentRef;
+        }
+
+        if (withStencil)
+        {
+            TextureRef stencilAttachmentRef = m_texturesId.alloc();
+            auto stencilTextureData = std::unique_ptr<TextureData, TextureDataDeleter>(new TextureData());
+            stencilTextureData->type = Texture2D;
+
+            glGenTextures(1, &stencilTextureData->textureID);
+            glBindTexture(GL_TEXTURE_2D, stencilTextureData->textureID);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_STENCIL_INDEX8, width, height, 0, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, stencilTextureData->textureID, 0);
+
+            m_textures[stencilAttachmentRef] = std::move(stencilTextureData);
+            framebufferData->stencilAttachment = stencilAttachmentRef;
+        }
+
+        if (!drawBuffer)
+        {
+            glDrawBuffer(GL_NONE);
+        }
+        if (!readBuffer)
+        {
+            glReadBuffer(GL_NONE);
+        }
 
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         {
             Log::Print("Failed to create framebuffer.", LogLevel::Error);
         }
-
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         auto err = glGetError();
         if (err != GL_NO_ERROR)
         {
-            Log::Print("OpenGL error creating depth framebuffer: 0x" + std::to_string(err), LogLevel::Error);
+            Log::Print("OpenGL error creating framebuffer: 0x" + std::to_string(err), LogLevel::Error);
         }
 
         m_framebuffers[newFramebufferRef] = std::move(framebufferData);
@@ -434,6 +481,42 @@ namespace engine
         glDisable(GL_SCISSOR_TEST);
     }
 
+    TextureRef Renderer::getFramebufferColorAttachment(FramebufferRef framebuffer) const
+    {
+        auto framebufferIt = m_framebuffers.find(framebuffer);
+        if (framebufferIt == m_framebuffers.end())
+        {
+            Log::Print("Framebuffer not found for framebufferRef " + std::to_string(framebuffer) + " out of " + std::to_string(m_framebuffers.size()),
+                       LogLevel::Warning);
+            return 0;
+        }
+        return framebufferIt->second->colorAttachment;
+    }
+
+    TextureRef Renderer::getFramebufferDepthAttachment(FramebufferRef framebuffer) const
+    {
+        auto framebufferIt = m_framebuffers.find(framebuffer);
+        if (framebufferIt == m_framebuffers.end())
+        {
+            Log::Print("Framebuffer not found for framebufferRef " + std::to_string(framebuffer) + " out of " + std::to_string(m_framebuffers.size()),
+                       LogLevel::Warning);
+            return 0;
+        }
+        return framebufferIt->second->depthAttachment;
+    }
+
+    TextureRef Renderer::getFramebufferStencilAttachment(FramebufferRef framebuffer) const
+    {
+        auto framebufferIt = m_framebuffers.find(framebuffer);
+        if (framebufferIt == m_framebuffers.end())
+        {
+            Log::Print("Framebuffer not found for framebufferRef " + std::to_string(framebuffer) + " out of " + std::to_string(m_framebuffers.size()),
+                       LogLevel::Warning);
+            return 0;
+        }
+        return framebufferIt->second->stencilAttachment;
+    }
+
     void Renderer::setFramebuffer(FramebufferRef framebuffer)
     {
         // Retrieve the current framebuffer
@@ -505,6 +588,183 @@ namespace engine
         }
 
         m_framebufferStack.pop();
+    }
+
+    void Renderer::setTextureWrapMode(TextureRef texture, TextureWrapMode wrapModeS, TextureWrapMode wrapModeT, TextureWrapMode wrapModeR)
+    {
+        auto textureIt = m_textures.find(texture);
+        if (textureIt == m_textures.end())
+        {
+            Log::Print("Texture not found for textureRef " + std::to_string(texture) + " out of " + std::to_string(m_textures.size()),
+                       LogLevel::Warning);
+            return;
+        }
+
+        GLenum glWrapModeS;
+        switch (wrapModeS)
+        {
+        case Repeat:
+            glWrapModeS = GL_REPEAT;
+            break;
+        case MirroredRepeat:
+            glWrapModeS = GL_MIRRORED_REPEAT;
+            break;
+        case ClampToEdge:
+            glWrapModeS = GL_CLAMP_TO_EDGE;
+            break;
+        case ClampToBorder:
+            glWrapModeS = GL_CLAMP_TO_BORDER;
+            break;
+        default:
+            Log::Print("Invalid wrap mode in Renderer::setTextureWrapMode", LogLevel::Error);
+            return;
+        }
+        GLenum glWrapModeT;
+        switch (wrapModeT)
+        {
+        case Repeat:
+            glWrapModeT = GL_REPEAT;
+            break;
+        case MirroredRepeat:
+            glWrapModeT = GL_MIRRORED_REPEAT;
+            break;
+        case ClampToEdge:
+            glWrapModeT = GL_CLAMP_TO_EDGE;
+            break;
+        case ClampToBorder:
+            glWrapModeT = GL_CLAMP_TO_BORDER;
+            break;
+        default:
+            Log::Print("Invalid wrap mode in Renderer::setTextureWrapMode", LogLevel::Error);
+            return;
+        }
+        GLenum glWrapModeR;
+        switch (wrapModeR)
+        {
+        case Repeat:
+            glWrapModeR = GL_REPEAT;
+            break;
+        case MirroredRepeat:
+            glWrapModeR = GL_MIRRORED_REPEAT;
+            break;
+        case ClampToEdge:
+            glWrapModeR = GL_CLAMP_TO_EDGE;
+            break;
+        case ClampToBorder:
+            glWrapModeR = GL_CLAMP_TO_BORDER;
+            break;
+        default:
+            Log::Print("Invalid wrap mode in Renderer::setTextureWrapMode", LogLevel::Error);
+            return;
+        }
+        switch (textureIt->second->type)
+        {
+        case Texture2D:
+            glBindTexture(GL_TEXTURE_2D, textureIt->second->textureID);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, glWrapModeS);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, glWrapModeT);
+            break;
+        case CubeMap:
+            glBindTexture(GL_TEXTURE_CUBE_MAP, textureIt->second->textureID);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, glWrapModeS);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, glWrapModeT);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, glWrapModeR);
+            break;
+        }
+    }
+
+    void Renderer::setTextureFilterMode(TextureRef texture, TextureFilterMode minFilterMode, TextureFilterMode magFilterMode)
+    {
+        auto textureIt = m_textures.find(texture);
+        if (textureIt == m_textures.end())
+        {
+            Log::Print("Texture not found for textureRef " + std::to_string(texture) + " out of " + std::to_string(m_textures.size()),
+                       LogLevel::Warning);
+            return;
+        }
+
+        GLenum glMinFilter;
+        GLenum glMagFilter;
+        switch (minFilterMode)
+        {
+        case Nearest:
+            glMinFilter = GL_NEAREST;
+            break;
+        case Linear:
+            glMinFilter = GL_LINEAR;
+            break;
+        case NearestMipmapNearest:
+            glMinFilter = GL_NEAREST_MIPMAP_NEAREST;
+            break;
+        case LinearMipmapNearest:
+            glMinFilter = GL_LINEAR_MIPMAP_NEAREST;
+            break;
+        case NearestMipmapLinear:
+            glMinFilter = GL_NEAREST_MIPMAP_LINEAR;
+            break;
+        case LinearMipmapLinear:
+            glMinFilter = GL_LINEAR_MIPMAP_LINEAR;
+            break;
+        default:
+            Log::Print("Invalid filter mode in Renderer::setTextureFilterMode", LogLevel::Error);
+            return;
+        }
+
+        switch (magFilterMode)
+        {
+        case Nearest:
+            glMagFilter = GL_NEAREST;
+            break;
+        case Linear:
+            glMagFilter = GL_LINEAR;
+            break;
+        case NearestMipmapNearest:
+        case LinearMipmapNearest:
+        case NearestMipmapLinear:
+        case LinearMipmapLinear:
+            Log::Print("Invalid mag filter mode in Renderer::setTextureFilterMode. Mipmapped filter modes are not valid for magnification.", LogLevel::Error);
+            return;
+        default:
+            Log::Print("Invalid filter mode in Renderer::setTextureFilterMode", LogLevel::Error);
+            return;
+        }
+
+        switch (textureIt->second->type)
+        {
+        case Texture2D:
+            glBindTexture(GL_TEXTURE_2D, textureIt->second->textureID);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glMinFilter);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glMagFilter);
+            break;
+        case CubeMap:
+            glBindTexture(GL_TEXTURE_CUBE_MAP, textureIt->second->textureID);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, glMinFilter);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, glMagFilter);
+            break;
+        }
+    }
+
+    void Renderer::setTextureBorderColor(TextureRef texture, const glm::vec4 &borderColor)
+    {
+        auto textureIt = m_textures.find(texture);
+        if (textureIt == m_textures.end())
+        {
+            Log::Print("Texture not found for textureRef " + std::to_string(texture) + " out of " + std::to_string(m_textures.size()),
+                       LogLevel::Warning);
+            return;
+        }
+
+        switch (textureIt->second->type)
+        {
+        case Texture2D:
+            glBindTexture(GL_TEXTURE_2D, textureIt->second->textureID);
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(borderColor));
+            break;
+        case CubeMap:
+            glBindTexture(GL_TEXTURE_CUBE_MAP, textureIt->second->textureID);
+            glTexParameterfv(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(borderColor));
+            break;
+        }
     }
 
     void Renderer::clear(bool clearColor, bool clearDepth, bool clearStencil)
@@ -602,7 +862,7 @@ namespace engine
                     {
                         glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(v));
                     }
-                    else if constexpr (std::is_same_v<T, TextureUniform>)
+                    else if constexpr (std::is_same_v<T, Sampler2D>)
                     {
                         if (m_textures.find(v.textureRef) == m_textures.end())
                         {
@@ -611,28 +871,20 @@ namespace engine
                             return;
                         }
                         glActiveTexture(GL_TEXTURE0 + textureUnit);
-                        switch (v.type)
-                        {
-                        case Texture2D:
-                            glBindTexture(GL_TEXTURE_2D, m_textures[v.textureRef]->textureID);
-                            break;
-                        case CubeMap:
-                            glBindTexture(GL_TEXTURE_CUBE_MAP, m_textures[v.textureRef]->textureID);
-                            break;
-                        }
+                        glBindTexture(GL_TEXTURE_2D, m_textures[v.textureRef]->textureID);
                         glUniform1i(location, textureUnit);
                         textureUnit++;
                     }
-                    else if constexpr (std::is_same_v<T, FramebufferUniform>)
+                    else if constexpr (std::is_same_v<T, SamplerCube>)
                     {
-                        if (m_framebuffers.find(v.framebufferRef) == m_framebuffers.end())
+                        if (m_textures.find(v.textureRef) == m_textures.end())
                         {
-                            Log::Print("Renderer::ApplyUniforms - Framebuffer not found for framebufferRef " + std::to_string(v.framebufferRef) + " out of " + std::to_string(m_framebuffers.size()),
+                            Log::Print("Texture not found for textureRef " + std::to_string(v.textureRef) + " out of " + std::to_string(m_textures.size()),
                                        LogLevel::Warning);
                             return;
                         }
                         glActiveTexture(GL_TEXTURE0 + textureUnit);
-                        glBindTexture(GL_TEXTURE_2D, m_framebuffers[v.framebufferRef]->textureAttachment);
+                        glBindTexture(GL_TEXTURE_CUBE_MAP, m_textures[v.textureRef]->textureID);
                         glUniform1i(location, textureUnit);
                         textureUnit++;
                     }

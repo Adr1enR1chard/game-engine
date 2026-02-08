@@ -18,15 +18,15 @@ namespace engine
         };
 
         if (options.baseColorMap != 0)
-            uniforms["material.baseColorMap"] = TextureUniform{options.baseColorMap, Texture2D};
+            uniforms["material.baseColorMap"] = Sampler2D{options.baseColorMap};
         if (options.normalMap != 0)
-            uniforms["material.normalMap"] = TextureUniform{options.normalMap, Texture2D};
+            uniforms["material.normalMap"] = Sampler2D{options.normalMap};
         if (options.metallicMap != 0)
-            uniforms["material.metallicMap"] = TextureUniform{options.metallicMap, Texture2D};
+            uniforms["material.metallicMap"] = Sampler2D{options.metallicMap};
         if (options.roughnessMap != 0)
-            uniforms["material.roughnessMap"] = TextureUniform{options.roughnessMap, Texture2D};
+            uniforms["material.roughnessMap"] = Sampler2D{options.roughnessMap};
         if (options.aoMap != 0)
-            uniforms["material.aoMap"] = TextureUniform{options.aoMap, Texture2D};
+            uniforms["material.aoMap"] = Sampler2D{options.aoMap};
         return CustomMaterial(pbrShaderRef, uniforms);
     };
 
@@ -42,11 +42,11 @@ namespace engine
         };
 
         if (options.diffuseMap != 0)
-            uniforms["material.diffuseMap"] = TextureUniform{options.diffuseMap, Texture2D};
+            uniforms["material.diffuseMap"] = Sampler2D{options.diffuseMap};
         if (options.specularMap != 0)
-            uniforms["material.specularMap"] = TextureUniform{options.specularMap, Texture2D};
+            uniforms["material.specularMap"] = Sampler2D{options.specularMap};
         if (options.normalMap != 0)
-            uniforms["material.normalMap"] = TextureUniform{options.normalMap, Texture2D};
+            uniforms["material.normalMap"] = Sampler2D{options.normalMap};
         return CustomMaterial(phongShaderRef, uniforms);
     }
 
@@ -56,7 +56,7 @@ namespace engine
 
         UniformCollection uniforms;
         if (options.colorMap != 0)
-            uniforms["material.colorMap"] = TextureUniform{options.colorMap, CubeMap};
+            uniforms["material.colorMap"] = SamplerCube{options.colorMap};
 
         return CustomMaterial(skyboxShaderRef, uniforms);
     }

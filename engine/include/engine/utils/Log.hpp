@@ -19,7 +19,7 @@ namespace engine
     class Log
     {
     public:
-        static void Print(const std::string &message, LogLevel level, bool logLocation = false,
+        static void Print(const std::string &message, LogLevel level = LogLevel::Debug, bool logLocation = false,
                           const std::source_location &location = std::source_location::current());
 
     private:

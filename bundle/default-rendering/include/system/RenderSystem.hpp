@@ -23,7 +23,7 @@ namespace default_rendering
     void update(float deltaTime) override;
 
   private:
-    void setFinalRenderingUniforms(UniformCollection &uniforms, const glm::mat4 &modelMatrix, const glm::mat4 &viewMatrix, const glm::mat4 &projMatrix, const glm::mat4 &lightSpaceMatrix, FramebufferRef shadowMap, float bias);
+    void setFinalRenderingUniforms(UniformCollection &uniforms, const glm::mat4 &modelMatrix, const glm::mat4 &viewMatrix, const glm::mat4 &projMatrix, const glm::mat4 &lightSpaceMatrix, Sampler2D shadowMap, float bias);
 
     bool m_cameraNotFoundLogged = false;
 

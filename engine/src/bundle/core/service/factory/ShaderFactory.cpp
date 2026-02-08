@@ -47,11 +47,11 @@ namespace engine
                                 {"material.roughness", 1.0f},
                                 {"material.ao", 1.0f},
                                 {"material.useMetallicRoughnessMap", false},
-                                {"material.baseColorMap", TextureUniform{m_textureFactory.WhiteTexture2D(), Texture2D}},
-                                {"material.normalMap", TextureUniform{m_textureFactory.NormalTexture2D(), Texture2D}},
-                                {"material.metallicMap", TextureUniform{m_textureFactory.BlackTexture2D(), Texture2D}},
-                                {"material.roughnessMap", TextureUniform{m_textureFactory.WhiteTexture2D(), Texture2D}},
-                                {"material.aoMap", TextureUniform{m_textureFactory.WhiteTexture2D(), Texture2D}},
+                                {"material.baseColorMap", Sampler2D{m_textureFactory.WhiteTexture2D()}},
+                                {"material.normalMap", Sampler2D{m_textureFactory.NormalTexture2D()}},
+                                {"material.metallicMap", Sampler2D{m_textureFactory.BlackTexture2D()}},
+                                {"material.roughnessMap", Sampler2D{m_textureFactory.WhiteTexture2D()}},
+                                {"material.aoMap", Sampler2D{m_textureFactory.WhiteTexture2D()}},
                             });
     }
 
@@ -68,9 +68,9 @@ namespace engine
                                 {"material.diffuse", glm::vec3(1.0f, 1.0f, 1.0f)},
                                 {"material.specular", glm::vec3(1.0f, 1.0f, 1.0f)},
                                 {"material.shininess", 32.0f},
-                                {"material.diffuseMap", TextureUniform{m_textureFactory.WhiteTexture2D(), Texture2D}},
-                                {"material.specularMap", TextureUniform{m_textureFactory.WhiteTexture2D(), Texture2D}},
-                                {"material.normalMap", TextureUniform{m_textureFactory.NormalTexture2D(), Texture2D}},
+                                {"material.diffuseMap", Sampler2D{m_textureFactory.WhiteTexture2D()}},
+                                {"material.specularMap", Sampler2D{m_textureFactory.WhiteTexture2D()}},
+                                {"material.normalMap", Sampler2D{m_textureFactory.NormalTexture2D()}},
                             });
     }
 
@@ -85,10 +85,9 @@ namespace engine
             name, "default-bundle-assets/shaders/Skybox.vert", "default-bundle-assets/shaders/Skybox.frag",
             {
                 {"material.colorMap",
-                 TextureUniform{m_textureFactory.CubeMap({"default-bundle-assets/textures/skybox/right.jpg", "default-bundle-assets/textures/skybox/left.jpg",
-                                                          "default-bundle-assets/textures/skybox/top.jpg", "default-bundle-assets/textures/skybox/bottom.jpg",
-                                                          "default-bundle-assets/textures/skybox/front.jpg", "default-bundle-assets/textures/skybox/back.jpg"}),
-                                CubeMap}},
+                 SamplerCube{m_textureFactory.CubeMap({"default-bundle-assets/textures/skybox/right.jpg", "default-bundle-assets/textures/skybox/left.jpg",
+                                                       "default-bundle-assets/textures/skybox/top.jpg", "default-bundle-assets/textures/skybox/bottom.jpg",
+                                                       "default-bundle-assets/textures/skybox/front.jpg", "default-bundle-assets/textures/skybox/back.jpg"})}},
             },
             {
                 .enableBackfaceCulling = false,

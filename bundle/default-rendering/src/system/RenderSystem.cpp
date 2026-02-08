@@ -28,7 +28,7 @@ namespace default_rendering
     void RenderSystem::start()
     {
         auto shadowMapping = services().get<ShadowMapping>();
-        shadowMapping->initializeDepthBuffer();
+        shadowMapping->initialize();
         initializeShadowMapVisualizer(shadowMapping, services().get<ShaderFactory>(), services().get<MeshFactory>());
 
         auto renderer = services().get<Renderer>();
@@ -128,7 +128,7 @@ namespace default_rendering
                                       viewMatrix,
                                       projMatrix,
                                       lightSpaceMatrix,
-                                      shadowMapping->getDepthBuffer(),
+                                      shadowMapping->getShadowMap(),
                                       shadowMapping->getBias());
             renderer->drawMesh(meshRenderer->meshRef, meshRenderer->material.shaderRef, meshRenderer->material.uniforms);
         }
@@ -147,22 +147,22 @@ namespace default_rendering
                                 viewMatrix,
                                 projMatrix,
                                 lightSpaceMatrix,
-                                shadowMapping->getDepthBuffer(),
+                                shadowMapping->getShadowMap(),
                                 shadowMapping->getBias());
                 renderer->drawMesh(meshRef, material.shaderRef, material.uniforms); });
         }
     }
 
-    void RenderSystem::setFinalRenderingUniforms(UniformCollection &uniforms, const glm::mat4 &modelMatrix, const glm::mat4 &viewMatrix, const glm::mat4 &projMatrix, const glm::mat4 &lightSpaceMatrix, FramebufferRef shadowMap, float bias)
+    void RenderSystem::setFinalRenderingUniforms(UniformCollection &uniforms, const glm::mat4 &modelMatrix, const glm::mat4 &viewMatrix, const glm::mat4 &projMatrix, const glm::mat4 &lightSpaceMatrix, Sampler2D shadowMap, float bias)
     {
         uniforms["model"] = modelMatrix;
         uniforms["view"] = viewMatrix;
         uniforms["projection"] = projMatrix;
         uniforms["uDirLightSpaceMatrix"] = lightSpaceMatrix;
-        if (shadowMap != 0)
-            uniforms["uShadowMap"] = FramebufferUniform{shadowMap};
+        if (shadowMap.textureRef != 0)
+            uniforms["uShadowMap"] = shadowMap;
         else
-            uniforms["uShadowMap"] = TextureUniform{m_whiteTexture, TextureType::Texture2D};
+            uniforms["uShadowMap"] = Sampler2D{m_whiteTexture};
         uniforms["uBias"] = bias;
     }
 
@@ -174,7 +174,7 @@ namespace default_rendering
         m_debugScreenQuadMesh = meshFactory->Raw(kQuadVertices, kQuadIndices);
         m_debugShadowMapUniforms["uFarPlane"] = shadowMapping->getFarPlane();
         m_debugShadowMapUniforms["uNearPlane"] = shadowMapping->getNearPlane();
-        m_debugShadowMapUniforms["uShadowMap"] = FramebufferUniform{shadowMapping->getDepthBuffer()};
+        m_debugShadowMapUniforms["uShadowMap"] = shadowMapping->getShadowMap();
     }
 
 } // namespace engine
