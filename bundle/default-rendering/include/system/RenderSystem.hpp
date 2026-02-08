@@ -11,7 +11,7 @@ namespace engine
   class MeshFactory;
 }
 
-namespace rasterization_bundle
+namespace default_rendering
 {
 
   using namespace engine;

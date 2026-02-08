@@ -49,40 +49,39 @@ FetchContent_MakeAvailable(assets_compiler)
 ###########################
 
 # Library: Default bundle
-file(GLOB_RECURSE DEFAULT_BUNDLE_SYSTEMS
-    bundle/default/src/system/*.cpp
+file(GLOB_RECURSE DEFAULT_RENDERING_SOURCES
+    bundle/default-rendering/src/*.cpp
 )
 
-add_library(rasterization_bundle
-    ${DEFAULT_BUNDLE_SYSTEMS}
-    bundle/default/src/RasterizationBundle.cpp
+add_library(default_rendering
+    ${DEFAULT_RENDERING_SOURCES}
 )
-target_include_directories(rasterization_bundle PUBLIC
+target_include_directories(default_rendering PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/engine/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/bundle/default/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/bundle/default-rendering/include
 )
-target_link_libraries(rasterization_bundle PUBLIC
+target_link_libraries(default_rendering PUBLIC
     assets_format
 )
 
 # Library: GLFW platform
-add_library(rasterization_bundle_glfw
-    bundle/default/src/service/ShadowMapping.cpp
+add_library(default_rendering_glfw
+    bundle/default-rendering/src/service/ShadowMapping.cpp
 )
-target_include_directories(rasterization_bundle_glfw PUBLIC
+target_include_directories(default_rendering_glfw PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/engine/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/bundle/default/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/bundle/default-rendering/include
 )
 
-target_link_libraries(rasterization_bundle_glfw PUBLIC
+target_link_libraries(default_rendering_glfw PUBLIC
     glfw
     OpenGL::GL
     assets_loader
 )
 if (WIN32)
-    target_link_libraries(rasterization_bundle_glfw PUBLIC opengl32)
+    target_link_libraries(default_rendering_glfw PUBLIC opengl32)
 endif()
 
 # Library: Rendering
@@ -147,8 +146,8 @@ target_link_libraries(engine_editor PUBLIC
     engine_core
     engine_vendor
     imgui
-    rasterization_bundle
-    rasterization_bundle_glfw
+    default_rendering
+    default_rendering_glfw
 )
 
 ###########################
@@ -168,10 +167,10 @@ target_include_directories(BasicScene PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/examples/basic_scene
 )
 target_link_libraries(BasicScene PRIVATE
-    rasterization_bundle
+    default_rendering
     engine_core
     engine_vendor
-    rasterization_bundle_glfw
+    default_rendering_glfw
 )
 enable_strict_warnings(BasicScene)
 
@@ -199,8 +198,8 @@ target_include_directories(SpaceGame PRIVATE
 
 target_link_libraries(SpaceGame
 PUBLIC
-    rasterization_bundle
-    rasterization_bundle_glfw
+    default_rendering
+    default_rendering_glfw
     engine_core
     engine_vendor
 )

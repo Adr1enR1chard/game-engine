@@ -2,7 +2,7 @@
 
 #include <engine/utils/RenderTypes.hpp>
 
-namespace rasterization_bundle
+namespace default_rendering
 {
 
     struct CSkyboxCache

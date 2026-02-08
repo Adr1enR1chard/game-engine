@@ -11,12 +11,11 @@
 
 #include <engine/bundle/core/CoreBundle.hpp>
 
-namespace rasterization_bundle
+namespace default_rendering
 {
-
   using namespace engine;
 
-  class RasterizationBundle : public Bundle
+  class DefaultRendering : public Bundle
   {
   public:
     void install(Engine &engine) const override;

@@ -1,11 +1,11 @@
 #include <engine/Engine.hpp>
-#include <RasterizationBundle.hpp>
+#include <DefaultRenderingBundle.hpp>
 #include <systems/CameraControlSystem.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/rotate_vector.hpp>
 
 using namespace engine;
-using namespace rasterization_bundle;
+using namespace default_rendering;
 
 class MySystem : public System
 {
@@ -15,6 +15,8 @@ public:
         world().createEntity(CCamera{}, CTransform{glm::vec3(0.0f, 0.0f, 3.0f)});
         m_dirLight = world().createEntity(CDirectionalLight{glm::vec3(-3.0f, -1.0f, -1.0f), glm::vec3(1.0f), 5.0f, 10.0f});
         world().createEntity(CEnvironment{.skyboxMaterial = services().get<MaterialFactory>()->SkyboxMaterial({})});
+        services().get<ShadowMapping>()->setLightProjection(0.1f, 100.0f, 10.0f);
+        services().get<ShadowMapping>()->setShadowMapDimensions(2048, 2048);
 
         m_metalSphere = world().createEntity(
             CMesh{
@@ -96,7 +98,7 @@ private:
 
 int main()
 {
-    Engine::InitializeStandalone().addBundle<RasterizationBundle>().addSystems<CameraControlSystem, MySystem>().run(1280, 720, "Basic Scene", false);
+    Engine::InitializeStandalone().addBundle<DefaultRendering>().addSystems<CameraControlSystem, MySystem>().run(1280, 720, "Basic Scene", false);
 
     return 0;
 }

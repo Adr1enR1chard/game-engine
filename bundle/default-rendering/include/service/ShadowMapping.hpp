@@ -8,7 +8,7 @@
 #include <memory>
 #include <functional>
 
-namespace rasterization_bundle
+namespace default_rendering
 {
 
     using namespace engine;

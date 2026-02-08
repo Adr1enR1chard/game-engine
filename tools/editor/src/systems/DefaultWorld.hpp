@@ -1,9 +1,9 @@
 #pragma once
 
-#include <RasterizationBundle.hpp>
+#include <DefaultRenderingBundle.hpp>
 
 using namespace engine;
-using namespace rasterization_bundle;
+using namespace default_rendering;
 
 class DefaultWorld : public System
 {

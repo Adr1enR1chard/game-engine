@@ -6,7 +6,7 @@
 #include <components/OrbitCamera.hpp>
 
 using namespace engine;
-using namespace rasterization_bundle;
+using namespace default_rendering;
 
 class OrbitCameraSystem : public System
 {

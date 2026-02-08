@@ -10,7 +10,7 @@
 #include "ui/EditorUI.hpp"
 
 #include "rendering/Renderer.hpp"
-#include <RasterizationBundle.hpp>
+#include <DefaultRenderingBundle.hpp>
 #include "systems/DefaultWorld.hpp"
 
 #include <ui/EntityPanel.hpp>
@@ -20,7 +20,7 @@
 #include <chrono>
 
 using namespace engine_editor;
-using namespace rasterization_bundle;
+using namespace default_rendering;
 
 int main()
 {
@@ -74,10 +74,10 @@ int main()
     ServiceRegistry *services;
     engine::Engine::InitializeEmbedded(world, systems, services)
         .addServices<engine::Renderer>()
-        .addBundle<rasterization_bundle::RasterizationBundle>()
+        .addBundle<default_rendering::DefaultRendering>()
         .addSystems<DefaultWorld>();
 
-    services->get<rasterization_bundle::ShadowMapping>()->setEnabled(false); // Bug with shadow mapping in editor, disable for now
+    services->get<default_rendering::ShadowMapping>()->setEnabled(false); // Bug with shadow mapping in editor, disable for now
 
     using clock = std::chrono::steady_clock;
     auto lastFrame = clock::now();

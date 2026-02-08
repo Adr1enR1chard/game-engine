@@ -4,7 +4,7 @@
 #include <engine/utils/Log.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-namespace rasterization_bundle
+namespace default_rendering
 {
 
     using namespace engine;

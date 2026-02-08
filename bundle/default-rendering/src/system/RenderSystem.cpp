@@ -21,7 +21,7 @@ const std::vector<unsigned int> kQuadIndices = {
     0, 1, 2,
     2, 3, 0};
 
-namespace rasterization_bundle
+namespace default_rendering
 {
     using namespace engine;
 

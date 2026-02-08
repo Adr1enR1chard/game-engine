@@ -13,7 +13,7 @@ namespace engine
   struct CEnvironment;
 }
 
-namespace rasterization_bundle
+namespace default_rendering
 {
 
   class EnvironmentSystem : public engine::System

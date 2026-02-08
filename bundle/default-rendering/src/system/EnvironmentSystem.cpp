@@ -7,7 +7,7 @@
 
 #include <component/CSkyboxCache.hpp>
 
-namespace rasterization_bundle
+namespace default_rendering
 {
 
     using namespace engine;

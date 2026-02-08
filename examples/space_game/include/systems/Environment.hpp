@@ -5,7 +5,7 @@
 #include <glm/gtc/random.hpp>
 
 using namespace engine;
-using namespace rasterization_bundle;
+using namespace default_rendering;
 
 class SpaceEnvironmentSystem : public System
 {
