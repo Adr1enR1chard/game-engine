@@ -59,8 +59,8 @@ namespace engine
     struct Renderer::FramebufferData
     {
         GLuint fbo = 0;
+        std::vector<TextureRef> colorAttachments;
         TextureRef depthAttachment = 0;
-        TextureRef colorAttachment = 0;
         TextureRef stencilAttachment = 0;
     };
     void Renderer::FramebufferDataDeleter::operator()(FramebufferData *framebufferData)
@@ -72,9 +72,9 @@ namespace engine
             {
                 glDeleteTextures(1, &framebufferData->depthAttachment);
             }
-            if (framebufferData->colorAttachment)
+            for (auto colorAttachment : framebufferData->colorAttachments)
             {
-                glDeleteTextures(1, &framebufferData->colorAttachment);
+                glDeleteTextures(1, &colorAttachment);
             }
             if (framebufferData->stencilAttachment)
             {
@@ -273,7 +273,7 @@ namespace engine
         return newShaderRef;
     }
 
-    FramebufferRef Renderer::allocateFramebuffer(unsigned int width, unsigned int height, bool withColor, bool withDepth, bool withStencil, bool drawBuffer, bool readBuffer)
+    FramebufferRef Renderer::allocateFramebuffer(unsigned int width, unsigned int height, int colorAttachments, bool withDepth, bool withStencil, bool drawBuffer, bool readBuffer)
     {
         FramebufferRef newFramebufferRef = m_framebuffersId.alloc();
         auto framebufferData = std::unique_ptr<FramebufferData, FramebufferDataDeleter>(new FramebufferData());
@@ -281,7 +281,7 @@ namespace engine
         glGenFramebuffers(1, &framebufferData->fbo);
         glBindFramebuffer(GL_FRAMEBUFFER, framebufferData->fbo);
 
-        if (withColor)
+        for (int i = 0; i < colorAttachments; i++)
         {
             TextureRef colorAttachmentRef = m_texturesId.alloc();
             auto colorTextureData = std::unique_ptr<TextureData, TextureDataDeleter>(new TextureData());
@@ -292,10 +292,10 @@ namespace engine
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTextureData->textureID, 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, colorTextureData->textureID, 0);
 
             m_textures[colorAttachmentRef] = std::move(colorTextureData);
-            framebufferData->colorAttachment = colorAttachmentRef;
+            framebufferData->colorAttachments.push_back(colorAttachmentRef);
         }
 
         if (withDepth)
@@ -481,7 +481,7 @@ namespace engine
         glDisable(GL_SCISSOR_TEST);
     }
 
-    TextureRef Renderer::getFramebufferColorAttachment(FramebufferRef framebuffer) const
+    TextureRef Renderer::getFramebufferColorAttachment(FramebufferRef framebuffer, size_t index) const
     {
         auto framebufferIt = m_framebuffers.find(framebuffer);
         if (framebufferIt == m_framebuffers.end())
@@ -490,7 +490,13 @@ namespace engine
                        LogLevel::Warning);
             return 0;
         }
-        return framebufferIt->second->colorAttachment;
+        if (index >= framebufferIt->second->colorAttachments.size())
+        {
+            Log::Print("Color attachment index out of range for framebufferRef " + std::to_string(framebuffer) + " with " + std::to_string(framebufferIt->second->colorAttachments.size()) + " color attachments",
+                       LogLevel::Warning);
+            return 0;
+        }
+        return framebufferIt->second->colorAttachments[index];
     }
 
     TextureRef Renderer::getFramebufferDepthAttachment(FramebufferRef framebuffer) const
@@ -523,7 +529,7 @@ namespace engine
         GLint currentFramebuffer = 0;
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFramebuffer);
 
-        auto currentFramebufferData = std::unique_ptr<FramebufferData, FramebufferDataDeleter>(new FramebufferData({static_cast<GLuint>(currentFramebuffer), 0}));
+        auto currentFramebufferData = std::unique_ptr<FramebufferData, FramebufferDataDeleter>(new FramebufferData({static_cast<GLuint>(currentFramebuffer)}));
         m_framebufferStack.push(std::move(currentFramebufferData));
 
         if (framebuffer != 0)
@@ -536,6 +542,15 @@ namespace engine
                 return;
             }
             glBindFramebuffer(GL_FRAMEBUFFER, framebufferIt->second->fbo);
+            GLsizei drawBuffersCount = static_cast<GLsizei>(framebufferIt->second->colorAttachments.size());
+            std::vector<GLenum> drawBuffers(drawBuffersCount);
+            for (GLsizei i = 0; i < drawBuffersCount; i++)
+            {
+                drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
+            }
+            if (drawBuffersCount > 0)
+                glDrawBuffers(drawBuffersCount, drawBuffers.data());
+
             // checlk for gl error
             auto err = glGetError();
             if (err != GL_NO_ERROR)

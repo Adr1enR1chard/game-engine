@@ -59,7 +59,7 @@ namespace engine
         TextureRef allocateCubeMap(const std::vector<TextureAttributes> &faces);
         MeshRef allocateMesh(const MeshAttributes &mesh);
         ShaderRef allocateShader(const ShaderAttributes &shader);
-        FramebufferRef allocateFramebuffer(unsigned int width, unsigned int height, bool withColor = true, bool withDepth = true, bool withStencil = false, bool drawBuffer = true, bool readBuffer = true);
+        FramebufferRef allocateFramebuffer(unsigned int width, unsigned int height, int colorAttachments = 1, bool withDepth = true, bool withStencil = false, bool drawBuffer = true, bool readBuffer = true);
 
         void freeTexture(TextureRef texture);
         void freeMesh(MeshRef mesh);
@@ -75,7 +75,7 @@ namespace engine
         void setScissorRect(unsigned int x, unsigned int y, unsigned int width, unsigned int height);
         void resetScissorRect();
 
-        TextureRef getFramebufferColorAttachment(FramebufferRef framebuffer) const;
+        TextureRef getFramebufferColorAttachment(FramebufferRef framebuffer, size_t index = 0) const;
         TextureRef getFramebufferDepthAttachment(FramebufferRef framebuffer) const;
         TextureRef getFramebufferStencilAttachment(FramebufferRef framebuffer) const;
         void setFramebuffer(FramebufferRef framebuffer);

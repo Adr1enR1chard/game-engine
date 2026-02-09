@@ -168,7 +168,12 @@ namespace default_rendering
         }
         renderer->revertToPreviousFramebuffer();
 
-        renderer->drawMesh(m_imageQuadMesh, services().get<SSR>()->getShader(), {{"uTexture", Sampler2D{renderer->getFramebufferColorAttachment(m_gBuffer)}}});
+        renderer->drawMesh(m_imageQuadMesh, services().get<SSR>()->getShader(),
+                           {{"uColorTexture", Sampler2D{renderer->getFramebufferColorAttachment(m_gBuffer)}},
+                            // {"uNormalTexture", Sampler2D{renderer->getFramebufferDepthAttachment(m_gBuffer)}},
+                            {"uDepthTexture", Sampler2D{renderer->getFramebufferDepthAttachment(m_gBuffer)}},
+                            {"uView", viewMatrix},
+                            {"uProjection", projMatrix}});
     }
 
     void RenderSystem::setFinalRenderingUniforms(UniformCollection &uniforms, const glm::mat4 &modelMatrix, const glm::mat4 &viewMatrix, const glm::mat4 &projMatrix, const glm::mat4 &lightSpaceMatrix, Sampler2D shadowMap, float bias)

@@ -34,7 +34,7 @@ namespace default_rendering
 
     void ShadowMapping::createDepthBuffer()
     {
-        m_depthFramebuffer = m_renderer.allocateFramebuffer(m_width, m_height, false, true, false, false, false);
+        m_depthFramebuffer = m_renderer.allocateFramebuffer(m_width, m_height, 0, true, false, false, false);
         m_depthTexture = m_renderer.getFramebufferDepthAttachment(m_depthFramebuffer);
 
         m_renderer.setTextureBorderColor(m_depthTexture, glm::vec4(1.0f));
