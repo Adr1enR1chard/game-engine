@@ -8,6 +8,7 @@
 
 // --- Services ---
 #include <service/ShadowMapping.hpp>
+#include <service/SSR.hpp>
 
 #include <engine/bundle/core/CoreBundle.hpp>
 

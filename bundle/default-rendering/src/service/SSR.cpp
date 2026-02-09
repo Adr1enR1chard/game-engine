@@ -7,12 +7,10 @@ namespace default_rendering
 {
     using namespace engine;
 
-    SSR::SSR(Renderer &renderer, ShaderFactory &shaderFactory)
-        : Service()
+    void SSR::initialize(Renderer &renderer, ShaderFactory &shaderFactory)
     {
-    }
-
-    SSR::~SSR()
-    {
+        m_ssrShader = shaderFactory.CustomShader("__SSRShader",
+                                                 "default-bundle-assets/shaders/Image.vert",
+                                                 "default-bundle-assets/shaders/ssr/SSR.frag", {});
     }
 } // namespace default_rendering

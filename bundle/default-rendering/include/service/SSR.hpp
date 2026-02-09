@@ -2,6 +2,8 @@
 
 #include <engine/model/Service.hpp>
 
+#include <engine/utils/RenderTypes.hpp>
+
 namespace engine
 {
     class Renderer;
@@ -14,8 +16,15 @@ namespace default_rendering
     class SSR : public Service
     {
     public:
-        SSR(Renderer &renderer, ShaderFactory &shaderFactory);
-        ~SSR() override;
+        SSR() = default;
+        ~SSR() override = default;
+
+        void initialize(Renderer &renderer, ShaderFactory &shaderFactory);
+
+        const ShaderRef &getShader() const { return m_ssrShader; }
+
+    private:
+        ShaderRef m_ssrShader = 0;
     };
 
 } // namespace default_rendering

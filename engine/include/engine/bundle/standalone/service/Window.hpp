@@ -50,6 +50,8 @@ namespace engine
 
   public:
     void getSize(int &width, int &height) const;
+    void getWidth(int &width) const;
+    void getHeight(int &height) const;
 
   private:
     struct WindowImpl;

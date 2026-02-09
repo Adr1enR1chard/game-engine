@@ -27,11 +27,16 @@ namespace default_rendering
 
     bool m_cameraNotFoundLogged = false;
 
-    void initializeShadowMapVisualizer(class ShadowMapping *shadowMapping, class ShaderFactory *shaderFactory, class MeshFactory *meshFactory);
-    ShaderRef m_debugShadowMapShader = 0;
-    MeshRef m_debugScreenQuadMesh = 0;
-    UniformCollection m_debugShadowMapUniforms;
+    void initializeShadowMapVisualizer(class ShadowMapping *shadowMapping);
+    void initializeImageShader(class ShaderFactory *shaderFactory, class MeshFactory *meshFactory);
+
     TextureRef m_whiteTexture = 0;
+    FramebufferRef m_gBuffer = 0;
+
+    ShaderRef m_imageShader = 0;
+    MeshRef m_imageQuadMesh = 0;
+    // Debugging
+    UniformCollection m_debugShadowMapUniforms;
   };
 
 } // namespace rasterization_bundle

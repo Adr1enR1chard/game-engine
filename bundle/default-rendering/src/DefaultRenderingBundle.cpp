@@ -10,12 +10,13 @@ namespace default_rendering
     void DefaultRendering::install(Engine &engine) const
     {
         engine.addService<ShadowMapping>(*(engine.getService<Renderer>()), *(engine.getService<ShaderFactory>()));
+        engine.addService<SSR>();
         engine.addSystems<RenderSystem, EnvironmentSystem>();
     }
     void DefaultRendering::uninstall(Engine &engine) const
     {
         engine.removeSystems<RenderSystem, EnvironmentSystem>();
-        engine.removeServices<ShadowMapping>();
+        engine.removeServices<ShadowMapping, SSR>();
     }
 
 } // namespace default_rendering

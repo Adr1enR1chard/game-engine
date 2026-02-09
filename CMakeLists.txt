@@ -233,7 +233,7 @@ set_target_properties(Editor PROPERTIES
 
 # Command: Assets compilation
 set(ASSET_COMPILER_EXE "$<TARGET_FILE:assets_compiler>")
-set(DEFAULT_BUNDLE_ASSETS_SRC "${CMAKE_SOURCE_DIR}/bundle/default/default-bundle-assets")
+set(DEFAULT_BUNDLE_ASSETS_SRC "${CMAKE_SOURCE_DIR}/bundle/default-rendering/default-rendering-assets")
 set(EXTENSIONS jpg png bmp tga gif  obj fbx gltf vert frag)
 
 list(APPEND CMAKE_MODULE_PATH
