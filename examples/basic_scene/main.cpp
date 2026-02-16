@@ -62,7 +62,7 @@ public:
             CMesh({
                 .meshRef = services().get<MeshFactory>()->Plane(),
                 .material = services().get<MaterialFactory>()->PBRMaterial({.metallic = 0.0f,
-                                                                            .roughness = 1.0f,
+                                                                            .roughness = 0.0f,
                                                                             .ao = 0.0f}),
             }),
             CTransform{glm::vec3(0.0f, -1.0f, 0.0f), glm::quat(glm::vec3(glm::radians(180.0f), 0.0f, 0.0f)), glm::vec3(10.0f)});

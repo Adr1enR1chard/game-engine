@@ -5,7 +5,6 @@
 #include <string>
 
 #include <service/ShadowMapping.hpp>
-#include <service/SSR.hpp>
 #include <component/CSkyboxCache.hpp>
 
 #include <engine/bundle/core/CoreBundle.hpp>
@@ -41,13 +40,10 @@ namespace default_rendering
         shadowMapping->initialize();
         initializeShadowMapVisualizer(shadowMapping);
 
-        auto ssr = services().get<SSR>();
-        ssr->initialize(*renderer, *shaderFactory);
-
         renderer->enableMultisampling(true);
 
         m_whiteTexture = services().get<TextureFactory>()->WhiteTexture2D();
-        m_gBuffer = renderer->allocateFramebuffer(width, height, true, true, false);
+        m_gBuffer = renderer->allocateFramebuffer(width, height, 3, true, false);
     }
 
     void RenderSystem::update(float /*deltaTime*/)
@@ -116,8 +112,9 @@ namespace default_rendering
         // renderer->drawMesh(m_debugScreenQuadMesh, m_debugShadowMapShader, m_debugShadowMapUniforms);
         // return;
 
-        renderer->setFramebuffer(m_gBuffer);
-        renderer->clear(true, true, false);
+        // ------- Geometry Pass -------
+        // renderer->setFramebuffer(m_gBuffer);
+        // renderer->clear(true, true, false);
         /// ------- Render Environment -------
         if (const auto &[envEntity, environment] = world().fetchAt<CEnvironment>(0); envEntity)
         {
@@ -166,14 +163,7 @@ namespace default_rendering
                                 shadowMapping->getBias());
                 renderer->drawMesh(meshRef, material.shaderRef, material.uniforms); });
         }
-        renderer->revertToPreviousFramebuffer();
-
-        renderer->drawMesh(m_imageQuadMesh, services().get<SSR>()->getShader(),
-                           {{"uColorTexture", Sampler2D{renderer->getFramebufferColorAttachment(m_gBuffer)}},
-                            // {"uNormalTexture", Sampler2D{renderer->getFramebufferDepthAttachment(m_gBuffer)}},
-                            {"uDepthTexture", Sampler2D{renderer->getFramebufferDepthAttachment(m_gBuffer)}},
-                            {"uView", viewMatrix},
-                            {"uProjection", projMatrix}});
+        // renderer->revertToPreviousFramebuffer();
     }
 
     void RenderSystem::setFinalRenderingUniforms(UniformCollection &uniforms, const glm::mat4 &modelMatrix, const glm::mat4 &viewMatrix, const glm::mat4 &projMatrix, const glm::mat4 &lightSpaceMatrix, Sampler2D shadowMap, float bias)

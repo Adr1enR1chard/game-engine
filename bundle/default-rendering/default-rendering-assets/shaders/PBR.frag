@@ -26,7 +26,9 @@ struct Material {
     sampler2D normalMap;
 };
 
-out vec4 FragColor;
+layout(location = 0) out vec4 FragColor;
+layout(location = 1) out vec3 Normal;
+layout(location = 2) out float Roughness;
 
 in vec2 vUV;
 in vec3 vWorldPos;
@@ -166,6 +168,7 @@ void main() {
     vec3 N = vWorldNormal;
     N = texture(material.normalMap, vUV).rgb;
     N = normalize(vTBN * (N * 2.0 - 1.0));
+    Normal = N; // To view space
     vec3 V = normalize(viewPos - vWorldPos);
 
     vec3 baseColor = pow(texture(material.baseColorMap, vUV).rgb * material.baseColor, vec3(2.2));
@@ -185,6 +188,8 @@ void main() {
     for(int i = 0; i < pointLightCount; ++i) {
         Lo += CalcPointLight(pointLights[i], N, vWorldPos, V, baseColor, metallic, roughness, ao);
     }
+
+    Roughness = roughness;
 
     vec3 ambient = vec3(0.03) * baseColor * ao * dirLight.ambient;
     vec3 color = ambient + Lo;
