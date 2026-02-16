@@ -47,7 +47,8 @@ namespace engine
             if (it != m_systemTypeToIndex.end())
             {
                 size_t index = it->second;
-                m_systems.erase(m_systems.begin() + index);
+                // We need to convert index to difference_type for erase
+                m_systems.erase(m_systems.begin() + static_cast<std::ptrdiff_t>(index));
                 m_systemTypeToIndex.erase(it);
                 // Update indices
                 for (auto &pair : m_systemTypeToIndex)

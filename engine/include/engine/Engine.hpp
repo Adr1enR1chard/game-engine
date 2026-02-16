@@ -53,7 +53,7 @@ namespace engine
                 bool found = false;
                 for (const auto &existingBundle : m_bundles)
                 {
-                    if (std::type_index(typeid(*existingBundle)) == requiredBundleType)
+                    if (existingBundle && std::type_index(typeid(*existingBundle)) == requiredBundleType)
                     {
                         found = true;
                         break;

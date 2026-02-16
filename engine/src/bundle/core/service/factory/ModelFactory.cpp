@@ -26,7 +26,7 @@ namespace engine
         for (size_t i = 0; i < meshes.size(); i++)
         {
             auto meshRef = m_meshFactory.Raw(meshes[i].vertices, meshes[i].indices, meshes[i].localTransform);
-            auto materialParams = MaterialFactory::PBRMaterialParameters{};
+            auto materialParams = PBRMaterialParameters{};
             if (i < materialsDesc.size())
             {
                 auto &matDesc = materialsDesc[i];
